@@ -601,3 +601,13 @@ h1, h2, h3, h4, h5, h6 {
 .list-group-item:last-child {
   border-bottom: none;
 } 
+
+.dropdown-item.logout:hover, .dropdown-item.logout:focus {
+  background-color: #fff0f0 !important;
+  color: #dc3545 !important;
+} 
+
+.sidebar .nav-link.btn-link.text-danger:hover, .sidebar .nav-link.btn-link.text-danger:focus {
+  background-color: #dc3545 !important;
+  color: #fff !important;
+} 

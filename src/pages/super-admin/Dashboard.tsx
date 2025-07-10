@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, getCountFromServer, getDocs, query, where, orderBy, limit } from "firebase/firestore";
 import { db } from "../../config/firebase";
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { 
   FaUsers, 
   FaBuilding, 
@@ -48,6 +49,7 @@ const Dashboard: React.FC = () => {
   const [stats, setStats] = useState<SystemStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (role !== 'super_admin') return;
@@ -56,21 +58,21 @@ const Dashboard: React.FC = () => {
       try {
         // Compteurs principaux
         const [usersCount, enterprisesCount, stagesCount, candidaturesCount, universitesCount] = await Promise.all([
-          getCountFromServer(collection(db, "utilisateurs")).then(snap => snap.data().count).catch(() => 0),
-          getCountFromServer(collection(db, "entreprises")).then(snap => snap.data().count).catch(() => 0),
-          getCountFromServer(collection(db, "stages")).then(snap => snap.data().count).catch(() => 0),
-          getCountFromServer(collection(db, "candidatures")).then(snap => snap.data().count).catch(() => 0),
-          getCountFromServer(collection(db, "universites")).then(snap => snap.data().count).catch(() => 0)
+          getCountFromServer(query(collection(db, "utilisateurs"), where("email", "!=", ""))).then(snap => snap.data().count).catch(() => 0),
+          getCountFromServer(query(collection(db, "entreprises"), where("nom", "!=", ""))).then(snap => snap.data().count).catch(() => 0),
+          getCountFromServer(query(collection(db, "stages"), where("titre", "!=", ""))).then(snap => snap.data().count).catch(() => 0),
+          getCountFromServer(query(collection(db, "candidatures"), where("statut", "!=", ""))).then(snap => snap.data().count).catch(() => 0),
+          getCountFromServer(query(collection(db, "universites"), where("nom", "!=", ""))).then(snap => snap.data().count).catch(() => 0)
         ]);
 
         // Stages par statut
         const [activeStagesCount, completedStagesCount] = await Promise.all([
-          getCountFromServer(query(collection(db, "stages"), where("statut", "==", "en_cours"))).then(snap => snap.data().count).catch(() => 0),
-          getCountFromServer(query(collection(db, "stages"), where("statut", "==", "termine"))).then(snap => snap.data().count).catch(() => 0)
+          getCountFromServer(query(collection(db, "stages"), where("statut", "==", "en_cours"), where("titre", "!=", ""))).then(snap => snap.data().count).catch(() => 0),
+          getCountFromServer(query(collection(db, "stages"), where("statut", "==", "termine"), where("titre", "!=", ""))).then(snap => snap.data().count).catch(() => 0)
         ]);
 
         // Candidatures en attente
-        const pendingCandidaturesCount = await getCountFromServer(query(collection(db, "candidatures"), where("statut", "==", "en_attente")))
+        const pendingCandidaturesCount = await getCountFromServer(query(collection(db, "candidatures"), where("statut", "==", "en_attente"), where("email", "!=", "")))
           .then(snap => snap.data().count).catch(() => 0);
 
         // Activités récentes (5 derniers utilisateurs inscrits)
@@ -156,22 +158,22 @@ const Dashboard: React.FC = () => {
   const handleQuickAction = (action: string) => {
     switch (action) {
       case 'add_user':
-        window.location.href = '/super-admin/gestion-utilisateurs';
+        navigate('/super-admin/gestion-utilisateurs');
         break;
       case 'add_enterprise':
-        window.location.href = '/super-admin/gestion-entreprises';
+        navigate('/super-admin/gestion-entreprises');
         break;
       case 'add_stage':
-        window.location.href = '/super-admin/gestion-stages';
+        navigate('/super-admin/gestion-stages');
         break;
       case 'add_university':
-        window.location.href = '/super-admin/universites';
+        navigate('/super-admin/universites');
         break;
       case 'view_reports':
-        window.location.href = '/super-admin/statistiques';
+        navigate('/super-admin/statistiques');
         break;
       case 'system_settings':
-        window.location.href = '/super-admin/parametres';
+        navigate('/super-admin/parametres');
         break;
       default:
         break;
@@ -364,7 +366,7 @@ const Dashboard: React.FC = () => {
                 onClick={() => handleQuickAction('add_stage')}
               >
                 <FaGraduationCap className="me-2" />
-                Ajouter Stage
+                Consulter Stage
               </button>
             </div>
             <div className="col-md-2">

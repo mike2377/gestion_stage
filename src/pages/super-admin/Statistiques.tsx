@@ -11,7 +11,8 @@ import {
   FaTimesCircle,
   FaExclamationTriangle,
   FaDownload,
-  FaFilter
+  FaFilter,
+  FaHourglassHalf
 } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { collection, getCountFromServer, getDocs, query, where } from 'firebase/firestore';
@@ -29,6 +30,50 @@ interface StageData {
   stages: number;
   conventions: number;
   evaluations: number;
+}
+
+// Fonction utilitaire pour générer un camembert SVG
+function PieChart({ data, size = 180, strokeWidth = 32 }) {
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+  let cumulative = 0;
+  const center = size / 2;
+  const radius = center - strokeWidth / 2;
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      {data.map((d, i) => {
+        const value = d.value;
+        const angle = (value / total) * 360;
+        const startAngle = cumulative;
+        const endAngle = cumulative + angle;
+        cumulative += angle;
+        // Calcul des coordonnées
+        const largeArc = angle > 180 ? 1 : 0;
+        const start = polarToCartesian(center, center, radius, startAngle);
+        const end = polarToCartesian(center, center, radius, endAngle);
+        const pathData = [
+          `M ${start.x} ${start.y}`,
+          `A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y}`
+        ].join(' ');
+        return (
+          <path
+            key={i}
+            d={pathData}
+            fill="none"
+            stroke={d.color}
+            strokeWidth={strokeWidth}
+            strokeLinecap="butt"
+          />
+        );
+      })}
+    </svg>
+  );
+}
+function polarToCartesian(cx, cy, r, angle) {
+  const rad = ((angle - 90) * Math.PI) / 180.0;
+  return {
+    x: cx + r * Math.cos(rad),
+    y: cy + r * Math.sin(rad)
+  };
 }
 
 const Statistiques: React.FC = () => {
@@ -85,47 +130,65 @@ const Statistiques: React.FC = () => {
   const totalUtilisateurs = Object.values(stats.statsUtilisateurs).reduce((a, b) => a + b, 0);
   const totalStages = Object.values(stats.statsStages).reduce((a, b) => a + b, 0);
 
-  // Données simulées pour les statistiques
-  const statsUtilisateurs: Statistique[] = [
-    { label: 'Étudiants', value: 1250, percentage: 45, color: '#4e73df' },
-    { label: 'Enseignants', value: 85, percentage: 15, color: '#1cc88a' },
-    { label: 'Responsables', value: 25, percentage: 5, color: '#36b9cc' },
-    { label: 'Tuteurs', value: 180, percentage: 25, color: '#f6c23e' },
-    { label: 'Entreprises', value: 120, percentage: 10, color: '#e74a3b' }
-  ];
+  // Calcul dynamique des stats utilisateurs par rôle
+  const roles = ['etudiant', 'enseignant', 'responsable', 'tuteur', 'entreprise', 'admin', 'super_admin'];
+  const statsUtilisateursDyn = roles.map(role => ({
+    label: role.charAt(0).toUpperCase() + role.slice(1) + (role === 'etudiant' ? 's' : ''),
+    value: stats.statsUtilisateurs[role] || 0,
+    percentage: totalUtilisateurs ? Math.round((stats.statsUtilisateurs[role] || 0) * 100 / totalUtilisateurs) : 0,
+    color: role === 'etudiant' ? '#4e73df' : role === 'enseignant' ? '#1cc88a' : role === 'responsable' ? '#36b9cc' : role === 'tuteur' ? '#f6c23e' : role === 'entreprise' ? '#e74a3b' : '#858796'
+  }));
 
-  const statsStages: Statistique[] = [
-    { label: 'Stages en cours', value: 320, percentage: 40, color: '#1cc88a' },
-    { label: 'Stages terminés', value: 280, percentage: 35, color: '#4e73df' },
-    { label: 'Stages en attente', value: 120, percentage: 15, color: '#f6c23e' },
-    { label: 'Stages annulés', value: 80, percentage: 10, color: '#e74a3b' }
-  ];
+  // Calcul dynamique des stats stages par statut (accepté, refusé, en cours, terminé)
+  const nbStagesAcceptes = stats.statsStages['accepté'] || stats.statsStages['accepte'] || 0;
+  const nbStagesRefuses = stats.statsStages['refusé'] || stats.statsStages['refuse'] || 0;
+  const nbStagesEnCours = stats.statsStages['en cours'] || stats.statsStages['encours'] || 0;
+  const nbStagesTermines = stats.statsStages['terminé'] || stats.statsStages['termine'] || 0;
 
-  const statsSecteurs: Statistique[] = [
-    { label: 'Informatique', value: 45, percentage: 30, color: '#4e73df' },
-    { label: 'Finance', value: 25, percentage: 17, color: '#1cc88a' },
-    { label: 'Marketing', value: 20, percentage: 13, color: '#36b9cc' },
-    { label: 'Agriculture', value: 15, percentage: 10, color: '#f6c23e' },
-    { label: 'BTP', value: 12, percentage: 8, color: '#e74a3b' },
-    { label: 'Autres', value: 33, percentage: 22, color: '#858796' }
-  ];
+  // Calcul dynamique des stats stages par statut
+  const statuts = Object.keys(stats.statsStages);
+  const statsStagesDyn = statuts.map(statut => ({
+    label: 'Stages ' + statut,
+    value: stats.statsStages[statut],
+    percentage: totalStages ? Math.round(stats.statsStages[statut] * 100 / totalStages) : 0,
+    color: statut === 'en cours' ? '#1cc88a' : statut === 'terminé' ? '#4e73df' : statut === 'en attente' ? '#f6c23e' : statut === 'annulé' ? '#e74a3b' : '#858796'
+  }));
 
-  const donneesMensuelles: StageData[] = [
-    { mois: 'Jan', stages: 45, conventions: 42, evaluations: 38 },
-    { mois: 'Fév', stages: 52, conventions: 48, evaluations: 45 },
-    { mois: 'Mar', stages: 38, conventions: 35, evaluations: 32 },
-    { mois: 'Avr', stages: 65, conventions: 62, evaluations: 58 },
-    { mois: 'Mai', stages: 72, conventions: 68, evaluations: 65 },
-    { mois: 'Juin', stages: 85, conventions: 82, evaluations: 78 },
-    { mois: 'Juil', stages: 95, conventions: 92, evaluations: 88 },
-    { mois: 'Août', stages: 78, conventions: 75, evaluations: 72 },
-    { mois: 'Sep', stages: 88, conventions: 85, evaluations: 82 },
-    { mois: 'Oct', stages: 92, conventions: 89, evaluations: 86 },
-    { mois: 'Nov', stages: 76, conventions: 73, evaluations: 70 },
-    { mois: 'Déc', stages: 68, conventions: 65, evaluations: 62 }
-  ];
+  // Calcul dynamique des stats entreprises par secteur (si le champ secteur existe)
+  const entreprisesParSecteur: Record<string, number> = {};
+  if (stats.entreprises && Array.isArray(stats.entreprises)) {
+    stats.entreprises.forEach((e: any) => {
+      const secteur = e.secteur || 'Autres';
+      entreprisesParSecteur[secteur] = (entreprisesParSecteur[secteur] || 0) + 1;
+    });
+  }
+  const totalEntreprises = Object.values(entreprisesParSecteur).reduce((a, b) => a + b, 0);
+  const statsSecteursDyn = Object.entries(entreprisesParSecteur).map(([secteur, value]) => ({
+    label: secteur,
+    value,
+    percentage: totalEntreprises ? Math.round(value * 100 / totalEntreprises) : 0,
+    color: '#4e73df'
+  }));
 
-  const tauxReussite = ((statsStages['terminé'] / totalStages) * 100).toFixed(1);
+  // Calcul dynamique des stats mensuelles (si la date de création des stages est disponible)
+  const moisLabels = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+  const statsMensuelles: Record<string, { stages: number }> = {};
+  if (stats.stages && Array.isArray(stats.stages)) {
+    stats.stages.forEach((s: any) => {
+      if (s.date_creation) {
+        const date = new Date(s.date_creation.seconds ? s.date_creation.seconds * 1000 : s.date_creation);
+        const mois = moisLabels[date.getMonth()];
+        statsMensuelles[mois] = statsMensuelles[mois] || { stages: 0 };
+        statsMensuelles[mois].stages++;
+      }
+    });
+  }
+  const donneesMensuellesDyn = moisLabels.map(mois => ({
+    mois,
+    stages: statsMensuelles[mois]?.stages || 0
+  }));
+
+  const tauxReussite = ((statsStagesDyn.find(stat => stat.label.includes('terminé'))?.value || 0) / totalStages) * 100;
 
   return (
     <div className="container-fluid">
@@ -202,7 +265,7 @@ const Statistiques: React.FC = () => {
                   <div className="text-xs font-weight-bold text-info text-uppercase mb-1">
                     Taux de Réussite
                   </div>
-                  <div className="h5 mb-0 font-weight-bold text-gray-800">{tauxReussite}%</div>
+                  <div className="h5 mb-0 font-weight-bold text-gray-800">{tauxReussite.toFixed(1)}%</div>
                 </div>
                 <div className="col-auto">
                   <FaCheckCircle className="fa-2x text-gray-300" />
@@ -242,47 +305,12 @@ const Statistiques: React.FC = () => {
                 Répartition des Utilisateurs
               </h6>
             </div>
-            <div className="card-body">
-              <div className="chart-pie mb-4">
-                <div className="d-flex justify-content-center">
-                  <div className="position-relative" style={{ width: '200px', height: '200px' }}>
-                    <div className="position-absolute w-100 h-100 d-flex align-items-center justify-content-center">
-                      <div className="text-center">
-                        <div className="h4 mb-0">{totalUtilisateurs}</div>
-                        <div className="text-xs text-muted">Total</div>
-                      </div>
-                    </div>
-                    {/* Simulated pie chart */}
-                    <div className="position-relative w-100 h-100">
-                      {statsUtilisateurs.map((stat, index) => (
-                        <div
-                          key={stat.label}
-                          className="position-absolute"
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            transform: `rotate(${(index * 72)}deg)`,
-                            clipPath: 'polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 50% 100%)'
-                          }}
-                        >
-                          <div
-                            className="w-100 h-100"
-                            style={{
-                              backgroundColor: stat.color,
-                              opacity: 0.8
-                            }}
-                          ></div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="card-body d-flex flex-column align-items-center">
+              <PieChart data={statsUtilisateursDyn.filter(d => d.value > 0)} size={180} strokeWidth={32} />
               <div className="mt-4 text-center small">
-                {statsUtilisateurs.map((stat, index) => (
+                {statsUtilisateursDyn.filter(d => d.value > 0).map((stat, index) => (
                   <span key={stat.label} className="me-3">
-                    <i className="fas fa-circle" style={{ color: stat.color }}></i>
-                    {stat.label} ({stat.value})
+                    <i className="fas fa-circle" style={{ color: stat.color }}></i> {stat.label} ({stat.value})
                   </span>
                 ))}
               </div>
@@ -301,7 +329,7 @@ const Statistiques: React.FC = () => {
             </div>
             <div className="card-body">
               <div className="chart-bar">
-                {statsStages.map((stat, index) => (
+                {statsStagesDyn.map((stat, index) => (
                   <div key={stat.label} className="mb-3">
                     <div className="d-flex justify-content-between mb-1">
                       <span className="text-xs font-weight-bold text-uppercase">
@@ -328,181 +356,72 @@ const Statistiques: React.FC = () => {
         </div>
       </div>
 
-      {/* Evolution Mensuelle */}
+      {/* New Stats Cards for Accepted, Rejected, In Progress, Completed Stages */}
       <div className="row mb-4">
-        <div className="col-xl-8 col-lg-7">
-          <div className="card shadow mb-4">
-            <div className="card-header py-3">
-              <div className="d-flex justify-content-between align-items-center">
-                <h6 className="m-0 font-weight-bold text-primary">
-                  <FaChartLine className="me-2" />
-                  Évolution Mensuelle des Stages
-                </h6>
-                <div className="btn-group" role="group">
-                  <button
-                    type="button"
-                    className={`btn btn-sm ${typeGraphique === 'barres' ? 'btn-primary' : 'btn-outline-primary'}`}
-                    onClick={() => setTypeGraphique('barres')}
-                  >
-                    <FaChartBar />
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn btn-sm ${typeGraphique === 'ligne' ? 'btn-primary' : 'btn-outline-primary'}`}
-                    onClick={() => setTypeGraphique('ligne')}
-                  >
-                    <FaChartLine />
-                  </button>
-                </div>
-              </div>
-            </div>
+        <div className="col-xl-3 col-md-6 mb-4">
+          <div className="card border-left-success shadow h-100 py-2">
             <div className="card-body">
-              <div className="chart-area">
-                <div className="row">
-                  <div className="col-12">
-                    <div className="d-flex justify-content-between mb-3">
-                      <div>
-                        <span className="badge bg-primary me-2">Stages</span>
-                        <span className="badge bg-success me-2">Conventions</span>
-                        <span className="badge bg-info">Évaluations</span>
-                      </div>
-                    </div>
+              <div className="row no-gutters align-items-center">
+                <div className="col mr-2">
+                  <div className="text-xs font-weight-bold text-success text-uppercase mb-1">
+                    Stages Acceptés
                   </div>
+                  <div className="h5 mb-0 font-weight-bold text-gray-800">{nbStagesAcceptes}</div>
                 </div>
-                <div className="chart-container" style={{ height: '300px' }}>
-                  <div className="d-flex align-items-end justify-content-between h-100">
-                    {donneesMensuelles.map((data, index) => (
-                      <div key={data.mois} className="d-flex flex-column align-items-center">
-                        <div className="d-flex align-items-end gap-1 mb-2">
-                          <div
-                            className="bg-primary"
-                            style={{
-                              width: '20px',
-                              height: `${(data.stages / 100) * 200}px`,
-                              borderRadius: '2px'
-                            }}
-                          ></div>
-                          <div
-                            className="bg-success"
-                            style={{
-                              width: '20px',
-                              height: `${(data.conventions / 100) * 200}px`,
-                              borderRadius: '2px'
-                            }}
-                          ></div>
-                          <div
-                            className="bg-info"
-                            style={{
-                              width: '20px',
-                              height: `${(data.evaluations / 100) * 200}px`,
-                              borderRadius: '2px'
-                            }}
-                          ></div>
-                        </div>
-                        <small className="text-muted">{data.mois}</small>
-                      </div>
-                    ))}
-                  </div>
+                <div className="col-auto">
+                  <FaCheckCircle className="fa-2x text-success" />
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Secteurs d'activité */}
-        <div className="col-xl-4 col-lg-5">
-          <div className="card shadow mb-4">
-            <div className="card-header py-3">
-              <h6 className="m-0 font-weight-bold text-primary">
-                <FaBuilding className="me-2" />
-                Stages par Secteur
-              </h6>
-            </div>
+        <div className="col-xl-3 col-md-6 mb-4">
+          <div className="card border-left-danger shadow h-100 py-2">
             <div className="card-body">
-              <div className="chart-pie">
-                {statsSecteurs.map((stat, index) => (
-                  <div key={stat.label} className="mb-3">
-                    <div className="d-flex justify-content-between mb-1">
-                      <span className="text-xs font-weight-bold">
-                        {stat.label}
-                      </span>
-                      <span className="text-xs font-weight-bold">
-                        {stat.value} ({stat.percentage}%)
-                      </span>
-                    </div>
-                    <div className="progress" style={{ height: '15px' }}>
-                      <div
-                        className="progress-bar"
-                        style={{
-                          width: `${stat.percentage}%`,
-                          backgroundColor: stat.color
-                        }}
-                      ></div>
-                    </div>
+              <div className="row no-gutters align-items-center">
+                <div className="col mr-2">
+                  <div className="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                    Stages Refusés
                   </div>
-                ))}
+                  <div className="h5 mb-0 font-weight-bold text-gray-800">{nbStagesRefuses}</div>
+                </div>
+                <div className="col-auto">
+                  <FaTimesCircle className="fa-2x text-danger" />
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Tableau détaillé */}
-      <div className="row">
-        <div className="col-12">
-          <div className="card shadow mb-4">
-            <div className="card-header py-3">
-              <h6 className="m-0 font-weight-bold text-primary">
-                <FaCalendarAlt className="me-2" />
-                Statistiques Détaillées par Mois
-              </h6>
-            </div>
+        <div className="col-xl-3 col-md-6 mb-4">
+          <div className="card border-left-warning shadow h-100 py-2">
             <div className="card-body">
-              <div className="table-responsive">
-                <table className="table table-bordered" width="100%" cellSpacing="0">
-                  <thead>
-                    <tr>
-                      <th>Mois</th>
-                      <th>Nouveaux Stages</th>
-                      <th>Conventions Signées</th>
-                      <th>Évaluations Réalisées</th>
-                      <th>Taux de Réussite</th>
-                      <th>Nouveaux Étudiants</th>
-                      <th>Nouvelles Entreprises</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {donneesMensuelles.map((data, index) => (
-                      <tr key={data.mois}>
-                        <td><strong>{data.mois}</strong></td>
-                        <td>
-                          <span className="badge bg-primary">{data.stages}</span>
-                        </td>
-                        <td>
-                          <span className="badge bg-success">{data.conventions}</span>
-                        </td>
-                        <td>
-                          <span className="badge bg-info">{data.evaluations}</span>
-                        </td>
-                        <td>
-                          <span className="text-success">
-                            {((data.evaluations / data.stages) * 100).toFixed(1)}%
-                          </span>
-                        </td>
-                        <td>
-                          <span className="badge bg-secondary">
-                            {Math.floor(Math.random() * 20) + 10}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="badge bg-warning">
-                            {Math.floor(Math.random() * 5) + 2}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="row no-gutters align-items-center">
+                <div className="col mr-2">
+                  <div className="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                    Stages en cours
+                  </div>
+                  <div className="h5 mb-0 font-weight-bold text-gray-800">{nbStagesEnCours}</div>
+                </div>
+                <div className="col-auto">
+                  <FaHourglassHalf className="fa-2x text-warning" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="col-xl-3 col-md-6 mb-4">
+          <div className="card border-left-info shadow h-100 py-2">
+            <div className="card-body">
+              <div className="row no-gutters align-items-center">
+                <div className="col mr-2">
+                  <div className="text-xs font-weight-bold text-info text-uppercase mb-1">
+                    Stages Terminés
+                  </div>
+                  <div className="h5 mb-0 font-weight-bold text-gray-800">{nbStagesTermines}</div>
+                </div>
+                <div className="col-auto">
+                  <FaCheckCircle className="fa-2x text-info" />
+                </div>
               </div>
             </div>
           </div>

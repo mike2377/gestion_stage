@@ -44,6 +44,7 @@ const GestionEntreprises: React.FC = () => {
   const [nouvelleEntreprise, setNouvelleEntreprise] = useState({ nom: '', email: '', secteur: '' });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingEntreprise, setEditingEntreprise] = useState<any>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   const fetchEntreprises = async () => {
     setLoadingEntreprises(true);
@@ -65,9 +66,10 @@ const GestionEntreprises: React.FC = () => {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await addDoc(collection(db, 'entreprises'), nouvelleEntreprise);
+      const docRef = await addDoc(collection(db, 'entreprises'), nouvelleEntreprise);
+      setEntreprises(prev => [...prev, { id: docRef.id, ...nouvelleEntreprise }]);
       setNouvelleEntreprise({ nom: '', email: '', secteur: '' });
-      fetchEntreprises();
+      setShowAddModal(false);
     } catch (e) {
       setError('Erreur lors de l\'ajout');
     }
@@ -83,9 +85,9 @@ const GestionEntreprises: React.FC = () => {
     if (!editingId) return;
     try {
       await updateDoc(doc(db, 'entreprises', editingId), editingEntreprise);
+      setEntreprises(prev => prev.map(e => e.id === editingId ? { ...e, ...editingEntreprise } : e));
       setEditingId(null);
       setEditingEntreprise(null);
-      fetchEntreprises();
     } catch (e) {
       setError('Erreur lors de la modification');
     }
@@ -94,16 +96,46 @@ const GestionEntreprises: React.FC = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteDoc(doc(db, 'entreprises', id));
-      fetchEntreprises();
+      setEntreprises(prev => prev.filter(e => e.id !== id));
     } catch (e) {
       setError('Erreur lors de la suppression');
     }
   };
 
+  // Ajout de la fonction getStatutBadge
+  const getStatutBadge = (statut: 'active' | 'inactive' | 'en_attente') => {
+    switch (statut) {
+      case 'active':
+        return <span className="badge bg-success">Active</span>;
+      case 'inactive':
+        return <span className="badge bg-secondary">Inactive</span>;
+      case 'en_attente':
+        return <span className="badge bg-warning text-dark">En attente</span>;
+      default:
+        return <span className="badge bg-light text-dark">Inconnu</span>;
+    }
+  };
+
+  // Ajout de la fonction getNoteStars
+  const getNoteStars = (note: number) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <span key={i} style={{ color: i <= Math.round(note) ? '#ffc107' : '#e4e5e9' }}>
+          &#9733;
+        </span>
+      );
+    }
+    return stars;
+  };
+
   if (loading) return <div>Chargement...</div>;
   if (role !== 'super_admin') return <div>Accès refusé</div>;
   if (loadingEntreprises) return <div>Chargement des entreprises...</div>;
-  if (error) return <div>{error}</div>;
+  if (error) {
+    console.error('Erreur GestionEntreprises:', error, 'role:', role, 'loading:', loading);
+    return <div className="alert alert-danger mt-4">Erreur : {error} <br/>Rôle : {role} <br/>Loading : {loading ? 'true' : 'false'}</div>;
+  }
 
   return (
     <div className="container-fluid">
@@ -116,7 +148,7 @@ const GestionEntreprises: React.FC = () => {
           </h1>
           <p className="text-muted">Gérez les entreprises partenaires du système de stages</p>
         </div>
-        <button className="btn btn-primary">
+        <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
           <FaPlus className="me-2" />
           Nouvelle Entreprise
         </button>
@@ -191,7 +223,7 @@ const GestionEntreprises: React.FC = () => {
                     Total Stages
                   </div>
                   <div className="h5 mb-0 font-weight-bold text-gray-800">
-                    {entreprises.reduce((sum, e) => sum + e.nombreStages, 0)}
+                    {entreprises.reduce((sum, e) => sum + (typeof e.nombreStages === 'number' && !isNaN(e.nombreStages) ? e.nombreStages : 0), 0)}
                   </div>
                 </div>
                 <div className="col-auto">
@@ -487,8 +519,94 @@ const GestionEntreprises: React.FC = () => {
         </div>
       )}
 
+      {/* Add Modal */}
+      {showAddModal && (
+        <div className="modal fade show" style={{ display: 'block' }} tabIndex={-1}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Nouvelle Entreprise</h5>
+                <button type="button" className="btn-close" onClick={() => setShowAddModal(false)}></button>
+              </div>
+              <div className="modal-body">
+                <form onSubmit={(e) => { handleAdd(e); setShowAddModal(false); }}>
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Nom de l'entreprise</label>
+                      <input type="text" className="form-control" value={nouvelleEntreprise.nom} onChange={e => setNouvelleEntreprise({ ...nouvelleEntreprise, nom: e.target.value })} required />
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Secteur d'activité</label>
+                      <select className="form-select" value={nouvelleEntreprise.secteur} onChange={e => setNouvelleEntreprise({ ...nouvelleEntreprise, secteur: e.target.value })} required>
+                        <option value="">Choisir...</option>
+                        {['Informatique', 'Finance', 'Agriculture', 'Marketing', 'BTP', 'Santé', 'Éducation'].map(secteur => (
+                          <option key={secteur} value={secteur}>{secteur}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Adresse</label>
+                      <input type="text" className="form-control" value={nouvelleEntreprise.adresse || ''} onChange={e => setNouvelleEntreprise({ ...nouvelleEntreprise, adresse: e.target.value })} />
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Ville</label>
+                      <input type="text" className="form-control" value={nouvelleEntreprise.ville || ''} onChange={e => setNouvelleEntreprise({ ...nouvelleEntreprise, ville: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Téléphone</label>
+                      <input type="text" className="form-control" value={nouvelleEntreprise.telephone || ''} onChange={e => setNouvelleEntreprise({ ...nouvelleEntreprise, telephone: e.target.value })} />
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Email</label>
+                      <input type="email" className="form-control" value={nouvelleEntreprise.email} onChange={e => setNouvelleEntreprise({ ...nouvelleEntreprise, email: e.target.value })} required />
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Site web</label>
+                      <input type="url" className="form-control" value={nouvelleEntreprise.siteWeb || ''} onChange={e => setNouvelleEntreprise({ ...nouvelleEntreprise, siteWeb: e.target.value })} />
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Nombre d'employés</label>
+                      <select className="form-select" value={nouvelleEntreprise.nombreEmployes || ''} onChange={e => setNouvelleEntreprise({ ...nouvelleEntreprise, nombreEmployes: e.target.value })}>
+                        <option value="">Choisir...</option>
+                        <option value="1-10">1-10</option>
+                        <option value="10-50">10-50</option>
+                        <option value="50-100">50-100</option>
+                        <option value="100-250">100-250</option>
+                        <option value="250-500">250-500</option>
+                        <option value="500+">500+</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Statut</label>
+                    <select className="form-select" value={nouvelleEntreprise.statut || ''} onChange={e => setNouvelleEntreprise({ ...nouvelleEntreprise, statut: e.target.value as 'active' | 'inactive' | 'en_attente' })} required>
+                      <option value="">Choisir...</option>
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                      <option value="en_attente">En attente</option>
+                    </select>
+                  </div>
+                  <div className="modal-footer">
+                    <button type="button" className="btn btn-secondary" onClick={() => setShowAddModal(false)}>Annuler</button>
+                    <button type="submit" className="btn btn-primary">Ajouter</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Modal Backdrop */}
       {editingId && (
+        <div className="modal-backdrop fade show"></div>
+      )}
+      {showAddModal && (
         <div className="modal-backdrop fade show"></div>
       )}
     </div>

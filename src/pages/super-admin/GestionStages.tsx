@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
+import { FaBriefcase, FaPlus, FaSearch, FaEdit, FaTrash, FaEye, FaCheck, FaTimes, FaHourglassHalf, FaUniversity } from 'react-icons/fa';
 
 interface Internship {
   id: number;
@@ -61,6 +62,13 @@ const GestionStages: React.FC = () => {
   const [selectedStage, setSelectedStage] = useState<any | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [universites, setUniversites] = useState<{
+    id: string;
+    nom: string;
+  }[]>([]);
+  const [utilisateurs, setUtilisateurs] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'stages' | 'etudiants'>('stages');
+  const [selectedUniversiteId, setSelectedUniversiteId] = useState<string>('');
 
   const fetchStages = async () => {
     setLoadingStages(true);
@@ -78,6 +86,20 @@ const GestionStages: React.FC = () => {
 
   useEffect(() => {
     fetchStages();
+  }, []);
+
+  useEffect(() => {
+    // Charger universités et utilisateurs pour la section étudiants par université
+    const fetchUniversites = async () => {
+      const snap = await getDocs(collection(db, 'universites'));
+      setUniversites(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    };
+    const fetchUtilisateurs = async () => {
+      const snap = await getDocs(collection(db, 'utilisateurs'));
+      setUtilisateurs(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    };
+    fetchUniversites();
+    fetchUtilisateurs();
   }, []);
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -151,15 +173,20 @@ const GestionStages: React.FC = () => {
     setFilteredStages(filtered);
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (statut: string) => {
     const statusConfig = {
       active: { class: 'bg-success', text: 'Actif' },
       completed: { class: 'bg-info', text: 'Terminé' },
       cancelled: { class: 'bg-danger', text: 'Annulé' },
       pending: { class: 'bg-warning', text: 'En attente' }
     };
-    const config = statusConfig[status as keyof typeof statusConfig];
-    return <span className={`badge ${config.class}`}>{config.text}</span>;
+    // Correction : valeur par défaut si statut inconnu
+    const config = statusConfig[statut] || { class: 'bg-secondary', text: statut || 'Inconnu' };
+    return (
+      <span className={`badge ${config.class}`}>
+        {config.text}
+      </span>
+    );
   };
 
   const getTypeBadge = (type: string) => {
@@ -169,7 +196,8 @@ const GestionStages: React.FC = () => {
       'remote': { class: 'bg-success', text: 'Télétravail' },
       'hybrid': { class: 'bg-info', text: 'Hybride' }
     };
-    const config = typeConfig[type as keyof typeof typeConfig];
+    // Correction : valeur par défaut si type inconnu
+    const config = typeConfig[type] || { class: 'bg-secondary', text: type || 'Inconnu' };
     return <span className={`badge ${config.class}`}>{config.text}</span>;
   };
 
@@ -181,346 +209,241 @@ const GestionStages: React.FC = () => {
     return stages.filter(internship => internship.isApproved === approved).length;
   };
 
+  const handleDeleteConfirm = (id: string) => {
+    if(window.confirm('Êtes-vous sûr de vouloir supprimer ce stage ?')) {
+      handleDelete(id);
+    }
+  };
+
+  const renderEtudiantsParUniversite = () => (
+    <div className="mt-4">
+      <h4><FaUniversity className="me-2 text-primary" />Étudiants en stage par université</h4>
+      {/* Selecteur d'université */}
+      <div className="mb-3" style={{ maxWidth: 400 }}>
+        <select className="form-select" value={selectedUniversiteId} onChange={e => setSelectedUniversiteId(e.target.value)}>
+          <option value="">Toutes les universités</option>
+          {universites.map(u => (
+            <option key={u.id} value={u.id}>{u.nom}</option>
+          ))}
+        </select>
+      </div>
+      {(selectedUniversiteId ? universites.filter(u => u.id === selectedUniversiteId) : universites).map(univ => {
+        // Trouver les étudiants de cette université
+        const etudiants = utilisateurs.filter(u => u.role === 'etudiant' && u.universiteId === univ.id);
+        // Pour chaque étudiant, trouver son stage (en cours, terminé, etc.)
+        const etudiantsAvecStage = etudiants.map(etudiant => {
+          const stage = stages.find(s => s.student && (s.student.id === etudiant.id || s.student.email === etudiant.email));
+          return { etudiant, stage };
+        }).filter(e => e.stage); // Ne garder que ceux qui ont un stage
+        if (etudiantsAvecStage.length === 0) return null;
+        return (
+          <div key={univ.id} className="mb-4">
+            <h5 className="mb-2">{univ.nom}</h5>
+            <div className="table-responsive">
+              <table className="table table-hover align-middle">
+                <thead className="table-light">
+                  <tr>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Entreprise</th>
+                    <th>Tuteur</th>
+                    <th>Enseignant référent</th>
+                    <th>Statut du stage</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {etudiantsAvecStage.map(({ etudiant, stage }, idx) => (
+                    <tr key={idx}>
+                      <td>{etudiant.prenom} {etudiant.nom}</td>
+                      <td>{etudiant.email}</td>
+                      <td>{stage.enterprise}</td>
+                      <td>{stage.mentor ? `${stage.mentor.name} (${stage.mentor.email})` : '-'}</td>
+                      <td>{stage.enseignant ? `${stage.enseignant.name} (${stage.enseignant.email})` : '-'}</td>
+                      <td>{getStatusBadge(stage.status)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   return (
-    <div className="container mt-4">
-      <h2>Gestion des Stages</h2>
-      <form onSubmit={editingId ? handleUpdate : handleAdd} className="mb-3">
-        <input type="text" placeholder="Titre" value={editingId ? editingStage?.title : nouveauStage.title} onChange={e => editingId ? setEditingStage({ ...editingStage, title: e.target.value }) : setNouveauStage({ ...nouveauStage, title: e.target.value })} required />
-        <input type="text" placeholder="Entreprise" value={editingId ? editingStage?.enterprise : nouveauStage.enterprise} onChange={e => editingId ? setEditingStage({ ...editingStage, enterprise: e.target.value }) : setNouveauStage({ ...nouveauStage, enterprise: e.target.value })} required />
-        <input type="text" placeholder="Localisation" value={editingId ? editingStage?.location : nouveauStage.location} onChange={e => editingId ? setEditingStage({ ...editingStage, location: e.target.value }) : setNouveauStage({ ...nouveauStage, location: e.target.value })} />
-        <input type="text" placeholder="Durée" value={editingId ? editingStage?.duration : nouveauStage.duration} onChange={e => editingId ? setEditingStage({ ...editingStage, duration: e.target.value }) : setNouveauStage({ ...nouveauStage, duration: e.target.value })} />
-        <input type="text" placeholder="Date de début" value={editingId ? editingStage?.startDate : nouveauStage.startDate} onChange={e => editingId ? setEditingStage({ ...editingStage, startDate: e.target.value }) : setNouveauStage({ ...nouveauStage, startDate: e.target.value })} />
-        <input type="text" placeholder="Date de fin" value={editingId ? editingStage?.endDate : nouveauStage.endDate} onChange={e => editingId ? setEditingStage({ ...editingStage, endDate: e.target.value }) : setNouveauStage({ ...nouveauStage, endDate: e.target.value })} />
-        <input type="text" placeholder="Salaire" value={editingId ? editingStage?.salary : nouveauStage.salary} onChange={e => editingId ? setEditingStage({ ...editingStage, salary: e.target.value }) : setNouveauStage({ ...nouveauStage, salary: e.target.value })} />
-        <select value={editingId ? editingStage?.status : nouveauStage.status} onChange={e => editingId ? setEditingStage({ ...editingStage, status: e.target.value as 'active' | 'completed' | 'cancelled' | 'pending' }) : setNouveauStage({ ...nouveauStage, status: e.target.value as 'active' | 'completed' | 'cancelled' | 'pending' })}>
-          <option value="active">En cours</option>
-                      <option value="completed">Terminé</option>
-                      <option value="cancelled">Annulé</option>
-                      <option value="pending">En attente</option>
-                    </select>
-        <select value={editingId ? editingStage?.type : nouveauStage.type} onChange={e => editingId ? setEditingStage({ ...editingStage, type: e.target.value as 'full-time' | 'part-time' | 'remote' | 'hybrid' }) : setNouveauStage({ ...nouveauStage, type: e.target.value as 'full-time' | 'part-time' | 'remote' | 'hybrid' })}>
-                      <option value="full-time">Temps plein</option>
-                      <option value="part-time">Temps partiel</option>
-                      <option value="remote">Télétravail</option>
-                      <option value="hybrid">Hybride</option>
-                    </select>
-        <button type="submit" className="btn btn-primary ms-2">{editingId ? 'Modifier' : 'Ajouter'}</button>
-        {editingId && <button type="button" className="btn btn-secondary ms-2" onClick={() => { setEditingId(null); setEditingStage(null); }}>Annuler</button>}
-      </form>
-      {stages.length === 0 ? (
-        <div>Aucun stage trouvé.</div>
-      ) : (
-        <table className="table table-bordered">
-                      <thead>
-                        <tr>
-                          <th>Titre</th>
-                          <th>Entreprise</th>
-                          <th>Localisation</th>
-                          <th>Statut</th>
-                          <th>Type</th>
-                          <th>Candidatures</th>
-                          <th>Approuvé</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-            {filteredStages.map(s => (
-              <tr key={s.id}>
-                <td>{s.title}</td>
-                <td>{s.enterprise}</td>
-                <td>{s.location}</td>
-                <td>{getStatusBadge(s.status)}</td>
-                <td>{getTypeBadge(s.type)}</td>
-                            <td>
-                              <div className="d-flex align-items-center">
-                    <span className="me-2">{s.applications}/{s.maxApplications}</span>
-                                <div className="progress flex-grow-1" style={{ height: '6px' }}>
-                                  <div 
-                                    className="progress-bar bg-primary"
-                        style={{ width: `${(s.applications / s.maxApplications) * 100}%` }}
-                                  ></div>
-                                </div>
-                              </div>
-                            </td>
-                            <td>
-                  {s.isApproved ? (
-                                <i className="fas fa-check-circle text-success"></i>
-                              ) : (
-                                <i className="fas fa-times-circle text-danger"></i>
-                              )}
-                            </td>
-                            <td>
-                              <div className="btn-group" role="group">
-                                <button 
-                      className="btn btn-sm btn-warning me-2"
-                                  onClick={() => {
-                        setSelectedStage(s);
-                                    setShowDetailsModal(true);
-                                  }}
-                                  title="Voir détails"
-                                >
-                                  <i className="fas fa-eye"></i>
-                                </button>
-                                <button 
-                      className="btn btn-sm btn-warning me-2"
-                      onClick={() => {
-                        setEditingStage(s);
-                        setEditingId(s.id);
-                      }}
-                      title="Éditer"
-                                >
-                                  <i className="fas fa-edit"></i>
-                                </button>
-                    {!s.isApproved && (
-                                  <button 
-                        className="btn btn-sm btn-warning me-2"
-                                    onClick={() => {
-                          setSelectedStage(s);
-                                      setShowApprovalModal(true);
-                                    }}
-                                    title="Approuver"
-                                  >
-                                    <i className="fas fa-check"></i>
-                                  </button>
-                                )}
-                                <button 
-                      className="btn btn-sm btn-danger"
-                      onClick={() => handleDelete(s.id)}
-                                  title="Supprimer"
-                                >
-                                  <i className="fas fa-trash"></i>
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                )}
+    <div className="container-fluid">
+      {/* Header */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 className="h3 mb-0">
+            <FaBriefcase className="me-2 text-primary" />
+            Gestion des Stages
+          </h1>
+          <p className="text-muted mb-0">Gérez les offres de stage du système</p>
+        </div>
+      </div>
+
+      {/* Cards de stats */}
+      <div className="row mb-4">
+        <div className="col-md-3">
+          <div className="card bg-primary text-white mb-3">
+            <div className="card-body d-flex justify-content-between align-items-center">
+              <div>
+                <h4 className="mb-0">{stages.length}</h4>
+                <p className="mb-0">Total Stages</p>
+              </div>
+              <FaBriefcase className="fa-2x" />
+            </div>
+          </div>
+        </div>
+        <div className="col-md-3">
+          <div className="card bg-success text-white mb-3">
+            <div className="card-body d-flex justify-content-between align-items-center">
+              <div>
+                <h4 className="mb-0">{getStatusCount('active')}</h4>
+                <p className="mb-0">Actifs</p>
+              </div>
+              <FaCheck className="fa-2x" />
+            </div>
+          </div>
+        </div>
+        <div className="col-md-3">
+          <div className="card bg-info text-white mb-3">
+            <div className="card-body d-flex justify-content-between align-items-center">
+              <div>
+                <h4 className="mb-0">{getStatusCount('pending')}</h4>
+                <p className="mb-0">En attente</p>
+              </div>
+              <FaHourglassHalf className="fa-2x" />
+            </div>
+          </div>
+        </div>
+        <div className="col-md-3">
+          <div className="card bg-danger text-white mb-3">
+            <div className="card-body d-flex justify-content-between align-items-center">
+              <div>
+                <h4 className="mb-0">{getStatusCount('cancelled')}</h4>
+                <p className="mb-0">Annulés</p>
+              </div>
+              <FaTimes className="fa-2x" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Barre de recherche */}
+      <div className="card mb-4">
+        <div className="card-body">
+          <div className="row align-items-center">
+            <div className="col-md-6">
+              <div className="input-group">
+                <span className="input-group-text"><FaSearch /></span>
+                <input type="text" className="form-control" placeholder="Rechercher un stage..." value={filters.enterprise} onChange={e => handleFilterChange('enterprise', e.target.value)} />
+              </div>
+            </div>
+            <div className="col-md-6 text-end">
+              <span className="text-muted">{filteredStages.length} stage(s) trouvé(s)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tableau des stages */}
+      <div className="card">
+        <div className="card-body">
+          <div className="mb-4">
+            <ul className="nav nav-tabs">
+              <li className="nav-item">
+                <button className={`nav-link${activeTab === 'stages' ? ' active' : ''}`} onClick={() => setActiveTab('stages')}>Stages</button>
+              </li>
+              <li className="nav-item">
+                <button className={`nav-link${activeTab === 'etudiants' ? ' active' : ''}`} onClick={() => setActiveTab('etudiants')}>Étudiants par université</button>
+              </li>
+            </ul>
+          </div>
+          {activeTab === 'stages' ? (
+            filteredStages.length === 0 ? (
+              <div className="text-center py-4">
+                <FaBriefcase className="fa-3x text-muted mb-3" />
+                <h5>Aucun stage trouvé</h5>
+                <p className="text-muted">Aucune offre de stage ne correspond à votre recherche.</p>
+              </div>
+            ) : (
+              <div className="table-responsive">
+                <table className="table table-hover align-middle">
+                  <thead className="table-light">
+                    <tr>
+                      <th>Titre</th>
+                      <th>Entreprise</th>
+                      <th>Localisation</th>
+                      <th>Type</th>
+                      <th>Statut</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredStages.map((stage) => (
+                      <tr key={stage.id}>
+                        <td><strong>{stage.title}</strong></td>
+                        <td>{stage.enterprise}</td>
+                        <td>{stage.location}</td>
+                        <td>{getTypeBadge(stage.type)}</td>
+                        <td>{getStatusBadge(stage.status)}</td>
+                        <td>
+                          <div className="btn-group" role="group">
+                            <button className="btn btn-sm btn-outline-primary" onClick={() => { setSelectedStage(stage); setShowDetailsModal(true); }} title="Voir les détails"><FaEye /></button>
+                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteConfirm(stage.id)} title="Supprimer"><FaTrash /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )
+          ) : (
+            renderEtudiantsParUniversite()
+          )}
+        </div>
+      </div>
 
       {/* Modal Détails Stage */}
       {showDetailsModal && selectedStage && (
         <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-xl">
+          <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">
-                  <i className="fas fa-briefcase me-2"></i>
+                  <FaBriefcase className="me-2" />
                   {selectedStage.title}
                 </h5>
-                <button 
-                  type="button" 
-                  className="btn-close"
-                  onClick={() => setShowDetailsModal(false)}
-                ></button>
+                <button type="button" className="btn-close" onClick={() => setShowDetailsModal(false)}></button>
               </div>
               <div className="modal-body">
-                <div className="row">
-                  <div className="col-md-8">
-                    <h6 className="text-primary mb-3">Description</h6>
-                    <p>{selectedStage.description}</p>
-                    
-                    <div className="row g-3 mb-4">
-                      <div className="col-md-6">
-                        <h6 className="text-primary">Informations générales</h6>
-                        <ul className="list-unstyled">
-                          <li><strong>Entreprise:</strong> {selectedStage.enterprise}</li>
-                          <li><strong>Localisation:</strong> {selectedStage.location}</li>
-                          <li><strong>Durée:</strong> {selectedStage.duration}</li>
-                          <li><strong>Période:</strong> {selectedStage.startDate} - {selectedStage.endDate}</li>
-                          <li><strong>Salaire:</strong> {selectedStage.salary || 'Non renseigné'}</li>
-                        </ul>
-                      </div>
-                      <div className="col-md-6">
-                        <h6 className="text-primary">Supervision</h6>
-                        <ul className="list-unstyled">
-                          <li><strong>Superviseur:</strong> {selectedStage.supervisor}</li>
-                          <li><strong>Email:</strong> {selectedStage.supervisorEmail}</li>
-                          {selectedStage.mentor && (
-                            <>
-                              <li><strong>Mentor:</strong> {selectedStage.mentor.name}</li>
-                              <li><strong>Rôle:</strong> {selectedStage.mentor.role}</li>
-                            </>
-                          )}
-                        </ul>
-                      </div>
-                    </div>
-
-                    <div className="row g-3">
-                      <div className="col-md-6">
-                        <h6 className="text-primary">Prérequis</h6>
-                        <div className="d-flex flex-wrap gap-1">
-                          {selectedStage.requirements.map((req, index) => (
-                            <span key={index} className="badge bg-light text-dark">{req}</span>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="col-md-6">
-                        <h6 className="text-primary">Avantages</h6>
-                        <div className="d-flex flex-wrap gap-1">
-                          {selectedStage.benefits.map((benefit, index) => (
-                            <span key={index} className="badge bg-success">{benefit}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-md-4">
-                    <div className="card">
-                      <div className="card-header">
-                        <h6 className="mb-0">Statistiques</h6>
-                      </div>
-                      <div className="card-body">
-                        <div className="mb-3">
-                          <label className="form-label">Candidatures</label>
-                          <div className="d-flex justify-content-between">
-                            <span>{selectedStage.applications}</span>
-                            <span className="text-muted">/ {selectedStage.maxApplications}</span>
-                          </div>
-                          <div className="progress mt-1">
-                            <div 
-                              className="progress-bar bg-primary"
-                              style={{ width: `${(selectedStage.applications / selectedStage.maxApplications) * 100}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                        
-                        {selectedStage.student && (
-                          <div className="mb-3">
-                            <h6 className="text-primary">Stagiaire assigné</h6>
-                            <div className="border rounded p-2">
-                              <strong>{selectedStage.student.name}</strong><br />
-                              <small className="text-muted">{selectedStage.student.email}</small><br />
-                              <small className="text-muted">{selectedStage.student.program} - {selectedStage.student.year}</small>
-                            </div>
-                          </div>
-                        )}
-
-                        {selectedStage.evaluations && (
-                          <div className="mb-3">
-                            <h6 className="text-primary">Évaluations</h6>
-                            <div className="row g-2">
-                              <div className="col-6">
-                                <small>Étudiant</small>
-                                <div className="d-flex align-items-center">
-                                  <span className="me-1">{selectedStage.evaluations.student}</span>
-                                  <div className="stars">
-                                    {[1, 2, 3, 4, 5].map(star => (
-                                      <i 
-                                        key={star} 
-                                        className={`fas fa-star ${star <= selectedStage.evaluations.student ? 'text-warning' : 'text-muted'}`}
-                                      ></i>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="col-6">
-                                <small>Entreprise</small>
-                                <div className="d-flex align-items-center">
-                                  <span className="me-1">{selectedStage.evaluations.enterprise}</span>
-                                  <div className="stars">
-                                    {[1, 2, 3, 4, 5].map(star => (
-                                      <i 
-                                        key={star} 
-                                        className={`fas fa-star ${star <= selectedStage.evaluations.enterprise ? 'text-warning' : 'text-muted'}`}
-                                      ></i>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="mb-3">
-                          <h6 className="text-primary">Tags</h6>
-                          <div className="d-flex flex-wrap gap-1">
-                            {selectedStage.tags.map((tag, index) => (
-                              <span key={index} className="badge bg-secondary">{tag}</span>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div>
-                          <h6 className="text-primary">Informations système</h6>
-                          <ul className="list-unstyled small">
-                            <li><strong>Créé:</strong> {selectedStage.createdAt}</li>
-                            <li><strong>Modifié:</strong> {selectedStage.updatedAt}</li>
-                            {selectedStage.approvedBy && (
-                              <li><strong>Approuvé par:</strong> {selectedStage.approvedBy}</li>
-                            )}
-                            {selectedStage.approvedAt && (
-                              <li><strong>Approuvé le:</strong> {selectedStage.approvedAt}</li>
-                            )}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <p><strong>Entreprise :</strong> {selectedStage.enterprise}</p>
+                <p><strong>Localisation :</strong> {selectedStage.location}</p>
+                <p><strong>Type :</strong> {getTypeBadge(selectedStage.type)}</p>
+                <p><strong>Statut :</strong> {getStatusBadge(selectedStage.status)}</p>
+                <p><strong>Description :</strong> {selectedStage.description}</p>
+                <p><strong>Durée :</strong> {selectedStage.duration}</p>
+                <p><strong>Période :</strong> {selectedStage.startDate} - {selectedStage.endDate}</p>
+                <p><strong>Salaire :</strong> {selectedStage.salary || 'Non renseigné'}</p>
+                <p><strong>Étudiants associés :</strong></p>
+                {selectedStage.students && selectedStage.students.length > 0 ? (
+                  <ul>
+                    {selectedStage.students.map((student: any, index: number) => (
+                      <li key={index}>
+                        {student.name} ({student.email}) - Programme: {student.program}, Année: {student.year}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>Aucun étudiant associé à ce stage.</p>
+                )}
               </div>
               <div className="modal-footer">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary"
-                  onClick={() => setShowDetailsModal(false)}
-                >
-                  Fermer
-                </button>
-                <button className="btn btn-primary">
-                  <i className="fas fa-edit me-2"></i>Modifier
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Approbation */}
-      {showApprovalModal && selectedStage && (
-        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  <i className="fas fa-check me-2"></i>
-                  Approuver le stage
-                </h5>
-                <button 
-                  type="button" 
-                  className="btn-close"
-                  onClick={() => setShowApprovalModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <p>Êtes-vous sûr de vouloir approuver le stage <strong>"{selectedStage.title}"</strong> ?</p>
-                <p className="text-muted">Cette action rendra le stage visible pour les étudiants et permettra les candidatures.</p>
-                
-                <div className="form-check">
-                  <input className="form-check-input" type="checkbox" id="notify_enterprise" />
-                  <label className="form-check-label" htmlFor="notify_enterprise">
-                    Notifier l'entreprise par email
-                  </label>
-                </div>
-                
-                <div className="form-check">
-                  <input className="form-check-input" type="checkbox" id="publish_immediately" />
-                  <label className="form-check-label" htmlFor="publish_immediately">
-                    Publier immédiatement
-                  </label>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary"
-                  onClick={() => setShowApprovalModal(false)}
-                >
-                  Annuler
-                </button>
-                <button className="btn btn-success">
-                  <i className="fas fa-check me-2"></i>Approuver
-                </button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowDetailsModal(false)}>Fermer</button>
               </div>
             </div>
           </div>

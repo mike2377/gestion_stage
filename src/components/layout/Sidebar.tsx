@@ -1,6 +1,8 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { UserRole } from '../../types/models/User';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../config/firebase';
 
 interface SidebarProps {
   user: any;
@@ -10,9 +12,15 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ user, isCollapsed = false, onToggle }) => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    navigate('/login');
   };
 
   const getMenuItems = () => {
@@ -154,6 +162,29 @@ const Sidebar: React.FC<SidebarProps> = ({ user, isCollapsed = false, onToggle }
             </Link>
           </li>
         </ul>
+
+        {/* Bouton de déconnexion en bas */}
+        {user && (
+          <>
+            <ul className="nav flex-column mt-4">
+              <li className="nav-item">
+                <button className="nav-link btn btn-link text-danger" onClick={handleLogout} style={{textAlign: 'left'}}>
+                  <i className="fas fa-sign-out-alt"></i>
+                  {!isCollapsed && <span className="ms-2">Déconnexion</span>}
+                </button>
+              </li>
+            </ul>
+            {/* Infos utilisateur en bas de la sidebar */}
+            <div className="sidebar-user-info text-center mt-4 mb-2" style={{fontSize: '0.95em', color: '#888'}}>
+              {!isCollapsed && (
+                <>
+                  <div><strong>{user.firstName} {user.lastName}</strong></div>
+                  <div style={{textTransform: 'capitalize'}}>{user.role && user.role.replace('_', ' ')}</div>
+                </>
+              )}
+            </div>
+          </>
+        )}
       </nav>
     </div>
   );

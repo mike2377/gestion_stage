@@ -2,41 +2,42 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../config/firebase';
-import { FaBriefcase, FaClipboardList, FaChartBar, FaTasks, FaUser, FaCogs } from 'react-icons/fa';
-import DashboardPage from './Dashboard';
+import { FaBriefcase, FaFileContract, FaStar, FaChartBar, FaClipboardCheck, FaTasks } from 'react-icons/fa';
+import GestionStages from './GestionStages';
+import Conventions from './Conventions';
 import Evaluations from './Evaluations';
 import Rapports from './Rapports';
-import SuiviTuteur from './SuiviTuteur';
+import SuiviPedagogique from './SuiviPedagogique';
 import TachesStagiaires from './TachesStagiaires';
 import Profil from './Profil';
-import Parametres from './Parametres';
 
 const tabs = [
-  { key: 'dashboard', label: 'Tableau de bord', icon: <FaBriefcase /> },
-  { key: 'evaluations', label: 'Évaluations', icon: <FaChartBar /> },
-  { key: 'rapports', label: 'Rapports', icon: <FaClipboardList /> },
-  { key: 'suivi', label: 'Suivi tuteur', icon: <FaTasks /> },
+  { key: 'stages', label: 'Gestion stages', icon: <FaBriefcase /> },
+  { key: 'conventions', label: 'Conventions', icon: <FaFileContract /> },
+  { key: 'evaluations', label: 'Évaluations', icon: <FaStar /> },
+  { key: 'rapports', label: 'Rapports', icon: <FaChartBar /> },
+  { key: 'suivi', label: 'Suivi pédagogique', icon: <FaClipboardCheck /> },
   { key: 'taches', label: 'Tâches stagiaires', icon: <FaTasks /> },
-  { key: 'profil', label: 'Profil', icon: <FaUser /> },
-  { key: 'parametres', label: 'Paramètres', icon: <FaCogs /> },
+  { key: 'profil', label: 'Profil', icon: <FaStar /> },
 ];
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [stats, setStats] = useState({ totalStages: 0, totalEvaluations: 0, totalTaches: 0 });
+  const [activeTab, setActiveTab] = useState('stages');
+  const [stats, setStats] = useState({ totalStages: 0, activeStages: 0, completedStages: 0 });
 
   useEffect(() => {
     if (!user) return;
     const fetchStats = async () => {
-      let totalStages = 0, totalEvaluations = 0, totalTaches = 0;
-      const stagesSnap = await getDocs(query(collection(db, 'stages'), where('tuteurId', '==', user.id)));
+      let totalStages = 0, activeStages = 0, completedStages = 0;
+      const stagesSnap = await getDocs(query(collection(db, 'stages'), where('enseignantId', '==', user.id)));
       totalStages = stagesSnap.docs.length;
-      const evalsSnap = await getDocs(query(collection(db, 'evaluations'), where('tuteurId', '==', user.id)));
-      totalEvaluations = evalsSnap.docs.length;
-      const tachesSnap = await getDocs(query(collection(db, 'taches'), where('tuteurId', '==', user.id)));
-      totalTaches = tachesSnap.docs.length;
-      setStats({ totalStages, totalEvaluations, totalTaches });
+      stagesSnap.docs.forEach(doc => {
+        const s = doc.data();
+        if (s.status === 'active' || s.status === 'en cours') activeStages++;
+        if (s.status === 'completed' || s.status === 'terminé') completedStages++;
+      });
+      setStats({ totalStages, activeStages, completedStages });
     };
     fetchStats();
   }, [user]);
@@ -44,30 +45,30 @@ const Dashboard: React.FC = () => {
   return (
     <div className="container-fluid">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="h3 mb-0">Tableau de bord - Tuteur</h1>
+        <h1 className="h3 mb-0">Tableau de bord - Enseignant</h1>
       </div>
       <div className="row mb-4">
         <div className="col-md-4">
           <div className="card bg-primary text-white mb-3">
             <div className="card-body">
               <h4>{stats.totalStages}</h4>
-              <p>Stages suivis</p>
+              <p>Total stages</p>
             </div>
           </div>
         </div>
         <div className="col-md-4">
           <div className="card bg-success text-white mb-3">
             <div className="card-body">
-              <h4>{stats.totalEvaluations}</h4>
-              <p>Évaluations réalisées</p>
+              <h4>{stats.activeStages}</h4>
+              <p>Stages actifs</p>
             </div>
           </div>
         </div>
         <div className="col-md-4">
           <div className="card bg-info text-white mb-3">
             <div className="card-body">
-              <h4>{stats.totalTaches}</h4>
-              <p>Tâches attribuées</p>
+              <h4>{stats.completedStages}</h4>
+              <p>Stages terminés</p>
             </div>
           </div>
         </div>
@@ -85,13 +86,13 @@ const Dashboard: React.FC = () => {
         ))}
       </ul>
       <div>
-        {activeTab === 'dashboard' && <DashboardPage />}
+        {activeTab === 'stages' && <GestionStages />}
+        {activeTab === 'conventions' && <Conventions />}
         {activeTab === 'evaluations' && <Evaluations />}
         {activeTab === 'rapports' && <Rapports />}
-        {activeTab === 'suivi' && <SuiviTuteur />}
+        {activeTab === 'suivi' && <SuiviPedagogique />}
         {activeTab === 'taches' && <TachesStagiaires />}
         {activeTab === 'profil' && <Profil />}
-        {activeTab === 'parametres' && <Parametres />}
       </div>
     </div>
   );

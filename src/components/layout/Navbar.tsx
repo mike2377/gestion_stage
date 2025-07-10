@@ -113,7 +113,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
                   <li><hr className="dropdown-divider" /></li>
                   <li>
                     <button 
-                      className="dropdown-item" 
+                      className="dropdown-item logout" 
                       onClick={handleLogout}
                     >
                       <i className="fas fa-sign-out-alt me-2"></i>Déconnexion

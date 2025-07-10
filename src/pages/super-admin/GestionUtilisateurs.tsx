@@ -36,6 +36,25 @@ interface User {
   url_photo_profil?: string;
 }
 
+// Fonction de normalisation pour uniformiser les champs utilisateur en français
+function normaliserUtilisateur(user: any) {
+  return {
+    id: user.id,
+    uid: user.uid,
+    email: user.email,
+    prenom: user.prenom || user.firstName || '',
+    nom: user.nom || user.lastName || '',
+    telephone: user.telephone || user.phone || '',
+    role: user.role,
+    est_actif: user.est_actif !== undefined ? user.est_actif : user.isActive,
+    date_creation: user.date_creation || user.createdAt || null,
+    derniere_connexion: user.derniere_connexion || user.updatedAt || null,
+    url_photo_profil: user.url_photo_profil || user.photoURL || '',
+    universiteId: user.universiteId ?? null,
+    entrepriseId: user.entrepriseId ?? null,
+  };
+}
+
 const GestionUtilisateurs: React.FC = () => {
   const { user, role, loading } = useAuth();
   const [utilisateurs, setUtilisateurs] = useState<User[]>([]);
@@ -72,7 +91,7 @@ const GestionUtilisateurs: React.FC = () => {
     setLoadingUsers(true);
     try {
       const snap = await getDocs(collection(db, 'utilisateurs'));
-      const usersData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }) as User);
+      const usersData = snap.docs.map(doc => normaliserUtilisateur({ id: doc.id, ...doc.data() }));
       setUtilisateurs(usersData);
       setFilteredUsers(usersData);
       setError(null);
@@ -191,7 +210,7 @@ const GestionUtilisateurs: React.FC = () => {
         entrepriseId = entDoc.id;
       }
       // 3. Création dans Firestore utilisateurs
-      await addDoc(collection(db, 'utilisateurs'), {
+      const docRef = await addDoc(collection(db, 'utilisateurs'), {
         uid: user.uid,
         email: nouvelUtilisateur.email,
         firstName: nouvelUtilisateur.prenom,
@@ -204,6 +223,20 @@ const GestionUtilisateurs: React.FC = () => {
         universiteId: universiteId || null,
         entrepriseId: entrepriseId || null,
       });
+      const newUser = {
+        id: docRef.id,
+        email: nouvelUtilisateur.email,
+        prenom: nouvelUtilisateur.prenom,
+        nom: nouvelUtilisateur.nom,
+        telephone: nouvelUtilisateur.telephone,
+        role: nouvelUtilisateur.role,
+        est_actif: nouvelUtilisateur.est_actif,
+        date_creation: new Date(),
+        universiteId: universiteId || null,
+        entrepriseId: entrepriseId || null,
+      };
+      setUtilisateurs(prev => [...prev, newUser]);
+      setFilteredUsers(prev => [...prev, newUser]);
       setNouvelUtilisateur({
         email: '',
         prenom: '',
@@ -218,7 +251,6 @@ const GestionUtilisateurs: React.FC = () => {
       setNewUniversite({ nom: '', email: '' });
       setNewEntreprise({ nom: '', email: '' });
       setShowUserModal(false);
-      fetchUtilisateurs();
     } catch (e) {
       setError('Erreur lors de la création du compte (email déjà utilisé ou mot de passe trop faible)');
     }
@@ -235,10 +267,11 @@ const GestionUtilisateurs: React.FC = () => {
     if (!editingId || !editingUser) return;
     try {
       await updateDoc(doc(db, 'utilisateurs', editingId), editingUser);
+      setUtilisateurs(prev => prev.map(u => u.id === editingId ? { ...u, ...editingUser } : u));
+      setFilteredUsers(prev => prev.map(u => u.id === editingId ? { ...u, ...editingUser } : u));
       setEditingId(null);
       setEditingUser(null);
       setShowUserModal(false);
-      fetchUtilisateurs();
     } catch (e) {
       setError('Erreur lors de la modification');
     }
@@ -248,7 +281,8 @@ const GestionUtilisateurs: React.FC = () => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
       try {
         await deleteDoc(doc(db, 'utilisateurs', id));
-        fetchUtilisateurs();
+        setUtilisateurs(prev => prev.filter(u => u.id !== id));
+        setFilteredUsers(prev => prev.filter(u => u.id !== id));
       } catch (e) {
         setError('Erreur lors de la suppression');
       }
@@ -622,16 +656,36 @@ const GestionUtilisateurs: React.FC = () => {
                         }
                         required
                       >
-                        <option value="">Sélectionner un rôle</option>
                         <option value="etudiant">Étudiant</option>
                         <option value="enseignant">Enseignant</option>
                         <option value="responsable">Responsable</option>
                         <option value="entreprise">Entreprise</option>
                         <option value="tuteur">Tuteur</option>
-                        <option value="admin">Admin</option>
                         <option value="super_admin">Super Admin</option>
                       </select>
                     </div>
+                    {/* Association université/entreprise */}
+                    {!editingId && !['admin', 'super_admin'].includes(nouvelUtilisateur.role) && (
+                      <div className="col-12">
+                        {['entreprise', 'tuteur'].includes(nouvelUtilisateur.role) ? (
+                          <>
+                            <label className="form-label">Associer à une entreprise *</label>
+                            <select className="form-select" value={assocEntrepriseId} onChange={e => setAssocEntrepriseId(e.target.value)} required>
+                              <option value="">Sélectionner une entreprise existante</option>
+                              {entreprises.map(e => <option key={e.id} value={e.id}>{e.nom}</option>)}
+                            </select>
+                          </>
+                        ) : (
+                          <>
+                            <label className="form-label">Associer à une université *</label>
+                            <select className="form-select" value={assocUniversiteId} onChange={e => setAssocUniversiteId(e.target.value)} required>
+                              <option value="">Sélectionner une université existante</option>
+                              {universites.map(u => <option key={u.id} value={u.id}>{u.nom}</option>)}
+                            </select>
+                          </>
+                        )}
+                      </div>
+                    )}
                     <div className="col-md-6">
                       <label className="form-label">Statut *</label>
                       <select 
@@ -659,30 +713,6 @@ const GestionUtilisateurs: React.FC = () => {
                         placeholder="Mot de passe initial"
                       />
                     </div>
-                    {!editingId && nouvelUtilisateur.role === 'responsable' && (
-                      <div className="col-12">
-                        <label className="form-label">Associer à une université</label>
-                        <select className="form-select mb-2" value={assocUniversiteId} onChange={e => setAssocUniversiteId(e.target.value)}>
-                          <option value="">Sélectionner une université existante</option>
-                          {universites.map(u => <option key={u.id} value={u.id}>{u.nom}</option>)}
-                        </select>
-                        <div className="mb-2">Ou créer une nouvelle université :</div>
-                        <input type="text" className="form-control mb-2" placeholder="Nom de l'université" value={newUniversite.nom} onChange={e => setNewUniversite({ ...newUniversite, nom: e.target.value })} />
-                        <input type="email" className="form-control" placeholder="Email de l'université" value={newUniversite.email} onChange={e => setNewUniversite({ ...newUniversite, email: e.target.value })} />
-                      </div>
-                    )}
-                    {!editingId && nouvelUtilisateur.role === 'entreprise' && (
-                      <div className="col-12">
-                        <label className="form-label">Associer à une entreprise</label>
-                        <select className="form-select mb-2" value={assocEntrepriseId} onChange={e => setAssocEntrepriseId(e.target.value)}>
-                          <option value="">Sélectionner une entreprise existante</option>
-                          {entreprises.map(e => <option key={e.id} value={e.id}>{e.nom}</option>)}
-                        </select>
-                        <div className="mb-2">Ou créer une nouvelle entreprise :</div>
-                        <input type="text" className="form-control mb-2" placeholder="Nom de l'entreprise" value={newEntreprise.nom} onChange={e => setNewEntreprise({ ...newEntreprise, nom: e.target.value })} />
-                        <input type="email" className="form-control" placeholder="Email de l'entreprise" value={newEntreprise.email} onChange={e => setNewEntreprise({ ...newEntreprise, email: e.target.value })} />
-                      </div>
-                    )}
                   </div>
                 </form>
               </div>

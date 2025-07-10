@@ -1,16 +1,46 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Layout from '../components/layout/Layout';
+import { useAuth } from '../context/AuthContext';
 
 const Home: React.FC = () => {
-  const defaultUser = {
-    id: 1,
-    firstName: "Test",
-    lastName: "Utilisateur",
-    email: "test@example.com",
-    role: "student"
-  };
+  const { user, role, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && user && role) {
+      switch (role) {
+        case 'etudiant':
+          navigate('/etudiant/dashboard', { replace: true });
+          break;
+        case 'entreprise':
+          navigate('/entreprise/dashboard', { replace: true });
+          break;
+        case 'enseignant':
+          navigate('/enseignant/dashboard', { replace: true });
+          break;
+        case 'responsable':
+          navigate('/responsable/dashboard', { replace: true });
+          break;
+        case 'tuteur':
+          navigate('/tuteur/dashboard', { replace: true });
+          break;
+        case 'admin':
+        case 'super_admin':
+          navigate('/super-admin/dashboard', { replace: true });
+          break;
+        default:
+          navigate('/', { replace: true });
+      }
+    }
+  }, [user, role, loading, navigate]);
+
+  if (loading) return <div>Chargement...</div>;
+  if (user && role) return null; // Empêche l'affichage de la page d'accueil pendant la redirection
 
   return (
+    <Layout user={user}>
+      {/* Début du contenu de la page d'accueil */}
     <div className="home-page">
       {/* Hero Section */}
       <section className="hero-section">
@@ -255,6 +285,8 @@ const Home: React.FC = () => {
         </div>
       </section>
     </div>
+      {/* Fin du contenu de la page d'accueil */}
+    </Layout>
   );
 };
 

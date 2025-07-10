@@ -5,7 +5,6 @@ import SidebarLayout from './components/layout/SidebarLayout';
 import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
-import Dashboard from './pages/dashboard/Dashboard';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -91,161 +90,210 @@ function App() {
             </Layout>
           } />
           
-          {/* Dashboard avec SidebarLayout */}
-          <Route path="/dashboard" element={
-            <SidebarLayout>
-              <Dashboard />
-            </SidebarLayout>
-          } />
-
           {/* Routes Étudiant avec Sidebar directe */}
           <Route path="/etudiant/stages" element={
+            <ProtectedRoute allowedRoles={['etudiant']}>
             <SidebarLayout>
               <MesStages />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/etudiant/rechercher" element={
+            <ProtectedRoute allowedRoles={['etudiant']}>
             <SidebarLayout>
               <RechercherStages />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/etudiant/documents" element={
+            <ProtectedRoute allowedRoles={['etudiant']}>
             <SidebarLayout>
               <MesDocuments />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/etudiant/profil" element={
+            <ProtectedRoute allowedRoles={['etudiant']}>
             <SidebarLayout>
               <MonProfilEtudiant />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/etudiant/taches" element={
+            <ProtectedRoute allowedRoles={['etudiant']}>
             <SidebarLayout>
               <TachesHebdomadaires />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
 
           {/* Routes Entreprise avec Sidebar directe */}
           <Route path="/entreprise/offres" element={
+            <ProtectedRoute allowedRoles={['entreprise']}>
             <SidebarLayout>
               <MesOffres />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/entreprise/candidatures" element={
+            <ProtectedRoute allowedRoles={['entreprise']}>
             <SidebarLayout>
               <Candidatures />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/entreprise/stagiaires" element={
+            <ProtectedRoute allowedRoles={['entreprise']}>
             <SidebarLayout>
               <MesStagiaires />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/entreprise/profil" element={
+            <ProtectedRoute allowedRoles={['entreprise']}>
             <SidebarLayout>
               <MonProfilEntreprise />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/entreprise/taches" element={
+            <ProtectedRoute allowedRoles={['entreprise']}>
             <SidebarLayout>
               <TachesStagiaires />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/entreprise/parametres" element={
+            <ProtectedRoute allowedRoles={['entreprise']}>
             <SidebarLayout>
               <ParametresEntreprise />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
 
           {/* Routes Enseignant avec Sidebar directe */}
           <Route path="/enseignant/stages" element={
+            <ProtectedRoute allowedRoles={['enseignant']}>
             <SidebarLayout>
               <GestionStages />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/enseignant/conventions" element={
+            <ProtectedRoute allowedRoles={['enseignant']}>
             <SidebarLayout>
               <Conventions />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/enseignant/evaluations" element={
+            <ProtectedRoute allowedRoles={['enseignant']}>
             <SidebarLayout>
               <Evaluations />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/enseignant/rapports" element={
+            <ProtectedRoute allowedRoles={['enseignant']}>
             <SidebarLayout>
               <Rapports />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/enseignant/suivi" element={
+            <ProtectedRoute allowedRoles={['enseignant']}>
             <SidebarLayout>
               <SuiviPedagogique />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/enseignant/taches" element={
+            <ProtectedRoute allowedRoles={['enseignant']}>
             <SidebarLayout>
               <TachesStagiairesEnseignant />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
 
           {/* Routes Responsable avec Sidebar directe */}
           <Route path="/responsable/stages" element={
+            <ProtectedRoute allowedRoles={['responsable']}>
             <SidebarLayout>
               <GestionStagesResponsable />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/responsable/conventions" element={
+            <ProtectedRoute allowedRoles={['responsable']}>
             <SidebarLayout>
               <ConventionsResponsable />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/responsable/evaluations" element={
+            <ProtectedRoute allowedRoles={['responsable']}>
             <SidebarLayout>
               <EvaluationsResponsable />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/responsable/utilisateurs-gestion" element={
+            <ProtectedRoute allowedRoles={['responsable']}>
             <SidebarLayout>
               <UtilisateursResponsable />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/responsable/entreprises-gestion" element={
+            <ProtectedRoute allowedRoles={['responsable']}>
             <SidebarLayout>
               <EntreprisesResponsable />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/responsable/parametres" element={
+            <ProtectedRoute allowedRoles={['responsable']}>
             <SidebarLayout>
               <ParametresResponsable />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
 
           {/* Routes Tuteur avec Sidebar directe */}
           <Route path="/tuteur/suivi" element={
+            <ProtectedRoute allowedRoles={['tuteur']}>
             <SidebarLayout>
               <SuiviTuteur />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/tuteur/evaluations" element={
+            <ProtectedRoute allowedRoles={['tuteur']}>
             <SidebarLayout>
               <EvaluationsTuteur />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/tuteur/rapports" element={
+            <ProtectedRoute allowedRoles={['tuteur']}>
             <SidebarLayout>
               <RapportsTuteur />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/tuteur/taches" element={
+            <ProtectedRoute allowedRoles={['tuteur']}>
             <SidebarLayout>
               <TachesStagiairesTuteur />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
           <Route path="/tuteur/parametres" element={
+            <ProtectedRoute allowedRoles={['tuteur']}>
             <SidebarLayout>
               <ParametresTuteur />
             </SidebarLayout>
+            </ProtectedRoute>
           } />
 
           {/* Routes communes avec Layout */}
@@ -255,18 +303,55 @@ function App() {
             </Layout>
           } />
 
+          {/* Routes avec SidebarLayout et protégées */}
+          <Route path="/etudiant/dashboard" element={
+            <ProtectedRoute allowedRoles={['etudiant']}>
+              <SidebarLayout>
+                <import('./pages/etudiant/Dashboard').then(m => <m.default />)}
+              </SidebarLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/entreprise/dashboard" element={
+            <ProtectedRoute allowedRoles={['entreprise']}>
+              <SidebarLayout>
+                <import('./pages/entreprise/Dashboard').then(m => <m.default />)}
+              </SidebarLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/enseignant/dashboard" element={
+            <ProtectedRoute allowedRoles={['enseignant']}>
+              <SidebarLayout>
+                <import('./pages/enseignant/Dashboard').then(m => <m.default />)}
+              </SidebarLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/responsable/dashboard" element={
+            <ProtectedRoute allowedRoles={['responsable']}>
+              <SidebarLayout>
+                <import('./pages/responsable/Dashboard').then(m => <m.default />)}
+              </SidebarLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/tuteur/dashboard" element={
+            <ProtectedRoute allowedRoles={['tuteur']}>
+              <SidebarLayout>
+                <import('./pages/tuteur/Dashboard').then(m => <m.default />)}
+              </SidebarLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/super-admin/dashboard" element={
+            <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
+              <SidebarLayout>
+                <import('./pages/super-admin/Dashboard').then(m => <m.default />)}
+              </SidebarLayout>
+            </ProtectedRoute>
+          } />
+
           {/* Super-Admin routes */}
           <Route path="/super-admin" element={
             role === 'super_admin'
               ? <Navigate to="/super-admin/dashboard" replace />
               : <Navigate to="/unauthorized" replace />
-          } />
-          <Route path="/super-admin/dashboard" element={
-            <ProtectedRoute allowedRoles={['super_admin']}>
-              <SidebarLayout>
-                <DashboardSuperAdmin />
-              </SidebarLayout>
-            </ProtectedRoute>
           } />
           <Route path="/super-admin/parametres" element={
             <ProtectedRoute allowedRoles={['super_admin']}>

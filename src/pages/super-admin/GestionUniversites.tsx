@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { db } from '../../config/firebase';
+import type { User } from '../../types/models/User';
 import { useAuth } from '../../context/AuthContext';
 import { 
   FaUniversity, 
@@ -27,8 +28,6 @@ interface Universite {
   email: string;
   site_web: string;
   description: string;
-  nombre_etudiants: number;
-  nombre_professeurs: number;
   date_creation: any;
   est_actif: boolean;
 }
@@ -49,16 +48,16 @@ const GestionUniversites: React.FC = () => {
     email: '',
     site_web: '',
     description: '',
-    nombre_etudiants: 0,
-    nombre_professeurs: 0,
     est_actif: true
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [utilisateurs, setUtilisateurs] = useState<User[]>([]);
 
   useEffect(() => {
     if (role !== 'super_admin') return;
     fetchUniversites();
+    fetchUtilisateurs();
   }, [role]);
 
   const fetchUniversites = async () => {
@@ -79,6 +78,16 @@ const GestionUniversites: React.FC = () => {
     }
   };
 
+  const fetchUtilisateurs = async () => {
+    try {
+      const snap = await getDocs(collection(db, 'utilisateurs'));
+      const usersData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as User[];
+      setUtilisateurs(usersData);
+    } catch (e) {
+      // Optionnel : gestion d'erreur
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -88,22 +97,21 @@ const GestionUniversites: React.FC = () => {
       const universiteData = {
         ...formData,
         date_creation: new Date(),
-        nombre_etudiants: Number(formData.nombre_etudiants),
-        nombre_professeurs: Number(formData.nombre_professeurs)
       };
 
       if (editingUniversite) {
         await updateDoc(doc(db, "universites", editingUniversite.id), universiteData);
+        setUniversites(prev => prev.map(u => u.id === editingUniversite.id ? { ...u, ...universiteData } : u));
         setSuccess('Université mise à jour avec succès');
       } else {
-        await addDoc(collection(db, "universites"), universiteData);
+        const docRef = await addDoc(collection(db, "universites"), universiteData);
+        setUniversites(prev => [...prev, { id: docRef.id, ...universiteData }]);
         setSuccess('Université ajoutée avec succès');
       }
 
       setShowModal(false);
       setEditingUniversite(null);
       resetForm();
-      fetchUniversites();
     } catch (err) {
       setError('Erreur lors de l\'opération');
     }
@@ -118,8 +126,6 @@ const GestionUniversites: React.FC = () => {
       email: universite.email,
       site_web: universite.site_web,
       description: universite.description,
-      nombre_etudiants: universite.nombre_etudiants,
-      nombre_professeurs: universite.nombre_professeurs,
       est_actif: universite.est_actif
     });
     setShowModal(true);
@@ -129,8 +135,8 @@ const GestionUniversites: React.FC = () => {
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'université "${universite.nom}" ?`)) {
       try {
         await deleteDoc(doc(db, "universites", universite.id));
+        setUniversites(prev => prev.filter(u => u.id !== universite.id));
         setSuccess('Université supprimée avec succès');
-        fetchUniversites();
       } catch (err) {
         setError('Erreur lors de la suppression');
       }
@@ -150,8 +156,6 @@ const GestionUniversites: React.FC = () => {
       email: '',
       site_web: '',
       description: '',
-      nombre_etudiants: 0,
-      nombre_professeurs: 0,
       est_actif: true
     });
   };
@@ -174,6 +178,11 @@ const GestionUniversites: React.FC = () => {
       <p>Vous n'avez pas les permissions nécessaires pour accéder à cette page.</p>
     </div>
   </div>;
+
+  if (error) {
+    console.error('Erreur GestionUniversites:', error, 'role:', role, 'loading:', loading);
+    return <div className="alert alert-danger mt-4">Erreur : {error} <br/>Rôle : {role} <br/>Loading : {loading ? 'true' : 'false'}</div>;
+  }
 
   return (
     <div className="container-fluid">
@@ -253,7 +262,7 @@ const GestionUniversites: React.FC = () => {
               <div className="d-flex justify-content-between">
                 <div>
                   <h4 className="mb-0">
-                    {universites.reduce((sum, u) => sum + u.nombre_etudiants, 0).toLocaleString()}
+                    {Array.isArray(utilisateurs) ? utilisateurs.filter(u => u && u.role === 'etudiant').length.toLocaleString() : '0'}
                   </h4>
                   <p className="mb-0">Total Étudiants</p>
                 </div>
@@ -270,7 +279,7 @@ const GestionUniversites: React.FC = () => {
               <div className="d-flex justify-content-between">
                 <div>
                   <h4 className="mb-0">
-                    {universites.reduce((sum, u) => sum + u.nombre_professeurs, 0).toLocaleString()}
+                    {Array.isArray(utilisateurs) ? utilisateurs.filter(u => u && u.role === 'enseignant').length.toLocaleString() : '0'}
                   </h4>
                   <p className="mb-0">Total Professeurs</p>
                 </div>
@@ -348,8 +357,6 @@ const GestionUniversites: React.FC = () => {
                     <th>Université</th>
                     <th>Adresse</th>
                     <th>Contact</th>
-                    <th>Étudiants</th>
-                    <th>Professeurs</th>
                     <th>Statut</th>
                     <th>Actions</th>
                   </tr>
@@ -387,16 +394,6 @@ const GestionUniversites: React.FC = () => {
                             {universite.email}
                           </div>
                         </div>
-                      </td>
-                      <td>
-                        <span className="badge bg-info">
-                          {universite.nombre_etudiants.toLocaleString()}
-                        </span>
-                      </td>
-                      <td>
-                        <span className="badge bg-warning">
-                          {universite.nombre_professeurs.toLocaleString()}
-                        </span>
                       </td>
                       <td>
                         <span className={`badge ${universite.est_actif ? 'bg-success' : 'bg-secondary'}`}>
@@ -508,26 +505,6 @@ const GestionUniversites: React.FC = () => {
                         required
                       />
                     </div>
-                    <div className="col-md-6">
-                      <label className="form-label">Nombre d'étudiants</label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        value={formData.nombre_etudiants}
-                        onChange={(e) => setFormData({...formData, nombre_etudiants: parseInt(e.target.value) || 0})}
-                        min="0"
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label">Nombre de professeurs</label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        value={formData.nombre_professeurs}
-                        onChange={(e) => setFormData({...formData, nombre_professeurs: parseInt(e.target.value) || 0})}
-                        min="0"
-                      />
-                    </div>
                     <div className="col-12">
                       <label className="form-label">Description</label>
                       <textarea
@@ -630,11 +607,11 @@ const GestionUniversites: React.FC = () => {
                   </div>
                   <div className="col-md-6">
                     <h6><FaGraduationCap className="me-2 text-muted" />Nombre d'étudiants</h6>
-                    <p>{selectedUniversite.nombre_etudiants.toLocaleString()}</p>
+                    <p>{typeof selectedUniversite.nombre_etudiants === 'number' && !isNaN(selectedUniversite.nombre_etudiants) ? selectedUniversite.nombre_etudiants.toLocaleString() : 0}</p>
                   </div>
                   <div className="col-md-6">
                     <h6><FaUsers className="me-2 text-muted" />Nombre de professeurs</h6>
-                    <p>{selectedUniversite.nombre_professeurs.toLocaleString()}</p>
+                    <p>{typeof selectedUniversite.nombre_professeurs === 'number' && !isNaN(selectedUniversite.nombre_professeurs) ? selectedUniversite.nombre_professeurs.toLocaleString() : 0}</p>
                   </div>
                   {selectedUniversite.description && (
                     <div className="col-12">
