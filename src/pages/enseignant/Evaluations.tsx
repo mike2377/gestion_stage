@@ -3,43 +3,43 @@ import Sidebar from '../../components/layout/Sidebar';
 
 interface Evaluation {
   id: number;
-  studentId: string;
-  studentName: string;
-  studentPhoto?: string;
-  enterpriseId: number;
-  enterpriseName: string;
-  enterpriseLogo?: string;
-  stageTitle: string;
-  evaluationType: 'midterm' | 'final';
-  evaluationDate: string;
-  dueDate: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'overdue';
-  supervisor: string;
-  tutor: string;
-  program: string;
-  year: number;
-  grades: Grade[];
-  overallGrade: number;
-  comments: string;
-  recommendations: string;
+  idEtudiant: string;
+  nomEtudiant: string;
+  photoEtudiant?: string;
+  idEntreprise: number;
+  nomEntreprise: string;
+  logoEntreprise?: string;
+  titreStage: string;
+  typeEvaluation: 'mi_parcours' | 'finale';
+  dateEvaluation: string;
+  dateLimite: string;
+  statut: 'en_attente' | 'en_cours' | 'terminee' | 'retard';
+  encadrant: string;
+  tuteur: string;
+  programme: string;
+  annee: number;
+  notes: Note[];
+  noteGlobale: number;
+  commentaires: string;
+  recommandations: string;
   documents: Document[];
 }
 
-interface Grade {
+interface Note {
   id: number;
-  criterion: string;
-  weight: number;
-  grade: number;
-  maxGrade: number;
-  comments?: string;
+  critere: string;
+  poids: number;
+  note: number;
+  noteMax: number;
+  commentaires?: string;
 }
 
 interface Document {
   id: number;
-  name: string;
+  nom: string;
   type: string;
-  uploadDate: string;
-  status: string;
+  dateDepot: string;
+  statut: string;
 }
 
 const Evaluations: React.FC = () => {
@@ -62,284 +62,284 @@ const Evaluations: React.FC = () => {
     const mockEvaluations: Evaluation[] = [
       {
         id: 1,
-        studentId: '2024001',
-        studentName: 'Jean Dupont',
-        studentPhoto: '/api/photos/student-1.jpg',
-        enterpriseId: 1,
-        enterpriseName: 'TechCorp Solutions',
-        enterpriseLogo: '/api/logos/techcorp-logo.png',
-        stageTitle: 'Développeur Web Full-Stack',
-        evaluationType: 'midterm',
-        evaluationDate: '01/04/2024',
-        dueDate: '15/04/2024',
-        status: 'completed',
-        supervisor: 'M. Martin',
-        tutor: 'Dr. Dupont',
-        program: 'Master Informatique',
-        year: 2,
-        overallGrade: 4.5,
-        comments: 'Excellent travail, très autonome et créatif. Développe bien ses compétences techniques.',
-        recommendations: 'Continuer dans cette voie, excellent potentiel pour un poste de développeur senior.',
-        grades: [
+        idEtudiant: '2024001',
+        nomEtudiant: 'Jean Dupont',
+        photoEtudiant: '/api/photos/student-1.jpg',
+        idEntreprise: 1,
+        nomEntreprise: 'TechCorp Solutions',
+        logoEntreprise: '/api/logos/techcorp-logo.png',
+        titreStage: 'Développeur Web Full-Stack',
+        typeEvaluation: 'mi_parcours',
+        dateEvaluation: '01/04/2024',
+        dateLimite: '15/04/2024',
+        statut: 'terminee',
+        encadrant: 'M. Martin',
+        tuteur: 'Dr. Dupont',
+        programme: 'Master Informatique',
+        annee: 2,
+        noteGlobale: 4.5,
+        commentaires: 'Excellent travail, très autonome et créatif. Développe bien ses compétences techniques.',
+        recommandations: 'Continuer dans cette voie, excellent potentiel pour un poste de développeur senior.',
+        notes: [
           {
             id: 1,
-            criterion: 'Compétences techniques',
-            weight: 30,
-            grade: 4.5,
-            maxGrade: 5,
-            comments: 'Maîtrise excellente des technologies web'
+            critere: 'Compétences techniques',
+            poids: 30,
+            note: 4.5,
+            noteMax: 5,
+            commentaires: 'Maîtrise excellente des technologies web'
           },
           {
             id: 2,
-            criterion: 'Autonomie',
-            weight: 25,
-            grade: 4.0,
-            maxGrade: 5,
-            comments: 'Très autonome dans son travail'
+            critere: 'Autonomie',
+            poids: 25,
+            note: 4.0,
+            noteMax: 5,
+            commentaires: 'Très autonome dans son travail'
           },
           {
             id: 3,
-            criterion: 'Communication',
-            weight: 20,
-            grade: 4.5,
-            maxGrade: 5,
-            comments: 'Communication claire et efficace'
+            critere: 'Communication',
+            poids: 20,
+            note: 4.5,
+            noteMax: 5,
+            commentaires: 'Communication claire et efficace'
           },
           {
             id: 4,
-            criterion: 'Qualité du travail',
-            weight: 25,
-            grade: 4.5,
-            maxGrade: 5,
-            comments: 'Code de qualité, bien documenté'
+            critere: 'Qualité du travail',
+            poids: 25,
+            note: 4.5,
+            noteMax: 5,
+            commentaires: 'Code de qualité, bien documenté'
           }
         ],
         documents: [
           {
             id: 1,
-            name: 'Evaluation_mi_parcours_Jean_Dupont.pdf',
+            nom: 'Evaluation_mi_parcours_Jean_Dupont.pdf',
             type: 'Évaluation',
-            uploadDate: '01/04/2024',
-            status: 'Validé'
+            dateDepot: '01/04/2024',
+            statut: 'Validé'
           }
         ]
       },
       {
         id: 2,
-        studentId: '2024002',
-        studentName: 'Marie Martin',
-        studentPhoto: '/api/photos/student-2.jpg',
-        enterpriseId: 2,
-        enterpriseName: 'MarketingPro',
-        enterpriseLogo: '/api/logos/marketingpro-logo.png',
-        stageTitle: 'Assistant Marketing Digital',
-        evaluationType: 'midterm',
-        evaluationDate: '15/04/2024',
-        dueDate: '30/04/2024',
-        status: 'in_progress',
-        supervisor: 'Mme. Dubois',
-        tutor: 'Dr. Moreau',
-        program: 'Master Marketing',
-        year: 2,
-        overallGrade: 0,
-        comments: '',
-        recommendations: '',
-        grades: [
+        idEtudiant: '2024002',
+        nomEtudiant: 'Marie Martin',
+        photoEtudiant: '/api/photos/student-2.jpg',
+        idEntreprise: 2,
+        nomEntreprise: 'MarketingPro',
+        logoEntreprise: '/api/logos/marketingpro-logo.png',
+        titreStage: 'Assistant Marketing Digital',
+        typeEvaluation: 'mi_parcours',
+        dateEvaluation: '15/04/2024',
+        dateLimite: '30/04/2024',
+        statut: 'en_cours',
+        encadrant: 'Mme. Dubois',
+        tuteur: 'Dr. Moreau',
+        programme: 'Master Marketing',
+        annee: 2,
+        noteGlobale: 0,
+        commentaires: '',
+        recommandations: '',
+        notes: [
           {
             id: 5,
-            criterion: 'Créativité',
-            weight: 30,
-            grade: 0,
-            maxGrade: 5
+            critere: 'Créativité',
+            poids: 30,
+            note: 0,
+            noteMax: 5
           },
           {
             id: 6,
-            criterion: 'Gestion des réseaux sociaux',
-            weight: 35,
-            grade: 0,
-            maxGrade: 5
+            critere: 'Gestion des réseaux sociaux',
+            poids: 35,
+            note: 0,
+            noteMax: 5
           },
           {
             id: 7,
-            criterion: 'Analyse des performances',
-            weight: 20,
-            grade: 0,
-            maxGrade: 5
+            critere: 'Analyse des performances',
+            poids: 20,
+            note: 0,
+            noteMax: 5
           },
           {
             id: 8,
-            criterion: 'Adaptabilité',
-            weight: 15,
-            grade: 0,
-            maxGrade: 5
+            critere: 'Adaptabilité',
+            poids: 15,
+            note: 0,
+            noteMax: 5
           }
         ],
         documents: []
       },
       {
         id: 3,
-        studentId: '2024003',
-        studentName: 'Sophie Bernard',
-        studentPhoto: '/api/photos/student-4.jpg',
-        enterpriseId: 3,
-        enterpriseName: 'DataCorp',
-        enterpriseLogo: '/api/logos/datacorp-logo.png',
-        stageTitle: 'Data Analyst',
-        evaluationType: 'final',
-        evaluationDate: '15/12/2023',
-        dueDate: '31/12/2023',
-        status: 'completed',
-        supervisor: 'M. Bernard',
-        tutor: 'Dr. Petit',
-        program: 'Master Data Science',
-        year: 2,
-        overallGrade: 4.8,
-        comments: 'Excellente stagiaire, travail de qualité exceptionnelle. A contribué significativement aux projets de l\'entreprise.',
-        recommendations: 'Recommandation forte pour un poste de data analyst senior.',
-        grades: [
+        idEtudiant: '2024003',
+        nomEtudiant: 'Sophie Bernard',
+        photoEtudiant: '/api/photos/student-4.jpg',
+        idEntreprise: 3,
+        nomEntreprise: 'DataCorp',
+        logoEntreprise: '/api/logos/datacorp-logo.png',
+        titreStage: 'Data Analyst',
+        typeEvaluation: 'finale',
+        dateEvaluation: '15/12/2023',
+        dateLimite: '31/12/2023',
+        statut: 'terminee',
+        encadrant: 'M. Bernard',
+        tuteur: 'Dr. Petit',
+        programme: 'Master Data Science',
+        annee: 2,
+        noteGlobale: 4.8,
+        commentaires: 'Excellente stagiaire, travail de qualité exceptionnelle. A contribué significativement aux projets de l\'entreprise.',
+        recommandations: 'Recommandation forte pour un poste de data analyst senior.',
+        notes: [
           {
             id: 9,
-            criterion: 'Analyse de données',
-            weight: 35,
-            grade: 5.0,
-            maxGrade: 5,
-            comments: 'Excellente maîtrise des outils d\'analyse'
+            critere: 'Analyse de données',
+            poids: 35,
+            note: 5.0,
+            noteMax: 5,
+            commentaires: 'Excellente maîtrise des outils d\'analyse'
           },
           {
             id: 10,
-            criterion: 'Présentation des résultats',
-            weight: 25,
-            grade: 4.5,
-            maxGrade: 5,
-            comments: 'Présentations claires et professionnelles'
+            critere: 'Présentation des résultats',
+            poids: 25,
+            note: 4.5,
+            noteMax: 5,
+            commentaires: 'Présentations claires et professionnelles'
           },
           {
             id: 11,
-            criterion: 'Outils techniques',
-            weight: 25,
-            grade: 5.0,
-            maxGrade: 5,
-            comments: 'Maîtrise parfaite de Python, R et SQL'
+            critere: 'Outils techniques',
+            poids: 25,
+            note: 5.0,
+            noteMax: 5,
+            commentaires: 'Maîtrise parfaite de Python, R et SQL'
           },
           {
             id: 12,
-            criterion: 'Travail en équipe',
-            weight: 15,
-            grade: 4.5,
-            maxGrade: 5,
-            comments: 'Intégration parfaite dans l\'équipe'
+            critere: 'Travail en équipe',
+            poids: 15,
+            note: 4.5,
+            noteMax: 5,
+            commentaires: 'Intégration parfaite dans l\'équipe'
           }
         ],
         documents: [
           {
             id: 2,
-            name: 'Evaluation_finale_Sophie_Bernard.pdf',
+            nom: 'Evaluation_finale_Sophie_Bernard.pdf',
             type: 'Évaluation',
-            uploadDate: '15/12/2023',
-            status: 'Validé'
+            dateDepot: '15/12/2023',
+            statut: 'Validé'
           }
         ]
       },
       {
         id: 4,
-        studentId: '2024004',
-        studentName: 'Pierre Durand',
-        studentPhoto: '/api/photos/student-3.jpg',
-        enterpriseId: 4,
-        enterpriseName: 'DesignStudio',
-        enterpriseLogo: '/api/logos/designstudio-logo.png',
-        stageTitle: 'UX/UI Designer',
-        evaluationType: 'midterm',
-        evaluationDate: '01/05/2024',
-        dueDate: '15/05/2024',
-        status: 'pending',
-        supervisor: 'Mme. Laurent',
-        tutor: 'Dr. Roux',
-        program: 'Master Design',
-        year: 2,
-        overallGrade: 0,
-        comments: '',
-        recommendations: '',
-        grades: [
+        idEtudiant: '2024004',
+        nomEtudiant: 'Pierre Durand',
+        photoEtudiant: '/api/photos/student-3.jpg',
+        idEntreprise: 4,
+        nomEntreprise: 'DesignStudio',
+        logoEntreprise: '/api/logos/designstudio-logo.png',
+        titreStage: 'UX/UI Designer',
+        typeEvaluation: 'mi_parcours',
+        dateEvaluation: '01/05/2024',
+        dateLimite: '15/05/2024',
+        statut: 'en_attente',
+        encadrant: 'Mme. Laurent',
+        tuteur: 'Dr. Roux',
+        programme: 'Master Design',
+        annee: 2,
+        noteGlobale: 0,
+        commentaires: '',
+        recommandations: '',
+        notes: [
           {
             id: 13,
-            criterion: 'Design UI',
-            weight: 30,
-            grade: 0,
-            maxGrade: 5
+            critere: 'Design UI',
+            poids: 30,
+            note: 0,
+            noteMax: 5
           },
           {
             id: 14,
-            criterion: 'Design UX',
-            weight: 30,
-            grade: 0,
-            maxGrade: 5
+            critere: 'Design UX',
+            poids: 30,
+            note: 0,
+            noteMax: 5
           },
           {
             id: 15,
-            criterion: 'Outils de design',
-            weight: 20,
-            grade: 0,
-            maxGrade: 5
+            critere: 'Outils de design',
+            poids: 20,
+            note: 0,
+            noteMax: 5
           },
           {
             id: 16,
-            criterion: 'Créativité',
-            weight: 20,
-            grade: 0,
-            maxGrade: 5
+            critere: 'Créativité',
+            poids: 20,
+            note: 0,
+            noteMax: 5
           }
         ],
         documents: []
       },
       {
         id: 5,
-        studentId: '2024005',
-        studentName: 'Lucas Moreau',
-        studentPhoto: '/api/photos/student-5.jpg',
-        enterpriseId: 5,
-        enterpriseName: 'MobileTech',
-        enterpriseLogo: '/api/logos/mobiletech-logo.png',
-        stageTitle: 'Développeur Mobile',
-        evaluationType: 'final',
-        evaluationDate: '01/11/2024',
-        dueDate: '15/11/2024',
-        status: 'overdue',
-        supervisor: 'M. Durand',
-        tutor: 'Dr. Simon',
-        program: 'Master Informatique',
-        year: 2,
-        overallGrade: 0,
-        comments: '',
-        recommendations: '',
-        grades: [
+        idEtudiant: '2024005',
+        nomEtudiant: 'Lucas Moreau',
+        photoEtudiant: '/api/photos/student-5.jpg',
+        idEntreprise: 5,
+        nomEntreprise: 'MobileTech',
+        logoEntreprise: '/api/logos/mobiletech-logo.png',
+        titreStage: 'Développeur Mobile',
+        typeEvaluation: 'finale',
+        dateEvaluation: '01/11/2024',
+        dateLimite: '15/11/2024',
+        statut: 'retard',
+        encadrant: 'M. Durand',
+        tuteur: 'Dr. Simon',
+        programme: 'Master Informatique',
+        annee: 2,
+        noteGlobale: 0,
+        commentaires: '',
+        recommandations: '',
+        notes: [
           {
             id: 17,
-            criterion: 'Développement mobile',
-            weight: 40,
-            grade: 0,
-            maxGrade: 5
+            critere: 'Développement mobile',
+            poids: 40,
+            note: 0,
+            noteMax: 5
           },
           {
             id: 18,
-            criterion: 'Gestion de projet',
-            weight: 25,
-            grade: 0,
-            maxGrade: 5
+            critere: 'Gestion de projet',
+            poids: 25,
+            note: 0,
+            noteMax: 5
           },
           {
             id: 19,
-            criterion: 'Tests et qualité',
-            weight: 20,
-            grade: 0,
-            maxGrade: 5
+            critere: 'Tests et qualité',
+            poids: 20,
+            note: 0,
+            noteMax: 5
           },
           {
             id: 20,
-            criterion: 'Documentation',
-            weight: 15,
-            grade: 0,
-            maxGrade: 5
+            critere: 'Documentation',
+            poids: 15,
+            note: 0,
+            noteMax: 5
           }
         ],
         documents: []
@@ -356,16 +356,16 @@ const Evaluations: React.FC = () => {
     let filtered = evaluations;
 
     if (newFilters.status) {
-      filtered = filtered.filter(evaluation => evaluation.status === newFilters.status);
+      filtered = filtered.filter(evaluation => evaluation.statut === newFilters.status);
     }
     if (newFilters.type) {
-      filtered = filtered.filter(evaluation => evaluation.evaluationType === newFilters.type);
+      filtered = filtered.filter(evaluation => evaluation.typeEvaluation === newFilters.type);
     }
     if (newFilters.program) {
-      filtered = filtered.filter(evaluation => evaluation.program === newFilters.program);
+      filtered = filtered.filter(evaluation => evaluation.programme === newFilters.program);
     }
     if (newFilters.year) {
-      filtered = filtered.filter(evaluation => evaluation.year.toString() === newFilters.year);
+      filtered = filtered.filter(evaluation => evaluation.annee.toString() === newFilters.year);
     }
 
     setFilteredEvaluations(filtered);
@@ -373,10 +373,10 @@ const Evaluations: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      pending: { class: 'bg-secondary', text: 'En attente', icon: 'fas fa-clock' },
-      in_progress: { class: 'bg-info', text: 'En cours', icon: 'fas fa-play' },
-      completed: { class: 'bg-success', text: 'Terminée', icon: 'fas fa-check' },
-      overdue: { class: 'bg-danger', text: 'En retard', icon: 'fas fa-exclamation-triangle' }
+      en_attente: { class: 'bg-secondary', text: 'En attente', icon: 'fas fa-clock' },
+      en_cours: { class: 'bg-info', text: 'En cours', icon: 'fas fa-play' },
+      terminee: { class: 'bg-success', text: 'Terminée', icon: 'fas fa-check' },
+      retard: { class: 'bg-danger', text: 'En retard', icon: 'fas fa-exclamation-triangle' }
     };
 
     const config = statusConfig[status as keyof typeof statusConfig];
@@ -390,8 +390,8 @@ const Evaluations: React.FC = () => {
 
   const getTypeBadge = (type: string) => {
     const typeConfig = {
-      midterm: { class: 'bg-warning', text: 'Mi-parcours' },
-      final: { class: 'bg-primary', text: 'Finale' }
+      mi_parcours: { class: 'bg-warning', text: 'Mi-parcours' },
+      finale: { class: 'bg-primary', text: 'Finale' }
     };
 
     const config = typeConfig[type as keyof typeof typeConfig];
@@ -399,7 +399,7 @@ const Evaluations: React.FC = () => {
   };
 
   const getStatusCount = (status: string) => {
-    return evaluations.filter(evaluation => evaluation.status === status).length;
+    return evaluations.filter(evaluation => evaluation.statut === status).length;
   };
 
   const getGradeColor = (grade: number) => {
@@ -468,7 +468,7 @@ const Evaluations: React.FC = () => {
                   <div className="card-body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <h4 className="mb-0">{getStatusCount('pending')}</h4>
+                        <h4 className="mb-0">{getStatusCount('en_attente')}</h4>
                         <p className="mb-0">En attente</p>
                       </div>
                       <i className="fas fa-clock fa-2x opacity-50"></i>
@@ -481,7 +481,7 @@ const Evaluations: React.FC = () => {
                   <div className="card-body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <h4 className="mb-0">{getStatusCount('in_progress')}</h4>
+                        <h4 className="mb-0">{getStatusCount('en_cours')}</h4>
                         <p className="mb-0">En cours</p>
                       </div>
                       <i className="fas fa-play-circle fa-2x opacity-50"></i>
@@ -494,7 +494,7 @@ const Evaluations: React.FC = () => {
                   <div className="card-body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <h4 className="mb-0">{getStatusCount('completed')}</h4>
+                        <h4 className="mb-0">{getStatusCount('terminee')}</h4>
                         <p className="mb-0">Terminées</p>
                       </div>
                       <i className="fas fa-check-circle fa-2x opacity-50"></i>
@@ -519,10 +519,10 @@ const Evaluations: React.FC = () => {
                       onChange={(e) => handleFilterChange('status', e.target.value)}
                     >
                       <option value="">Tous les statuts</option>
-                      <option value="pending">En attente</option>
-                      <option value="in_progress">En cours</option>
-                      <option value="completed">Terminée</option>
-                      <option value="overdue">En retard</option>
+                      <option value="en_attente">En attente</option>
+                      <option value="en_cours">En cours</option>
+                      <option value="terminee">Terminée</option>
+                      <option value="retard">En retard</option>
                     </select>
                   </div>
                   <div className="col-md-3">
@@ -533,8 +533,8 @@ const Evaluations: React.FC = () => {
                       onChange={(e) => handleFilterChange('type', e.target.value)}
                     >
                       <option value="">Tous les types</option>
-                      <option value="midterm">Mi-parcours</option>
-                      <option value="final">Finale</option>
+                      <option value="mi_parcours">Mi-parcours</option>
+                      <option value="finale">Finale</option>
                     </select>
                   </div>
                   <div className="col-md-3">
@@ -603,53 +603,53 @@ const Evaluations: React.FC = () => {
                             <td>
                               <div className="d-flex align-items-center">
                                 <img 
-                                  src={evaluation.studentPhoto || '/default-avatar.png'} 
+                                  src={evaluation.photoEtudiant || '/default-avatar.png'} 
                                   alt="Photo"
                                   className="rounded-circle me-3"
                                   style={{ width: '40px', height: '40px', objectFit: 'cover' }}
                                 />
                                 <div>
-                                  <strong>{evaluation.studentName}</strong><br />
-                                  <small className="text-muted">{evaluation.program} - {evaluation.year}</small><br />
-                                  <small className="text-muted">ID: {evaluation.studentId}</small>
+                                  <strong>{evaluation.nomEtudiant}</strong><br />
+                                  <small className="text-muted">{evaluation.programme} - {evaluation.annee}</small><br />
+                                  <small className="text-muted">ID: {evaluation.idEtudiant}</small>
                                 </div>
                               </div>
                             </td>
                             <td>
-                              <strong>{evaluation.stageTitle}</strong><br />
-                              <small className="text-muted">{evaluation.supervisor}</small>
+                              <strong>{evaluation.titreStage}</strong><br />
+                              <small className="text-muted">{evaluation.encadrant}</small>
                             </td>
                             <td>
                               <div className="d-flex align-items-center">
                                 <img 
-                                  src={evaluation.enterpriseLogo || '/default-logo.png'} 
+                                  src={evaluation.logoEntreprise || '/default-logo.png'} 
                                   alt="Logo"
                                   className="rounded me-2"
                                   style={{ width: '30px', height: '30px', objectFit: 'contain' }}
                                 />
                                 <div>
-                                  <strong>{evaluation.enterpriseName}</strong>
+                                  <strong>{evaluation.nomEntreprise}</strong>
                                 </div>
                               </div>
                             </td>
-                            <td>{getTypeBadge(evaluation.evaluationType)}</td>
+                            <td>{getTypeBadge(evaluation.typeEvaluation)}</td>
                             <td>
-                              {evaluation.dueDate}<br />
-                              {evaluation.evaluationDate && (
-                                <small className="text-muted">Réalisée: {evaluation.evaluationDate}</small>
+                              {evaluation.dateLimite}<br />
+                              {evaluation.dateEvaluation && (
+                                <small className="text-muted">Réalisée: {evaluation.dateEvaluation}</small>
                               )}
                             </td>
                             <td>
-                              {evaluation.overallGrade > 0 ? (
+                              {evaluation.noteGlobale > 0 ? (
                                 <div className="d-flex align-items-center">
-                                  <span className={`me-2 text-${getGradeColor(evaluation.overallGrade)}`}>
-                                    {evaluation.overallGrade}/5
+                                  <span className={`me-2 text-${getGradeColor(evaluation.noteGlobale)}`}>
+                                    {evaluation.noteGlobale}/5
                                   </span>
                                   <div className="d-flex">
                                     {[...Array(5)].map((_, i) => (
                                       <i 
                                         key={i} 
-                                        className={`fas fa-star ${i < Math.floor(evaluation.overallGrade) ? 'text-warning' : 'text-muted'}`}
+                                        className={`fas fa-star ${i < Math.floor(evaluation.noteGlobale) ? 'text-warning' : 'text-muted'}`}
                                       ></i>
                                     ))}
                                   </div>
@@ -658,7 +658,7 @@ const Evaluations: React.FC = () => {
                                 <span className="text-muted">-</span>
                               )}
                             </td>
-                            <td>{getStatusBadge(evaluation.status)}</td>
+                            <td>{getStatusBadge(evaluation.statut)}</td>
                             <td>
                               <div className="btn-group" role="group">
                                 <button 
@@ -671,7 +671,7 @@ const Evaluations: React.FC = () => {
                                 >
                                   <i className="fas fa-eye"></i>
                                 </button>
-                                {evaluation.status !== 'completed' && (
+                                {evaluation.statut !== 'terminee' && (
                                   <button 
                                     className="btn btn-sm btn-outline-success"
                                     title="Évaluer"
@@ -717,7 +717,7 @@ const Evaluations: React.FC = () => {
               <div className="modal-header">
                 <h5 className="modal-title">
                   <i className="fas fa-star me-2"></i>
-                  Détails de l'évaluation - {selectedEvaluation.studentName}
+                  Détails de l'évaluation - {selectedEvaluation.nomEtudiant}
                 </h5>
                 <button 
                   type="button" 
@@ -761,34 +761,34 @@ const Evaluations: React.FC = () => {
                         <div className="row">
                           <div className="col-md-6">
                             <h6 className="text-primary mb-3">Informations étudiant</h6>
-                            <p><strong>Nom:</strong> {selectedEvaluation.studentName}</p>
-                            <p><strong>ID Étudiant:</strong> {selectedEvaluation.studentId}</p>
-                            <p><strong>Programme:</strong> {selectedEvaluation.program}</p>
-                            <p><strong>Année:</strong> {selectedEvaluation.year}</p>
-                            <p><strong>Tuteur:</strong> {selectedEvaluation.tutor}</p>
+                            <p><strong>Nom:</strong> {selectedEvaluation.nomEtudiant}</p>
+                            <p><strong>ID Étudiant:</strong> {selectedEvaluation.idEtudiant}</p>
+                            <p><strong>Programme:</strong> {selectedEvaluation.programme}</p>
+                            <p><strong>Année:</strong> {selectedEvaluation.annee}</p>
+                            <p><strong>Tuteur:</strong> {selectedEvaluation.tuteur}</p>
                           </div>
                           <div className="col-md-6">
                             <h6 className="text-primary mb-3">Informations stage</h6>
-                            <p><strong>Stage:</strong> {selectedEvaluation.stageTitle}</p>
-                            <p><strong>Entreprise:</strong> {selectedEvaluation.enterpriseName}</p>
-                            <p><strong>Superviseur:</strong> {selectedEvaluation.supervisor}</p>
-                            <p><strong>Type d'évaluation:</strong> {getTypeBadge(selectedEvaluation.evaluationType)}</p>
-                            <p><strong>Date limite:</strong> {selectedEvaluation.dueDate}</p>
+                            <p><strong>Stage:</strong> {selectedEvaluation.titreStage}</p>
+                            <p><strong>Entreprise:</strong> {selectedEvaluation.nomEntreprise}</p>
+                            <p><strong>Encadrant:</strong> {selectedEvaluation.encadrant}</p>
+                            <p><strong>Type d'évaluation:</strong> {getTypeBadge(selectedEvaluation.typeEvaluation)}</p>
+                            <p><strong>Date limite:</strong> {selectedEvaluation.dateLimite}</p>
                           </div>
                         </div>
 
-                        {selectedEvaluation.overallGrade > 0 && (
+                        {selectedEvaluation.noteGlobale > 0 && (
                           <div className="mt-4">
                             <h6 className="text-primary mb-3">Note globale</h6>
                             <div className="d-flex align-items-center">
-                              <span className={`h4 me-3 text-${getGradeColor(selectedEvaluation.overallGrade)}`}>
-                                {selectedEvaluation.overallGrade}/5
+                              <span className={`h4 me-3 text-${getGradeColor(selectedEvaluation.noteGlobale)}`}>
+                                {selectedEvaluation.noteGlobale}/5
                               </span>
                               <div className="d-flex">
                                 {[...Array(5)].map((_, i) => (
                                   <i 
                                     key={i} 
-                                    className={`fas fa-star ${i < Math.floor(selectedEvaluation.overallGrade) ? 'text-warning' : 'text-muted'}`}
+                                    className={`fas fa-star ${i < Math.floor(selectedEvaluation.noteGlobale) ? 'text-warning' : 'text-muted'}`}
                                   ></i>
                                 ))}
                               </div>
@@ -796,17 +796,17 @@ const Evaluations: React.FC = () => {
                           </div>
                         )}
 
-                        {selectedEvaluation.comments && (
+                        {selectedEvaluation.commentaires && (
                           <div className="mt-4">
                             <h6 className="text-primary mb-3">Commentaires</h6>
-                            <p>{selectedEvaluation.comments}</p>
+                            <p>{selectedEvaluation.commentaires}</p>
                           </div>
                         )}
 
-                        {selectedEvaluation.recommendations && (
+                        {selectedEvaluation.recommandations && (
                           <div className="mt-4">
                             <h6 className="text-primary mb-3">Recommandations</h6>
-                            <p>{selectedEvaluation.recommendations}</p>
+                            <p>{selectedEvaluation.recommandations}</p>
                           </div>
                         )}
                       </div>
@@ -815,14 +815,14 @@ const Evaluations: React.FC = () => {
                           <div className="card-body">
                             <h6>Statut et dates</h6>
                             <div className="mb-3">
-                              <strong>Statut:</strong> {getStatusBadge(selectedEvaluation.status)}
+                              <strong>Statut:</strong> {getStatusBadge(selectedEvaluation.statut)}
                             </div>
                             <div className="mb-3">
-                              <strong>Date limite:</strong> {selectedEvaluation.dueDate}
+                              <strong>Date limite:</strong> {selectedEvaluation.dateLimite}
                             </div>
-                            {selectedEvaluation.evaluationDate && (
+                            {selectedEvaluation.dateEvaluation && (
                               <div className="mb-3">
-                                <strong>Réalisée le:</strong> {selectedEvaluation.evaluationDate}
+                                <strong>Réalisée le:</strong> {selectedEvaluation.dateEvaluation}
                               </div>
                             )}
                           </div>
@@ -835,7 +835,7 @@ const Evaluations: React.FC = () => {
                   {activeTab === 'grades' && (
                     <div>
                       <h6 className="text-primary mb-3">Notes détaillées</h6>
-                      {selectedEvaluation.grades.length === 0 ? (
+                      {selectedEvaluation.notes.length === 0 ? (
                         <p className="text-muted">Aucune note disponible.</p>
                       ) : (
                         <div className="table-responsive">
@@ -849,25 +849,25 @@ const Evaluations: React.FC = () => {
                               </tr>
                             </thead>
                             <tbody>
-                              {selectedEvaluation.grades.map((grade) => (
-                                <tr key={grade.id}>
+                              {selectedEvaluation.notes.map((note) => (
+                                <tr key={note.id}>
                                   <td>
-                                    <strong>{grade.criterion}</strong>
+                                    <strong>{note.critere}</strong>
                                   </td>
                                   <td>
-                                    <span className="badge bg-info">{grade.weight}%</span>
+                                    <span className="badge bg-info">{note.poids}%</span>
                                   </td>
                                   <td>
-                                    {grade.grade > 0 ? (
+                                    {note.note > 0 ? (
                                       <div className="d-flex align-items-center">
-                                        <span className={`me-2 text-${getGradeColor(grade.grade)}`}>
-                                          {grade.grade}/{grade.maxGrade}
+                                        <span className={`me-2 text-${getGradeColor(note.note)}`}>
+                                          {note.note}/{note.noteMax}
                                         </span>
                                         <div className="d-flex">
-                                          {[...Array(grade.maxGrade)].map((_, i) => (
+                                          {[...Array(note.noteMax)].map((_, i) => (
                                             <i 
                                               key={i} 
-                                              className={`fas fa-star ${i < Math.floor(grade.grade) ? 'text-warning' : 'text-muted'}`}
+                                              className={`fas fa-star ${i < Math.floor(note.note) ? 'text-warning' : 'text-muted'}`}
                                             ></i>
                                           ))}
                                         </div>
@@ -877,7 +877,7 @@ const Evaluations: React.FC = () => {
                                     )}
                                   </td>
                                   <td>
-                                    {grade.comments || <span className="text-muted">-</span>}
+                                    {note.commentaires || <span className="text-muted">-</span>}
                                   </td>
                                 </tr>
                               ))}
@@ -911,18 +911,18 @@ const Evaluations: React.FC = () => {
                                 <tr key={doc.id}>
                                   <td>
                                     <i className="fas fa-file-pdf text-danger me-2"></i>
-                                    {doc.name}
+                                    {doc.nom}
                                   </td>
                                   <td>
                                     <span className="badge bg-light text-dark">{doc.type}</span>
                                   </td>
-                                  <td>{doc.uploadDate}</td>
+                                  <td>{doc.dateDepot}</td>
                                   <td>
                                     <span className={`badge ${
-                                      doc.status === 'Validé' ? 'bg-success' : 
-                                      doc.status === 'En attente' ? 'bg-warning' : 'bg-danger'
+                                      doc.statut === 'Validé' ? 'bg-success' : 
+                                      doc.statut === 'En attente' ? 'bg-warning' : 'bg-danger'
                                     }`}>
-                                      {doc.status}
+                                      {doc.statut}
                                     </span>
                                   </td>
                                   <td>
@@ -953,7 +953,7 @@ const Evaluations: React.FC = () => {
                 >
                   Fermer
                 </button>
-                {selectedEvaluation.status !== 'completed' && (
+                {selectedEvaluation.statut !== 'terminee' && (
                   <button 
                     type="button" 
                     className="btn btn-success"
@@ -979,7 +979,7 @@ const Evaluations: React.FC = () => {
               <div className="modal-header">
                 <h5 className="modal-title">
                   <i className="fas fa-star me-2"></i>
-                  Évaluer - {selectedEvaluation.studentName}
+                  Évaluer - {selectedEvaluation.nomEtudiant}
                 </h5>
                 <button 
                   type="button" 
@@ -988,7 +988,7 @@ const Evaluations: React.FC = () => {
                 ></button>
               </div>
               <div className="modal-body">
-                <p>Formulaire d'évaluation pour {selectedEvaluation.studentName} - {selectedEvaluation.stageTitle}</p>
+                <p>Formulaire d'évaluation pour {selectedEvaluation.nomEtudiant} - {selectedEvaluation.titreStage}</p>
                 {/* Ici on ajouterait le formulaire d'évaluation détaillé */}
               </div>
               <div className="modal-footer">

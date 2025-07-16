@@ -1,38 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/layout/Sidebar';
 
-interface Task {
+interface Tache {
   id: number;
-  title: string;
+  titre: string;
   description: string;
-  internId: number;
-  internName: string;
-  internPhoto?: string;
-  stageTitle: string;
-  assignedDate: string;
-  dueDate: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'overdue' | 'cancelled';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  category: string;
-  estimatedHours: number;
-  actualHours?: number;
-  supervisor: string;
-  attachments?: string[];
-  comments: Comment[];
-  progress: number;
+  idStagiaire: number;
+  nomStagiaire: string;
+  photoStagiaire?: string;
+  titreStage: string;
+  dateAttribution: string;
+  dateEcheance: string;
+  statut: 'en_attente' | 'en_cours' | 'terminee' | 'retard' | 'annulee';
+  priorite: 'basse' | 'moyenne' | 'haute' | 'urgente';
+  categorie: string;
+  heuresEstimees: number;
+  heuresReelles?: number;
+  encadrant: string;
+  fichiers?: string[];
+  commentaires: Commentaire[];
+  progression: number;
 }
 
-interface Comment {
+interface Commentaire {
   id: number;
-  author: string;
-  content: string;
+  auteur: string;
+  contenu: string;
   date: string;
-  isSupervisor: boolean;
+  estEncadrant: boolean;
 }
 
 const TachesStagiaires: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<Tache[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<Tache[]>([]);
   const [filters, setFilters] = useState({
     status: '',
     priority: '',
@@ -40,163 +40,163 @@ const TachesStagiaires: React.FC = () => {
     category: ''
   });
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Tache | null>(null);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
 
   // Données simulées
   useEffect(() => {
-    const mockTasks: Task[] = [
+    const mockTasks: Tache[] = [
       {
         id: 1,
-        title: 'Développement du module authentification',
+        titre: 'Développement du module authentification',
         description: 'Créer un système d\'authentification sécurisé avec JWT pour l\'application web. Inclure la gestion des rôles et permissions.',
-        internId: 1,
-        internName: 'Jean Dupont',
-        internPhoto: '/api/photos/student-1.jpg',
-        stageTitle: 'Développeur Web Full-Stack',
-        assignedDate: '01/03/2024',
-        dueDate: '15/04/2024',
-        status: 'in_progress',
-        priority: 'high',
-        category: 'Développement',
-        estimatedHours: 40,
-        actualHours: 25,
-        supervisor: 'M. Martin',
-        attachments: ['specs-auth.pdf', 'mockups-auth.png'],
-        progress: 62,
-        comments: [
+        idStagiaire: 1,
+        nomStagiaire: 'Jean Dupont',
+        photoStagiaire: '/api/photos/student-1.jpg',
+        titreStage: 'Développeur Web Full-Stack',
+        dateAttribution: '01/03/2024',
+        dateEcheance: '15/04/2024',
+        statut: 'en_cours',
+        priorite: 'haute',
+        categorie: 'Développement',
+        heuresEstimees: 40,
+        heuresReelles: 25,
+        encadrant: 'M. Martin',
+        fichiers: ['specs-auth.pdf', 'mockups-auth.png'],
+        progression: 62,
+        commentaires: [
           {
             id: 1,
-            author: 'M. Martin',
-            content: 'Bon début, n\'oubliez pas de tester les cas d\'erreur',
+            auteur: 'M. Martin',
+            contenu: 'Bon début, n\'oubliez pas de tester les cas d\'erreur',
             date: '05/03/2024',
-            isSupervisor: true
+            estEncadrant: true
           },
           {
             id: 2,
-            author: 'Jean Dupont',
-            content: 'Merci, je vais ajouter les tests unitaires',
+            auteur: 'Jean Dupont',
+            contenu: 'Merci, je vais ajouter les tests unitaires',
             date: '06/03/2024',
-            isSupervisor: false
+            estEncadrant: false
           }
         ]
       },
       {
         id: 2,
-        title: 'Création de la base de données',
+        titre: 'Création de la base de données',
         description: 'Concevoir et implémenter le schéma de base de données pour le projet e-commerce. Inclure les relations et contraintes.',
-        internId: 1,
-        internName: 'Jean Dupont',
-        internPhoto: '/api/photos/student-1.jpg',
-        stageTitle: 'Développeur Web Full-Stack',
-        assignedDate: '10/03/2024',
-        dueDate: '25/03/2024',
-        status: 'completed',
-        priority: 'medium',
-        category: 'Base de données',
-        estimatedHours: 20,
-        actualHours: 18,
-        supervisor: 'M. Martin',
-        progress: 100,
-        comments: [
+        idStagiaire: 1,
+        nomStagiaire: 'Jean Dupont',
+        photoStagiaire: '/api/photos/student-1.jpg',
+        titreStage: 'Développeur Web Full-Stack',
+        dateAttribution: '10/03/2024',
+        dateEcheance: '25/03/2024',
+        statut: 'terminee',
+        priorite: 'moyenne',
+        categorie: 'Base de données',
+        heuresEstimees: 20,
+        heuresReelles: 18,
+        encadrant: 'M. Martin',
+        progression: 100,
+        commentaires: [
           {
             id: 3,
-            author: 'M. Martin',
-            content: 'Excellent travail, la structure est bien pensée',
+            auteur: 'M. Martin',
+            contenu: 'Excellent travail, la structure est bien pensée',
             date: '20/03/2024',
-            isSupervisor: true
+            estEncadrant: true
           }
         ]
       },
       {
         id: 3,
-        title: 'Gestion des réseaux sociaux',
+        titre: 'Gestion des réseaux sociaux',
         description: 'Créer et publier du contenu sur les réseaux sociaux de l\'entreprise. Analyser les performances et proposer des améliorations.',
-        internId: 2,
-        internName: 'Marie Martin',
-        internPhoto: '/api/photos/student-2.jpg',
-        stageTitle: 'Assistant Marketing Digital',
-        assignedDate: '01/04/2024',
-        dueDate: '30/04/2024',
-        status: 'in_progress',
-        priority: 'medium',
-        category: 'Marketing',
-        estimatedHours: 30,
-        actualHours: 15,
-        supervisor: 'Mme. Dubois',
-        progress: 50,
-        comments: [
+        idStagiaire: 2,
+        nomStagiaire: 'Marie Martin',
+        photoStagiaire: '/api/photos/student-2.jpg',
+        titreStage: 'Assistant Marketing Digital',
+        dateAttribution: '01/04/2024',
+        dateEcheance: '30/04/2024',
+        statut: 'en_cours',
+        priorite: 'moyenne',
+        categorie: 'Marketing',
+        heuresEstimees: 30,
+        heuresReelles: 15,
+        encadrant: 'Mme. Dubois',
+        progression: 50,
+        commentaires: [
           {
             id: 4,
-            author: 'Mme. Dubois',
-            content: 'Le contenu est de bonne qualité, continuez ainsi',
+            auteur: 'Mme. Dubois',
+            contenu: 'Le contenu est de bonne qualité, continuez ainsi',
             date: '10/04/2024',
-            isSupervisor: true
+            estEncadrant: true
           }
         ]
       },
       {
         id: 4,
-        title: 'Tests unitaires et d\'intégration',
+        titre: 'Tests unitaires et d\'intégration',
         description: 'Écrire des tests complets pour tous les modules développés. Assurer une couverture de code d\'au moins 80%.',
-        internId: 1,
-        internName: 'Jean Dupont',
-        internPhoto: '/api/photos/student-1.jpg',
-        stageTitle: 'Développeur Web Full-Stack',
-        assignedDate: '20/03/2024',
-        dueDate: '10/04/2024',
-        status: 'pending',
-        priority: 'high',
-        category: 'Tests',
-        estimatedHours: 25,
-        supervisor: 'M. Martin',
-        progress: 0,
-        comments: []
+        idStagiaire: 1,
+        nomStagiaire: 'Jean Dupont',
+        photoStagiaire: '/api/photos/student-1.jpg',
+        titreStage: 'Développeur Web Full-Stack',
+        dateAttribution: '20/03/2024',
+        dateEcheance: '10/04/2024',
+        statut: 'en_attente',
+        priorite: 'haute',
+        categorie: 'Tests',
+        heuresEstimees: 25,
+        encadrant: 'M. Martin',
+        progression: 0,
+        commentaires: []
       },
       {
         id: 5,
-        title: 'Analyse des performances SEO',
+        titre: 'Analyse des performances SEO',
         description: 'Analyser le SEO du site web actuel et proposer des améliorations pour optimiser le référencement.',
-        internId: 2,
-        internName: 'Marie Martin',
-        internPhoto: '/api/photos/student-2.jpg',
-        stageTitle: 'Assistant Marketing Digital',
-        assignedDate: '15/04/2024',
-        dueDate: '15/05/2024',
-        status: 'pending',
-        priority: 'low',
-        category: 'SEO',
-        estimatedHours: 35,
-        supervisor: 'Mme. Dubois',
-        progress: 0,
-        comments: []
+        idStagiaire: 2,
+        nomStagiaire: 'Marie Martin',
+        photoStagiaire: '/api/photos/student-2.jpg',
+        titreStage: 'Assistant Marketing Digital',
+        dateAttribution: '15/04/2024',
+        dateEcheance: '15/05/2024',
+        statut: 'en_attente',
+        priorite: 'basse',
+        categorie: 'SEO',
+        heuresEstimees: 35,
+        encadrant: 'Mme. Dubois',
+        progression: 0,
+        commentaires: []
       },
       {
         id: 6,
-        title: 'Déploiement en production',
+        titre: 'Déploiement en production',
         description: 'Préparer et effectuer le déploiement de l\'application en production. Configurer l\'environnement et les variables.',
-        internId: 1,
-        internName: 'Jean Dupont',
-        internPhoto: '/api/photos/student-1.jpg',
-        stageTitle: 'Développeur Web Full-Stack',
-        assignedDate: '01/05/2024',
-        dueDate: '15/05/2024',
-        status: 'overdue',
-        priority: 'urgent',
-        category: 'DevOps',
-        estimatedHours: 15,
-        actualHours: 20,
-        supervisor: 'M. Martin',
-        progress: 85,
-        comments: [
+        idStagiaire: 1,
+        nomStagiaire: 'Jean Dupont',
+        photoStagiaire: '/api/photos/student-1.jpg',
+        titreStage: 'Développeur Web Full-Stack',
+        dateAttribution: '01/05/2024',
+        dateEcheance: '15/05/2024',
+        statut: 'retard',
+        priorite: 'urgente',
+        categorie: 'DevOps',
+        heuresEstimees: 15,
+        heuresReelles: 20,
+        encadrant: 'M. Martin',
+        progression: 85,
+        commentaires: [
           {
             id: 5,
-            author: 'M. Martin',
-            content: 'Attention aux délais, cette tâche est critique',
+            auteur: 'M. Martin',
+            contenu: 'Attention aux délais, cette tâche est critique',
             date: '10/05/2024',
-            isSupervisor: true
+            estEncadrant: true
           }
         ]
       }
@@ -212,16 +212,16 @@ const TachesStagiaires: React.FC = () => {
     let filtered = tasks;
 
     if (newFilters.status) {
-      filtered = filtered.filter(task => task.status === newFilters.status);
+      filtered = filtered.filter(task => task.statut === newFilters.status);
     }
     if (newFilters.priority) {
-      filtered = filtered.filter(task => task.priority === newFilters.priority);
+      filtered = filtered.filter(task => task.priorite === newFilters.priority);
     }
     if (newFilters.intern) {
-      filtered = filtered.filter(task => task.internId.toString() === newFilters.intern);
+      filtered = filtered.filter(task => task.idStagiaire.toString() === newFilters.intern);
     }
     if (newFilters.category) {
-      filtered = filtered.filter(task => task.category === newFilters.category);
+      filtered = filtered.filter(task => task.categorie === newFilters.category);
     }
 
     setFilteredTasks(filtered);
@@ -229,11 +229,11 @@ const TachesStagiaires: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      pending: { class: 'bg-secondary', text: 'En attente', icon: 'fas fa-clock' },
-      in_progress: { class: 'bg-info', text: 'En cours', icon: 'fas fa-play' },
-      completed: { class: 'bg-success', text: 'Terminé', icon: 'fas fa-check' },
-      overdue: { class: 'bg-danger', text: 'En retard', icon: 'fas fa-exclamation-triangle' },
-      cancelled: { class: 'bg-dark', text: 'Annulé', icon: 'fas fa-times' }
+      en_attente: { class: 'bg-secondary', text: 'En attente', icon: 'fas fa-clock' },
+      en_cours: { class: 'bg-info', text: 'En cours', icon: 'fas fa-play' },
+      terminee: { class: 'bg-success', text: 'Terminé', icon: 'fas fa-check' },
+      retard: { class: 'bg-danger', text: 'En retard', icon: 'fas fa-exclamation-triangle' },
+      annulee: { class: 'bg-dark', text: 'Annulé', icon: 'fas fa-times' }
     };
 
     const config = statusConfig[status as keyof typeof statusConfig];
@@ -247,10 +247,10 @@ const TachesStagiaires: React.FC = () => {
 
   const getPriorityBadge = (priority: string) => {
     const priorityConfig = {
-      low: { class: 'bg-success', text: 'Faible' },
-      medium: { class: 'bg-warning', text: 'Moyenne' },
-      high: { class: 'bg-danger', text: 'Élevée' },
-      urgent: { class: 'bg-dark', text: 'Urgente' }
+      basse: { class: 'bg-success', text: 'Faible' },
+      moyenne: { class: 'bg-warning', text: 'Moyenne' },
+      haute: { class: 'bg-danger', text: 'Élevée' },
+      urgente: { class: 'bg-dark', text: 'Urgente' }
     };
 
     const config = priorityConfig[priority as keyof typeof priorityConfig];
@@ -258,7 +258,7 @@ const TachesStagiaires: React.FC = () => {
   };
 
   const getStatusCount = (status: string) => {
-    return tasks.filter(task => task.status === status).length;
+    return tasks.filter(task => task.statut === status).length;
   };
 
   const getProgressColor = (progress: number) => {
@@ -271,12 +271,12 @@ const TachesStagiaires: React.FC = () => {
   const handleStatusChange = (taskId: number, newStatus: string) => {
     setTasks(prev => 
       prev.map(task => 
-        task.id === taskId ? { ...task, status: newStatus as any } : task
+        task.id === taskId ? { ...task, statut: newStatus as any } : task
       )
     );
     setFilteredTasks(prev => 
       prev.map(task => 
-        task.id === taskId ? { ...task, status: newStatus as any } : task
+        task.id === taskId ? { ...task, statut: newStatus as any } : task
       )
     );
   };
@@ -354,7 +354,7 @@ const TachesStagiaires: React.FC = () => {
                   <div className="card-body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <h4 className="mb-0">{getStatusCount('in_progress')}</h4>
+                        <h4 className="mb-0">{getStatusCount('en_cours')}</h4>
                         <p className="mb-0">En cours</p>
                       </div>
                       <i className="fas fa-play-circle fa-2x opacity-50"></i>
@@ -367,7 +367,7 @@ const TachesStagiaires: React.FC = () => {
                   <div className="card-body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <h4 className="mb-0">{getStatusCount('completed')}</h4>
+                        <h4 className="mb-0">{getStatusCount('terminee')}</h4>
                         <p className="mb-0">Terminées</p>
                       </div>
                       <i className="fas fa-check-circle fa-2x opacity-50"></i>
@@ -380,7 +380,7 @@ const TachesStagiaires: React.FC = () => {
                   <div className="card-body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <h4 className="mb-0">{getStatusCount('overdue')}</h4>
+                        <h4 className="mb-0">{getStatusCount('retard')}</h4>
                         <p className="mb-0">En retard</p>
                       </div>
                       <i className="fas fa-exclamation-triangle fa-2x opacity-50"></i>
@@ -405,11 +405,11 @@ const TachesStagiaires: React.FC = () => {
                       onChange={(e) => handleFilterChange('status', e.target.value)}
                     >
                       <option value="">Tous les statuts</option>
-                      <option value="pending">En attente</option>
-                      <option value="in_progress">En cours</option>
-                      <option value="completed">Terminé</option>
-                      <option value="overdue">En retard</option>
-                      <option value="cancelled">Annulé</option>
+                      <option value="en_attente">En attente</option>
+                      <option value="en_cours">En cours</option>
+                      <option value="terminee">Terminé</option>
+                      <option value="retard">En retard</option>
+                      <option value="annulee">Annulé</option>
                     </select>
                   </div>
                   <div className="col-md-3">
@@ -420,10 +420,10 @@ const TachesStagiaires: React.FC = () => {
                       onChange={(e) => handleFilterChange('priority', e.target.value)}
                     >
                       <option value="">Toutes les priorités</option>
-                      <option value="low">Faible</option>
-                      <option value="medium">Moyenne</option>
-                      <option value="high">Élevée</option>
-                      <option value="urgent">Urgente</option>
+                      <option value="basse">Faible</option>
+                      <option value="moyenne">Moyenne</option>
+                      <option value="haute">Élevée</option>
+                      <option value="urgente">Urgente</option>
                     </select>
                   </div>
                   <div className="col-md-3">
@@ -506,50 +506,50 @@ const TachesStagiaires: React.FC = () => {
                             <tr key={task.id}>
                               <td>
                                 <div>
-                                  <strong>{task.title}</strong><br />
+                                  <strong>{task.titre}</strong><br />
                                   <small className="text-muted">{task.description.substring(0, 100)}...</small><br />
                                   <small className="text-muted">
-                                    <i className="fas fa-tag me-1"></i>{task.category}
+                                    <i className="fas fa-tag me-1"></i>{task.categorie}
                                   </small>
                                 </div>
                               </td>
                               <td>
                                 <div className="d-flex align-items-center">
                                   <img 
-                                    src={task.internPhoto || '/default-avatar.png'} 
+                                    src={task.photoStagiaire || '/default-avatar.png'} 
                                     alt="Photo"
                                     className="rounded-circle me-2"
                                     style={{ width: '30px', height: '30px', objectFit: 'cover' }}
                                   />
                                   <div>
-                                    <strong>{task.internName}</strong><br />
-                                    <small className="text-muted">{task.stageTitle}</small>
+                                    <strong>{task.nomStagiaire}</strong><br />
+                                    <small className="text-muted">{task.titreStage}</small>
                                   </div>
                                 </div>
                               </td>
                               <td>
                                 <div>
-                                  <strong>{task.dueDate}</strong><br />
+                                  <strong>{task.dateEcheance}</strong><br />
                                   <small className="text-muted">
-                                    {task.estimatedHours}h estimées
+                                    {task.heuresEstimees}h estimées
                                   </small>
                                 </div>
                               </td>
                               <td>
                                 <div className="mb-1">
                                   <div className="d-flex justify-content-between">
-                                    <small>{task.progress}%</small>
+                                    <small>{task.progression}%</small>
                                   </div>
                                   <div className="progress" style={{ height: '6px' }}>
                                     <div 
-                                      className={`progress-bar bg-${getProgressColor(task.progress)}`}
-                                      style={{ width: `${task.progress}%` }}
+                                      className={`progress-bar bg-${getProgressColor(task.progression)}`}
+                                      style={{ width: `${task.progression}%` }}
                                     ></div>
                                   </div>
                                 </div>
                               </td>
-                              <td>{getStatusBadge(task.status)}</td>
-                              <td>{getPriorityBadge(task.priority)}</td>
+                              <td>{getStatusBadge(task.statut)}</td>
+                              <td>{getPriorityBadge(task.priorite)}</td>
                               <td>
                                 <div className="btn-group" role="group">
                                   <button 
@@ -565,7 +565,7 @@ const TachesStagiaires: React.FC = () => {
                                   <button 
                                     className="btn btn-sm btn-outline-success"
                                     title="Marquer comme terminé"
-                                    onClick={() => handleStatusChange(task.id, 'completed')}
+                                    onClick={() => handleStatusChange(task.id, 'terminee')}
                                   >
                                     <i className="fas fa-check"></i>
                                   </button>
@@ -600,23 +600,23 @@ const TachesStagiaires: React.FC = () => {
                   <div className="card">
                     <div className="card-header bg-secondary text-white">
                       <h6 className="mb-0">
-                        <i className="fas fa-clock me-2"></i>En attente ({filteredTasks.filter(t => t.status === 'pending').length})
+                        <i className="fas fa-clock me-2"></i>En attente ({filteredTasks.filter(t => t.statut === 'en_attente').length})
                       </h6>
                     </div>
                     <div className="card-body">
-                      {filteredTasks.filter(task => task.status === 'pending').map((task) => (
+                      {filteredTasks.filter(task => task.statut === 'en_attente').map((task) => (
                         <div key={task.id} className="card mb-3 task-card">
                           <div className="card-body">
-                            <h6 className="card-title">{task.title}</h6>
+                            <h6 className="card-title">{task.titre}</h6>
                             <p className="card-text small">{task.description.substring(0, 80)}...</p>
                             <div className="d-flex justify-content-between align-items-center">
-                              <small className="text-muted">{task.internName}</small>
-                              {getPriorityBadge(task.priority)}
+                              <small className="text-muted">{task.nomStagiaire}</small>
+                              {getPriorityBadge(task.priorite)}
                             </div>
                             <div className="progress mt-2" style={{ height: '4px' }}>
                               <div 
-                                className={`progress-bar bg-${getProgressColor(task.progress)}`}
-                                style={{ width: `${task.progress}%` }}
+                                className={`progress-bar bg-${getProgressColor(task.progression)}`}
+                                style={{ width: `${task.progression}%` }}
                               ></div>
                             </div>
                           </div>
@@ -630,23 +630,23 @@ const TachesStagiaires: React.FC = () => {
                   <div className="card">
                     <div className="card-header bg-info text-white">
                       <h6 className="mb-0">
-                        <i className="fas fa-play me-2"></i>En cours ({filteredTasks.filter(t => t.status === 'in_progress').length})
+                        <i className="fas fa-play me-2"></i>En cours ({filteredTasks.filter(t => t.statut === 'en_cours').length})
                       </h6>
                     </div>
                     <div className="card-body">
-                      {filteredTasks.filter(task => task.status === 'in_progress').map((task) => (
+                      {filteredTasks.filter(task => task.statut === 'en_cours').map((task) => (
                         <div key={task.id} className="card mb-3 task-card">
                           <div className="card-body">
-                            <h6 className="card-title">{task.title}</h6>
+                            <h6 className="card-title">{task.titre}</h6>
                             <p className="card-text small">{task.description.substring(0, 80)}...</p>
                             <div className="d-flex justify-content-between align-items-center">
-                              <small className="text-muted">{task.internName}</small>
-                              {getPriorityBadge(task.priority)}
+                              <small className="text-muted">{task.nomStagiaire}</small>
+                              {getPriorityBadge(task.priorite)}
                             </div>
                             <div className="progress mt-2" style={{ height: '4px' }}>
                               <div 
-                                className={`progress-bar bg-${getProgressColor(task.progress)}`}
-                                style={{ width: `${task.progress}%` }}
+                                className={`progress-bar bg-${getProgressColor(task.progression)}`}
+                                style={{ width: `${task.progression}%` }}
                               ></div>
                             </div>
                           </div>
@@ -660,18 +660,18 @@ const TachesStagiaires: React.FC = () => {
                   <div className="card">
                     <div className="card-header bg-success text-white">
                       <h6 className="mb-0">
-                        <i className="fas fa-check me-2"></i>Terminées ({filteredTasks.filter(t => t.status === 'completed').length})
+                        <i className="fas fa-check me-2"></i>Terminées ({filteredTasks.filter(t => t.statut === 'terminee').length})
                       </h6>
                     </div>
                     <div className="card-body">
-                      {filteredTasks.filter(task => task.status === 'completed').map((task) => (
+                      {filteredTasks.filter(task => task.statut === 'terminee').map((task) => (
                         <div key={task.id} className="card mb-3 task-card">
                           <div className="card-body">
-                            <h6 className="card-title">{task.title}</h6>
+                            <h6 className="card-title">{task.titre}</h6>
                             <p className="card-text small">{task.description.substring(0, 80)}...</p>
                             <div className="d-flex justify-content-between align-items-center">
-                              <small className="text-muted">{task.internName}</small>
-                              {getPriorityBadge(task.priority)}
+                              <small className="text-muted">{task.nomStagiaire}</small>
+                              {getPriorityBadge(task.priorite)}
                             </div>
                             <div className="progress mt-2" style={{ height: '4px' }}>
                               <div 
@@ -690,23 +690,23 @@ const TachesStagiaires: React.FC = () => {
                   <div className="card">
                     <div className="card-header bg-danger text-white">
                       <h6 className="mb-0">
-                        <i className="fas fa-exclamation-triangle me-2"></i>En retard ({filteredTasks.filter(t => t.status === 'overdue').length})
+                        <i className="fas fa-exclamation-triangle me-2"></i>En retard ({filteredTasks.filter(t => t.statut === 'retard').length})
                       </h6>
                     </div>
                     <div className="card-body">
-                      {filteredTasks.filter(task => task.status === 'overdue').map((task) => (
+                      {filteredTasks.filter(task => task.statut === 'retard').map((task) => (
                         <div key={task.id} className="card mb-3 task-card">
                           <div className="card-body">
-                            <h6 className="card-title">{task.title}</h6>
+                            <h6 className="card-title">{task.titre}</h6>
                             <p className="card-text small">{task.description.substring(0, 80)}...</p>
                             <div className="d-flex justify-content-between align-items-center">
-                              <small className="text-muted">{task.internName}</small>
-                              {getPriorityBadge(task.priority)}
+                              <small className="text-muted">{task.nomStagiaire}</small>
+                              {getPriorityBadge(task.priorite)}
                             </div>
                             <div className="progress mt-2" style={{ height: '4px' }}>
                               <div 
-                                className={`progress-bar bg-${getProgressColor(task.progress)}`}
-                                style={{ width: `${task.progress}%` }}
+                                className={`progress-bar bg-${getProgressColor(task.progression)}`}
+                                style={{ width: `${task.progression}%` }}
                               ></div>
                             </div>
                           </div>
@@ -740,49 +740,49 @@ const TachesStagiaires: React.FC = () => {
               <div className="modal-body">
                 <div className="row">
                   <div className="col-md-8">
-                    <h5>{selectedTask.title}</h5>
+                    <h5>{selectedTask.titre}</h5>
                     <p className="text-muted">{selectedTask.description}</p>
                     
                     <div className="row mb-3">
                       <div className="col-md-6">
-                        <strong>Stagiaire:</strong> {selectedTask.internName}<br />
-                        <strong>Stage:</strong> {selectedTask.stageTitle}<br />
-                        <strong>Superviseur:</strong> {selectedTask.supervisor}
+                        <strong>Stagiaire:</strong> {selectedTask.nomStagiaire}<br />
+                        <strong>Stage:</strong> {selectedTask.titreStage}<br />
+                        <strong>Encadrant:</strong> {selectedTask.encadrant}
                       </div>
                       <div className="col-md-6">
-                        <strong>Date d'assignation:</strong> {selectedTask.assignedDate}<br />
-                        <strong>Date limite:</strong> {selectedTask.dueDate}<br />
-                        <strong>Catégorie:</strong> {selectedTask.category}
+                        <strong>Date d'attribution:</strong> {selectedTask.dateAttribution}<br />
+                        <strong>Date limite:</strong> {selectedTask.dateEcheance}<br />
+                        <strong>Catégorie:</strong> {selectedTask.categorie}
                       </div>
                     </div>
 
                     <div className="row mb-3">
                       <div className="col-md-6">
-                        <strong>Heures estimées:</strong> {selectedTask.estimatedHours}h
-                        {selectedTask.actualHours && (
+                        <strong>Heures estimées:</strong> {selectedTask.heuresEstimees}h
+                        {selectedTask.heuresReelles && (
                           <div>
-                            <strong>Heures réelles:</strong> {selectedTask.actualHours}h
+                            <strong>Heures réelles:</strong> {selectedTask.heuresReelles}h
                           </div>
                         )}
                       </div>
                       <div className="col-md-6">
-                        <strong>Progression:</strong> {selectedTask.progress}%<br />
+                        <strong>Progression:</strong> {selectedTask.progression}%<br />
                         <div className="progress mt-1">
                           <div 
-                            className={`progress-bar bg-${getProgressColor(selectedTask.progress)}`}
-                            style={{ width: `${selectedTask.progress}%` }}
+                            className={`progress-bar bg-${getProgressColor(selectedTask.progression)}`}
+                            style={{ width: `${selectedTask.progression}%` }}
                           ></div>
                         </div>
                       </div>
                     </div>
 
-                    {selectedTask.attachments && selectedTask.attachments.length > 0 && (
+                    {selectedTask.fichiers && selectedTask.fichiers.length > 0 && (
                       <div className="mb-3">
-                        <strong>Pièces jointes:</strong>
+                        <strong>Fichiers joints:</strong>
                         <div className="mt-2">
-                          {selectedTask.attachments.map((attachment, index) => (
+                          {selectedTask.fichiers.map((fichier, index) => (
                             <a key={index} href="#" className="btn btn-sm btn-outline-primary me-2">
-                              <i className="fas fa-paperclip me-1"></i>{attachment}
+                              <i className="fas fa-paperclip me-1"></i>{fichier}
                             </a>
                           ))}
                         </div>
@@ -791,18 +791,18 @@ const TachesStagiaires: React.FC = () => {
 
                     <div className="mb-3">
                       <strong>Commentaires:</strong>
-                      {selectedTask.comments.length === 0 ? (
+                      {selectedTask.commentaires.length === 0 ? (
                         <p className="text-muted mt-2">Aucun commentaire</p>
                       ) : (
                         <div className="mt-2">
-                          {selectedTask.comments.map((comment) => (
+                          {selectedTask.commentaires.map((comment) => (
                             <div key={comment.id} className="card mb-2">
                               <div className="card-body">
                                 <div className="d-flex justify-content-between">
-                                  <strong>{comment.author}</strong>
+                                  <strong>{comment.auteur}</strong>
                                   <small className="text-muted">{comment.date}</small>
                                 </div>
-                                <p className="mb-0 mt-1">{comment.content}</p>
+                                <p className="mb-0 mt-1">{comment.contenu}</p>
                               </div>
                             </div>
                           ))}
@@ -817,7 +817,7 @@ const TachesStagiaires: React.FC = () => {
                         <div className="d-grid gap-2">
                           <button 
                             className="btn btn-success btn-sm"
-                            onClick={() => handleStatusChange(selectedTask.id, 'completed')}
+                            onClick={() => handleStatusChange(selectedTask.id, 'terminee')}
                           >
                             <i className="fas fa-check me-2"></i>Marquer comme terminé
                           </button>
@@ -908,16 +908,16 @@ const TachesStagiaires: React.FC = () => {
                       <label className="form-label">Priorité *</label>
                       <select className="form-select" required>
                         <option value="">Sélectionner une priorité</option>
-                        <option value="low">Faible</option>
-                        <option value="medium">Moyenne</option>
-                        <option value="high">Élevée</option>
-                        <option value="urgent">Urgente</option>
+                        <option value="basse">Faible</option>
+                        <option value="moyenne">Moyenne</option>
+                        <option value="haute">Élevée</option>
+                        <option value="urgente">Urgente</option>
                       </select>
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label">Superviseur *</label>
+                      <label className="form-label">Encadrant *</label>
                       <select className="form-select" required>
-                        <option value="">Sélectionner un superviseur</option>
+                        <option value="">Sélectionner un encadrant</option>
                         <option value="M. Martin">M. Martin</option>
                         <option value="Mme. Dubois">Mme. Dubois</option>
                       </select>

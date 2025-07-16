@@ -27,54 +27,54 @@ import {
 import { db, auth } from '../../config/firebase';
 import { doc, updateDoc, getDocs, collection, query, where } from 'firebase/firestore';
 
-interface EnterpriseProfile {
+interface ProfilEntreprise {
   id: number;
-  name: string;
+  nom: string;
   siret: string;
-  address: string;
-  city: string;
-  postalCode: string;
-  country: string;
-  phone: string;
+  adresse: string;
+  ville: string;
+  codePostal: string;
+  pays: string;
+  telephone: string;
   email: string;
-  website: string;
-  sector: string;
-  size: string;
+  siteWeb: string;
+  secteur: string;
+  taille: string;
   description: string;
   logo?: string;
-  foundedYear: number;
-  employees: number;
-  contactPerson: {
-    firstName: string;
-    lastName: string;
-    position: string;
+  anneeCreation: number;
+  nbEmployes: number;
+  contact: {
+    prenom: string;
+    nom: string;
+    poste: string;
     email: string;
-    phone: string;
+    telephone: string;
   };
-  socialMedia: {
+  reseauxSociaux: {
     linkedin?: string;
     twitter?: string;
     facebook?: string;
   };
   documents: {
     id: number;
-    name: string;
+    nom: string;
     type: string;
-    uploadDate: string;
-    status: string;
+    dateDepot: string;
+    statut: string;
   }[];
-  statistics: {
-    totalInterns: number;
-    activeInterns: number;
-    completedInterns: number;
-    averageRating: number;
-    totalOffers: number;
-    activeOffers: number;
+  statistiques: {
+    nbStagiairesTotal: number;
+    nbStagiairesActifs: number;
+    nbStagiairesTermines: number;
+    noteMoyenne: number;
+    nbOffresTotal: number;
+    nbOffresActives: number;
   };
 }
 
 const MonProfil: React.FC = () => {
-  const [profile, setProfile] = useState<EnterpriseProfile | null>(null);
+  const [profile, setProfile] = useState<ProfilEntreprise | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
@@ -85,31 +85,31 @@ const MonProfil: React.FC = () => {
 
   // Données simulées
   useEffect(() => {
-    const mockProfile: EnterpriseProfile = {
+    const mockProfile: ProfilEntreprise = {
       id: 1,
-      name: 'TechCorp Solutions',
+      nom: 'TechCorp Solutions',
       siret: '12345678901234',
-      address: '123 Rue de l\'Innovation',
-      city: 'Paris',
-      postalCode: '75001',
-      country: 'France',
-      phone: '+33 1 23 45 67 89',
+      adresse: '123 Rue de l\'Innovation',
+      ville: 'Paris',
+      codePostal: '75001',
+      pays: 'France',
+      telephone: '+33 1 23 45 67 89',
       email: 'contact@techcorp-solutions.fr',
-      website: 'https://www.techcorp-solutions.fr',
-      sector: 'Technologies de l\'information',
-      size: '50-100 employés',
+      siteWeb: 'https://www.techcorp-solutions.fr',
+      secteur: 'Technologies de l\'information',
+      taille: '50-100 employés',
       description: 'TechCorp Solutions est une entreprise innovante spécialisée dans le développement de solutions logicielles modernes. Nous créons des applications web et mobiles de haute qualité pour nos clients.',
       logo: '/api/logos/techcorp-logo.png',
-      foundedYear: 2018,
-      employees: 75,
-      contactPerson: {
-        firstName: 'Jean',
-        lastName: 'Martin',
-        position: 'Directeur des Ressources Humaines',
+      anneeCreation: 2018,
+      nbEmployes: 75,
+      contact: {
+        prenom: 'Jean',
+        nom: 'Martin',
+        poste: 'Directeur des Ressources Humaines',
         email: 'jean.martin@techcorp-solutions.fr',
-        phone: '+33 1 23 45 67 90'
+        telephone: '+33 1 23 45 67 90'
       },
-      socialMedia: {
+      reseauxSociaux: {
         linkedin: 'https://linkedin.com/company/techcorp-solutions',
         twitter: 'https://twitter.com/techcorp_sol',
         facebook: 'https://facebook.com/techcorpsolutions'
@@ -117,33 +117,33 @@ const MonProfil: React.FC = () => {
       documents: [
         {
           id: 1,
-          name: 'Kbis_TechCorp_Solutions.pdf',
+          nom: 'Kbis_TechCorp_Solutions.pdf',
           type: 'Kbis',
-          uploadDate: '15/01/2024',
-          status: 'Approuvé'
+          dateDepot: '15/01/2024',
+          statut: 'Approuvé'
         },
         {
           id: 2,
-          name: 'Attestation_assurance_TechCorp.pdf',
+          nom: 'Attestation_assurance_TechCorp.pdf',
           type: 'Attestation d\'assurance',
-          uploadDate: '20/01/2024',
-          status: 'Approuvé'
+          dateDepot: '20/01/2024',
+          statut: 'Approuvé'
         },
         {
           id: 3,
-          name: 'Convention_stage_template.pdf',
+          nom: 'Convention_stage_template.pdf',
           type: 'Convention type',
-          uploadDate: '25/01/2024',
-          status: 'En attente'
+          dateDepot: '25/01/2024',
+          statut: 'En attente'
         }
       ],
-      statistics: {
-        totalInterns: 12,
-        activeInterns: 3,
-        completedInterns: 9,
-        averageRating: 4.6,
-        totalOffers: 8,
-        activeOffers: 2
+      statistiques: {
+        nbStagiairesTotal: 12,
+        nbStagiairesActifs: 3,
+        nbStagiairesTermines: 9,
+        noteMoyenne: 4.6,
+        nbOffresTotal: 8,
+        nbOffresActives: 2
       }
     };
     setProfile(mockProfile);
@@ -323,25 +323,25 @@ const MonProfil: React.FC = () => {
                               className="rounded mb-3"
                               style={{ width: '150px', height: '150px', objectFit: 'contain' }}
                             />
-                            <h4>{profile.name}</h4>
-                            <p className="text-muted">{profile.sector}</p>
+                            <h4>{profile.nom}</h4>
+                            <p className="text-muted">{profile.secteur}</p>
                             <p className="text-muted">
                               <i className="fas fa-map-marker-alt me-1"></i>
-                              {profile.city}, {profile.country}
+                              {profile.ville}, {profile.pays}
                             </p>
                             <div className="d-flex justify-content-center gap-2">
-                              {profile.socialMedia.linkedin && (
-                                <a href={profile.socialMedia.linkedin} className="btn btn-outline-primary btn-sm" target="_blank">
+                              {profile.reseauxSociaux.linkedin && (
+                                <a href={profile.reseauxSociaux.linkedin} className="btn btn-outline-primary btn-sm" target="_blank">
                                   <i className="fab fa-linkedin"></i>
                                 </a>
                               )}
-                              {profile.socialMedia.twitter && (
-                                <a href={profile.socialMedia.twitter} className="btn btn-outline-info btn-sm" target="_blank">
+                              {profile.reseauxSociaux.twitter && (
+                                <a href={profile.reseauxSociaux.twitter} className="btn btn-outline-info btn-sm" target="_blank">
                                   <i className="fab fa-twitter"></i>
                                 </a>
                               )}
-                              {profile.socialMedia.facebook && (
-                                <a href={profile.socialMedia.facebook} className="btn btn-outline-primary btn-sm" target="_blank">
+                              {profile.reseauxSociaux.facebook && (
+                                <a href={profile.reseauxSociaux.facebook} className="btn btn-outline-primary btn-sm" target="_blank">
                                   <i className="fab fa-facebook"></i>
                                 </a>
                               )}
@@ -356,7 +356,7 @@ const MonProfil: React.FC = () => {
                               <div className="card-body">
                                 <div className="d-flex justify-content-between">
                                   <div>
-                                    <h4 className="mb-0">{profile.statistics.totalInterns}</h4>
+                                    <h4 className="mb-0">{profile.statistiques.nbStagiairesTotal}</h4>
                                     <p className="mb-0">Total stagiaires</p>
                                   </div>
                                   <i className="fas fa-user-graduate fa-2x opacity-50"></i>
@@ -369,7 +369,7 @@ const MonProfil: React.FC = () => {
                               <div className="card-body">
                                 <div className="d-flex justify-content-between">
                                   <div>
-                                    <h4 className="mb-0">{profile.statistics.activeInterns}</h4>
+                                    <h4 className="mb-0">{profile.statistiques.nbStagiairesActifs}</h4>
                                     <p className="mb-0">Stagiaires actifs</p>
                                   </div>
                                   <i className="fas fa-play-circle fa-2x opacity-50"></i>
@@ -382,7 +382,7 @@ const MonProfil: React.FC = () => {
                               <div className="card-body">
                                 <div className="d-flex justify-content-between">
                                   <div>
-                                    <h4 className="mb-0">{profile.statistics.averageRating.toFixed(1)}</h4>
+                                    <h4 className="mb-0">{profile.statistiques.noteMoyenne.toFixed(1)}</h4>
                                     <p className="mb-0">Note moyenne</p>
                                   </div>
                                   <i className="fas fa-star fa-2x opacity-50"></i>
@@ -395,7 +395,7 @@ const MonProfil: React.FC = () => {
                               <div className="card-body">
                                 <div className="d-flex justify-content-between">
                                   <div>
-                                    <h4 className="mb-0">{profile.statistics.activeOffers}</h4>
+                                    <h4 className="mb-0">{profile.statistiques.nbOffresActives}</h4>
                                     <p className="mb-0">Offres actives</p>
                                   </div>
                                   <i className="fas fa-briefcase fa-2x opacity-50"></i>
@@ -413,12 +413,12 @@ const MonProfil: React.FC = () => {
                             <p className="card-text">{profile.description}</p>
                             <div className="row">
                               <div className="col-md-6">
-                                <p><strong>Fondée en:</strong> {profile.foundedYear}</p>
-                                <p><strong>Effectifs:</strong> {profile.employees} employés</p>
+                                <p><strong>Fondée en:</strong> {profile.anneeCreation}</p>
+                                <p><strong>Effectifs:</strong> {profile.nbEmployes} employés</p>
                               </div>
                               <div className="col-md-6">
-                                <p><strong>Taille:</strong> {profile.size}</p>
-                                <p><strong>Site web:</strong> <a href={profile.website} target="_blank">{profile.website}</a></p>
+                                <p><strong>Taille:</strong> {profile.taille}</p>
+                                <p><strong>Site web:</strong> <a href={profile.siteWeb} target="_blank">{profile.siteWeb}</a></p>
                               </div>
                             </div>
                           </div>
@@ -440,7 +440,7 @@ const MonProfil: React.FC = () => {
                             <input 
                               type="text" 
                               className="form-control" 
-                              value={profile.name}
+                              value={profile.nom}
                               disabled={!isEditing}
                             />
                           </div>
@@ -458,7 +458,7 @@ const MonProfil: React.FC = () => {
                             <input 
                               type="text" 
                               className="form-control" 
-                              value={profile.address}
+                              value={profile.adresse}
                               disabled={!isEditing}
                             />
                           </div>
@@ -467,7 +467,7 @@ const MonProfil: React.FC = () => {
                             <input 
                               type="text" 
                               className="form-control" 
-                              value={profile.city}
+                              value={profile.ville}
                               disabled={!isEditing}
                             />
                           </div>
@@ -476,7 +476,7 @@ const MonProfil: React.FC = () => {
                             <input 
                               type="text" 
                               className="form-control" 
-                              value={profile.postalCode}
+                              value={profile.codePostal}
                               disabled={!isEditing}
                             />
                           </div>
@@ -485,7 +485,7 @@ const MonProfil: React.FC = () => {
                             <input 
                               type="text" 
                               className="form-control" 
-                              value={profile.country}
+                              value={profile.pays}
                               disabled={!isEditing}
                             />
                           </div>
@@ -494,7 +494,7 @@ const MonProfil: React.FC = () => {
                             <input 
                               type="tel" 
                               className="form-control" 
-                              value={profile.phone}
+                              value={profile.telephone}
                               disabled={!isEditing}
                             />
                           </div>
@@ -512,7 +512,7 @@ const MonProfil: React.FC = () => {
                             <input 
                               type="url" 
                               className="form-control" 
-                              value={profile.website}
+                              value={profile.siteWeb}
                               disabled={!isEditing}
                             />
                           </div>
@@ -521,7 +521,7 @@ const MonProfil: React.FC = () => {
                             <input 
                               type="text" 
                               className="form-control" 
-                              value={profile.sector}
+                              value={profile.secteur}
                               disabled={!isEditing}
                             />
                           </div>
@@ -529,7 +529,7 @@ const MonProfil: React.FC = () => {
                             <label className="form-label">Taille de l'entreprise</label>
                             <select 
                               className="form-select" 
-                              value={profile.size}
+                              value={profile.taille}
                               disabled={!isEditing}
                             >
                               <option value="1-10 employés">1-10 employés</option>
@@ -544,7 +544,7 @@ const MonProfil: React.FC = () => {
                             <input 
                               type="number" 
                               className="form-control" 
-                              value={profile.foundedYear}
+                              value={profile.anneeCreation}
                               disabled={!isEditing}
                             />
                           </div>
@@ -575,7 +575,7 @@ const MonProfil: React.FC = () => {
                             <input 
                               type="text" 
                               className="form-control" 
-                              value={profile.contactPerson.firstName}
+                              value={profile.contact.prenom}
                               disabled={!isEditing}
                             />
                           </div>
@@ -584,7 +584,7 @@ const MonProfil: React.FC = () => {
                             <input 
                               type="text" 
                               className="form-control" 
-                              value={profile.contactPerson.lastName}
+                              value={profile.contact.nom}
                               disabled={!isEditing}
                             />
                           </div>
@@ -593,7 +593,7 @@ const MonProfil: React.FC = () => {
                             <input 
                               type="text" 
                               className="form-control" 
-                              value={profile.contactPerson.position}
+                              value={profile.contact.poste}
                               disabled={!isEditing}
                             />
                           </div>
@@ -602,7 +602,7 @@ const MonProfil: React.FC = () => {
                             <input 
                               type="email" 
                               className="form-control" 
-                              value={profile.contactPerson.email}
+                              value={profile.contact.email}
                               disabled={!isEditing}
                             />
                           </div>
@@ -611,7 +611,7 @@ const MonProfil: React.FC = () => {
                             <input 
                               type="tel" 
                               className="form-control" 
-                              value={profile.contactPerson.phone}
+                              value={profile.contact.telephone}
                               disabled={!isEditing}
                             />
                           </div>
@@ -654,13 +654,13 @@ const MonProfil: React.FC = () => {
                                   <tr key={doc.id}>
                                     <td>
                                       <i className="fas fa-file-pdf text-danger me-2"></i>
-                                      {doc.name}
+                                      {doc.nom}
                                     </td>
                                     <td>
                                       <span className="badge bg-light text-dark">{doc.type}</span>
                                     </td>
-                                    <td>{doc.uploadDate}</td>
-                                    <td>{getDocumentStatusBadge(doc.status)}</td>
+                                    <td>{doc.dateDepot}</td>
+                                    <td>{getDocumentStatusBadge(doc.statut)}</td>
                                     <td>
                                       <div className="btn-group" role="group">
                                         <button className="btn btn-sm btn-outline-primary">
@@ -696,12 +696,12 @@ const MonProfil: React.FC = () => {
                             <div className="row text-center">
                               <div className="col-6">
                                 <div className="border-end">
-                                  <h3 className="text-primary">{profile.statistics.activeInterns}</h3>
+                                  <h3 className="text-primary">{profile.statistiques.nbStagiairesActifs}</h3>
                                   <p className="text-muted">Actifs</p>
                                 </div>
                               </div>
                               <div className="col-6">
-                                <h3 className="text-success">{profile.statistics.completedInterns}</h3>
+                                <h3 className="text-success">{profile.statistiques.nbStagiairesTermines}</h3>
                                 <p className="text-muted">Terminés</p>
                               </div>
                             </div>
@@ -715,16 +715,16 @@ const MonProfil: React.FC = () => {
                               <i className="fas fa-star me-2"></i>Évaluation moyenne
                             </h5>
                             <div className="text-center">
-                              <h2 className="text-warning">{profile.statistics.averageRating.toFixed(1)}/5</h2>
+                              <h2 className="text-warning">{profile.statistiques.noteMoyenne.toFixed(1)}/5</h2>
                               <div className="d-flex justify-content-center">
                                 {[...Array(5)].map((_, i) => (
                                   <i 
                                     key={i} 
-                                    className={`fas fa-star ${i < Math.floor(profile.statistics.averageRating) ? 'text-warning' : 'text-muted'}`}
+                                    className={`fas fa-star ${i < Math.floor(profile.statistiques.noteMoyenne) ? 'text-warning' : 'text-muted'}`}
                                   ></i>
                                 ))}
                               </div>
-                              <p className="text-muted mt-2">Basé sur {profile.statistics.totalInterns} évaluations</p>
+                              <p className="text-muted mt-2">Basé sur {profile.statistiques.nbStagiairesTotal} évaluations</p>
                             </div>
                           </div>
                         </div>
@@ -737,15 +737,15 @@ const MonProfil: React.FC = () => {
                             </h5>
                             <div className="row text-center">
                               <div className="col-md-4">
-                                <h4 className="text-primary">{profile.statistics.totalOffers}</h4>
+                                <h4 className="text-primary">{profile.statistiques.nbOffresTotal}</h4>
                                 <p className="text-muted">Total des offres</p>
                               </div>
                               <div className="col-md-4">
-                                <h4 className="text-success">{profile.statistics.activeOffers}</h4>
+                                <h4 className="text-success">{profile.statistiques.nbOffresActives}</h4>
                                 <p className="text-muted">Offres actives</p>
                               </div>
                               <div className="col-md-4">
-                                <h4 className="text-info">{profile.statistics.totalOffers - profile.statistics.activeOffers}</h4>
+                                <h4 className="text-info">{profile.statistiques.nbOffresTotal - profile.statistiques.nbOffresActives}</h4>
                                 <p className="text-muted">Offres fermées</p>
                               </div>
                             </div>

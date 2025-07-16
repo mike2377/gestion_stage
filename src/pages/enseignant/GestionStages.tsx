@@ -3,37 +3,37 @@ import Sidebar from '../../components/layout/Sidebar';
 
 interface Stage {
   id: number;
-  title: string;
+  titre: string;
   description: string;
-  enterpriseId: number;
-  enterpriseName: string;
-  enterpriseLogo?: string;
-  studentId?: string;
-  studentName?: string;
-  studentPhoto?: string;
-  startDate: string;
-  endDate: string;
-  status: 'available' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
-  location: string;
-  salary?: number;
-  requirements: string[];
-  skills: string[];
-  supervisor: string;
-  tutor: string;
-  program: string;
-  year: number;
-  applications: number;
-  evaluation?: number;
-  progress?: number;
+  idEntreprise: number;
+  nomEntreprise: string;
+  logoEntreprise?: string;
+  idEtudiant?: string;
+  nomEtudiant?: string;
+  photoEtudiant?: string;
+  dateDebut: string;
+  dateFin: string;
+  statut: 'disponible' | 'attribue' | 'en_cours' | 'termine' | 'annule';
+  lieu: string;
+  remuneration?: number;
+  exigences: string[];
+  competences: string[];
+  encadrant: string;
+  tuteur: string;
+  programme: string;
+  annee: number;
+  nbCandidatures: number;
+  noteEvaluation?: number;
+  progression?: number;
   documents: Document[];
 }
 
 interface Document {
   id: number;
-  name: string;
+  nom: string;
   type: string;
-  uploadDate: string;
-  status: string;
+  dateDepot: string;
+  statut: string;
 }
 
 const GestionStages: React.FC = () => {
@@ -56,140 +56,140 @@ const GestionStages: React.FC = () => {
     const mockStages: Stage[] = [
       {
         id: 1,
-        title: 'Développeur Web Full-Stack',
+        titre: 'Développeur Web Full-Stack',
         description: 'Développement d\'applications web modernes avec React, Node.js et MongoDB. Participation à l\'ensemble du cycle de développement.',
-        enterpriseId: 1,
-        enterpriseName: 'TechCorp Solutions',
-        enterpriseLogo: '/api/logos/techcorp-logo.png',
-        studentId: '2024001',
-        studentName: 'Jean Dupont',
-        studentPhoto: '/api/photos/student-1.jpg',
-        startDate: '01/03/2024',
-        endDate: '31/08/2024',
-        status: 'in_progress',
-        location: 'Paris',
-        salary: 800,
-        requirements: ['Master Informatique', 'Connaissances React/Node.js', 'Anglais courant'],
-        skills: ['React', 'Node.js', 'MongoDB', 'Git', 'Docker'],
-        supervisor: 'M. Martin',
-        tutor: 'Dr. Dupont',
-        program: 'Master Informatique',
-        year: 2,
-        applications: 15,
-        evaluation: 4.5,
-        progress: 75,
+        idEntreprise: 1,
+        nomEntreprise: 'TechCorp Solutions',
+        logoEntreprise: '/api/logos/techcorp-logo.png',
+        idEtudiant: '2024001',
+        nomEtudiant: 'Jean Dupont',
+        photoEtudiant: '/api/photos/student-1.jpg',
+        dateDebut: '01/03/2024',
+        dateFin: '31/08/2024',
+        statut: 'en_cours',
+        lieu: 'Paris',
+        remuneration: 800,
+        exigences: ['Master Informatique', 'Connaissances React/Node.js', 'Anglais courant'],
+        competences: ['React', 'Node.js', 'MongoDB', 'Git', 'Docker'],
+        encadrant: 'M. Martin',
+        tuteur: 'Dr. Dupont',
+        programme: 'Master Informatique',
+        annee: 2,
+        nbCandidatures: 15,
+        noteEvaluation: 4.5,
+        progression: 75,
         documents: [
           {
             id: 1,
-            name: 'Convention_stage_Jean_Dupont.pdf',
+            nom: 'Convention_stage_Jean_Dupont.pdf',
             type: 'Convention',
-            uploadDate: '28/02/2024',
-            status: 'Approuvé'
+            dateDepot: '28/02/2024',
+            statut: 'Approuvé'
           },
           {
             id: 2,
-            name: 'Rapport_mensuel_Jean_Dupont.pdf',
+            nom: 'Rapport_mensuel_Jean_Dupont.pdf',
             type: 'Rapport',
-            uploadDate: '01/04/2024',
-            status: 'En attente'
+            dateDepot: '01/04/2024',
+            statut: 'En attente'
           }
         ]
       },
       {
         id: 2,
-        title: 'Assistant Marketing Digital',
+        titre: 'Assistant Marketing Digital',
         description: 'Gestion des réseaux sociaux, création de contenu, analyse des performances marketing et optimisation des campagnes.',
-        enterpriseId: 2,
-        enterpriseName: 'MarketingPro',
-        enterpriseLogo: '/api/logos/marketingpro-logo.png',
-        studentId: '2024002',
-        studentName: 'Marie Martin',
-        studentPhoto: '/api/photos/student-2.jpg',
-        startDate: '01/04/2024',
-        endDate: '31/07/2024',
-        status: 'in_progress',
-        location: 'Lyon',
-        salary: 700,
-        requirements: ['Master Marketing', 'Expérience réseaux sociaux', 'Créativité'],
-        skills: ['Marketing Digital', 'SEO', 'Réseaux sociaux', 'Analytics'],
-        supervisor: 'Mme. Dubois',
-        tutor: 'Dr. Moreau',
-        program: 'Master Marketing',
-        year: 2,
-        applications: 8,
-        evaluation: 4.2,
-        progress: 60,
+        idEntreprise: 2,
+        nomEntreprise: 'MarketingPro',
+        logoEntreprise: '/api/logos/marketingpro-logo.png',
+        idEtudiant: '2024002',
+        nomEtudiant: 'Marie Martin',
+        photoEtudiant: '/api/photos/student-2.jpg',
+        dateDebut: '01/04/2024',
+        dateFin: '31/07/2024',
+        statut: 'en_cours',
+        lieu: 'Lyon',
+        remuneration: 700,
+        exigences: ['Master Marketing', 'Expérience réseaux sociaux', 'Créativité'],
+        competences: ['Marketing Digital', 'SEO', 'Réseaux sociaux', 'Analytics'],
+        encadrant: 'Mme. Dubois',
+        tuteur: 'Dr. Moreau',
+        programme: 'Master Marketing',
+        annee: 2,
+        nbCandidatures: 8,
+        noteEvaluation: 4.2,
+        progression: 60,
         documents: [
           {
             id: 3,
-            name: 'Convention_stage_Marie_Martin.pdf',
+            nom: 'Convention_stage_Marie_Martin.pdf',
             type: 'Convention',
-            uploadDate: '25/03/2024',
-            status: 'Approuvé'
+            dateDepot: '25/03/2024',
+            statut: 'Approuvé'
           }
         ]
       },
       {
         id: 3,
-        title: 'Data Analyst',
+        titre: 'Data Analyst',
         description: 'Analyse de données, création de rapports, développement de dashboards et support aux décisions métier.',
-        enterpriseId: 3,
-        enterpriseName: 'DataCorp',
-        enterpriseLogo: '/api/logos/datacorp-logo.png',
-        startDate: '01/06/2024',
-        endDate: '31/12/2024',
-        status: 'available',
-        location: 'Marseille',
-        salary: 750,
-        requirements: ['Master Statistiques/Informatique', 'Python/R', 'SQL'],
-        skills: ['Python', 'R', 'SQL', 'Tableau', 'Machine Learning'],
-        supervisor: 'M. Bernard',
-        tutor: 'Dr. Petit',
-        program: 'Master Data Science',
-        year: 2,
-        applications: 12,
+        idEntreprise: 3,
+        nomEntreprise: 'DataCorp',
+        logoEntreprise: '/api/logos/datacorp-logo.png',
+        dateDebut: '01/06/2024',
+        dateFin: '31/12/2024',
+        statut: 'disponible',
+        lieu: 'Marseille',
+        remuneration: 750,
+        exigences: ['Master Statistiques/Informatique', 'Python/R', 'SQL'],
+        competences: ['Python', 'R', 'SQL', 'Tableau', 'Machine Learning'],
+        encadrant: 'M. Bernard',
+        tuteur: 'Dr. Petit',
+        programme: 'Master Data Science',
+        annee: 2,
+        nbCandidatures: 12,
         documents: []
       },
       {
         id: 4,
-        title: 'UX/UI Designer',
+        titre: 'UX/UI Designer',
         description: 'Conception d\'interfaces utilisateur, tests utilisateurs, prototypage et amélioration de l\'expérience utilisateur.',
-        enterpriseId: 4,
-        enterpriseName: 'DesignStudio',
-        enterpriseLogo: '/api/logos/designstudio-logo.png',
-        startDate: '01/09/2024',
-        endDate: '28/02/2025',
-        status: 'available',
-        location: 'Toulouse',
-        salary: 650,
-        requirements: ['Master Design/Arts', 'Portfolio', 'Outils design'],
-        skills: ['Figma', 'Adobe Creative Suite', 'Prototypage', 'User Research'],
-        supervisor: 'Mme. Laurent',
-        tutor: 'Dr. Roux',
-        program: 'Master Design',
-        year: 2,
-        applications: 6,
+        idEntreprise: 4,
+        nomEntreprise: 'DesignStudio',
+        logoEntreprise: '/api/logos/designstudio-logo.png',
+        dateDebut: '01/09/2024',
+        dateFin: '28/02/2025',
+        statut: 'disponible',
+        lieu: 'Toulouse',
+        remuneration: 650,
+        exigences: ['Master Design/Arts', 'Portfolio', 'Outils design'],
+        competences: ['Figma', 'Adobe Creative Suite', 'Prototypage', 'User Research'],
+        encadrant: 'Mme. Laurent',
+        tuteur: 'Dr. Roux',
+        programme: 'Master Design',
+        annee: 2,
+        nbCandidatures: 6,
         documents: []
       },
       {
         id: 5,
-        title: 'Développeur Mobile',
+        titre: 'Développeur Mobile',
         description: 'Développement d\'applications mobiles iOS et Android avec React Native et Swift.',
-        enterpriseId: 5,
-        enterpriseName: 'MobileTech',
-        enterpriseLogo: '/api/logos/mobiletech-logo.png',
-        startDate: '01/05/2024',
-        endDate: '31/10/2024',
-        status: 'assigned',
-        location: 'Bordeaux',
-        salary: 800,
-        requirements: ['Master Informatique', 'React Native', 'Swift'],
-        skills: ['React Native', 'Swift', 'iOS', 'Android', 'Git'],
-        supervisor: 'M. Durand',
-        tutor: 'Dr. Simon',
-        program: 'Master Informatique',
-        year: 2,
-        applications: 10,
+        idEntreprise: 5,
+        nomEntreprise: 'MobileTech',
+        logoEntreprise: '/api/logos/mobiletech-logo.png',
+        dateDebut: '01/05/2024',
+        dateFin: '31/10/2024',
+        statut: 'attribue',
+        lieu: 'Bordeaux',
+        remuneration: 800,
+        exigences: ['Master Informatique', 'React Native', 'Swift'],
+        competences: ['React Native', 'Swift', 'iOS', 'Android', 'Git'],
+        encadrant: 'M. Durand',
+        tuteur: 'Dr. Simon',
+        programme: 'Master Informatique',
+        annee: 2,
+        nbCandidatures: 10,
         documents: []
       }
     ];
@@ -204,16 +204,16 @@ const GestionStages: React.FC = () => {
     let filtered = stages;
 
     if (newFilters.status) {
-      filtered = filtered.filter(stage => stage.status === newFilters.status);
+      filtered = filtered.filter(stage => stage.statut === newFilters.status);
     }
     if (newFilters.program) {
-      filtered = filtered.filter(stage => stage.program === newFilters.program);
+      filtered = filtered.filter(stage => stage.programme === newFilters.program);
     }
     if (newFilters.year) {
-      filtered = filtered.filter(stage => stage.year.toString() === newFilters.year);
+      filtered = filtered.filter(stage => stage.annee.toString() === newFilters.year);
     }
     if (newFilters.enterprise) {
-      filtered = filtered.filter(stage => stage.enterpriseId.toString() === newFilters.enterprise);
+      filtered = filtered.filter(stage => stage.idEntreprise.toString() === newFilters.enterprise);
     }
 
     setFilteredStages(filtered);
@@ -221,11 +221,11 @@ const GestionStages: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      available: { class: 'bg-success', text: 'Disponible', icon: 'fas fa-check-circle' },
-      assigned: { class: 'bg-info', text: 'Assigné', icon: 'fas fa-user-check' },
-      in_progress: { class: 'bg-warning', text: 'En cours', icon: 'fas fa-play-circle' },
-      completed: { class: 'bg-primary', text: 'Terminé', icon: 'fas fa-flag-checkered' },
-      cancelled: { class: 'bg-danger', text: 'Annulé', icon: 'fas fa-times-circle' }
+      disponible: { class: 'bg-success', text: 'Disponible', icon: 'fas fa-check-circle' },
+      attribue: { class: 'bg-info', text: 'Assigné', icon: 'fas fa-user-check' },
+      en_cours: { class: 'bg-warning', text: 'En cours', icon: 'fas fa-play-circle' },
+      termine: { class: 'bg-primary', text: 'Terminé', icon: 'fas fa-flag-checkered' },
+      annule: { class: 'bg-danger', text: 'Annulé', icon: 'fas fa-times-circle' }
     };
 
     const config = statusConfig[status as keyof typeof statusConfig];
@@ -238,7 +238,7 @@ const GestionStages: React.FC = () => {
   };
 
   const getStatusCount = (status: string) => {
-    return stages.filter(stage => stage.status === status).length;
+    return stages.filter(stage => stage.statut === status).length;
   };
 
   const getProgressColor = (progress: number) => {
@@ -307,7 +307,7 @@ const GestionStages: React.FC = () => {
                   <div className="card-body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <h4 className="mb-0">{getStatusCount('available')}</h4>
+                        <h4 className="mb-0">{getStatusCount('disponible')}</h4>
                         <p className="mb-0">Disponibles</p>
                       </div>
                       <i className="fas fa-check-circle fa-2x opacity-50"></i>
@@ -320,7 +320,7 @@ const GestionStages: React.FC = () => {
                   <div className="card-body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <h4 className="mb-0">{getStatusCount('in_progress')}</h4>
+                        <h4 className="mb-0">{getStatusCount('en_cours')}</h4>
                         <p className="mb-0">En cours</p>
                       </div>
                       <i className="fas fa-play-circle fa-2x opacity-50"></i>
@@ -333,7 +333,7 @@ const GestionStages: React.FC = () => {
                   <div className="card-body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <h4 className="mb-0">{getStatusCount('completed')}</h4>
+                        <h4 className="mb-0">{getStatusCount('termine')}</h4>
                         <p className="mb-0">Terminés</p>
                       </div>
                       <i className="fas fa-flag-checkered fa-2x opacity-50"></i>
@@ -358,11 +358,11 @@ const GestionStages: React.FC = () => {
                       onChange={(e) => handleFilterChange('status', e.target.value)}
                     >
                       <option value="">Tous les statuts</option>
-                      <option value="available">Disponible</option>
-                      <option value="assigned">Assigné</option>
-                      <option value="in_progress">En cours</option>
-                      <option value="completed">Terminé</option>
-                      <option value="cancelled">Annulé</option>
+                      <option value="disponible">Disponible</option>
+                      <option value="attribue">Assigné</option>
+                      <option value="en_cours">En cours</option>
+                      <option value="termine">Terminé</option>
+                      <option value="annule">Annulé</option>
                     </select>
                   </div>
                   <div className="col-md-3">
@@ -441,39 +441,39 @@ const GestionStages: React.FC = () => {
                           <tr key={stage.id}>
                             <td>
                               <div>
-                                <strong>{stage.title}</strong><br />
-                                <small className="text-muted">{stage.location}</small><br />
+                                <strong>{stage.titre}</strong><br />
+                                <small className="text-muted">{stage.lieu}</small><br />
                                 <small className="text-muted">
-                                  <i className="fas fa-users me-1"></i>{stage.applications} candidatures
+                                  <i className="fas fa-users me-1"></i>{stage.nbCandidatures} candidatures
                                 </small>
                               </div>
                             </td>
                             <td>
                               <div className="d-flex align-items-center">
                                 <img 
-                                  src={stage.enterpriseLogo || '/default-logo.png'} 
+                                  src={stage.logoEntreprise || '/default-logo.png'} 
                                   alt="Logo"
                                   className="rounded me-2"
                                   style={{ width: '30px', height: '30px', objectFit: 'contain' }}
                                 />
                                 <div>
-                                  <strong>{stage.enterpriseName}</strong><br />
-                                  <small className="text-muted">{stage.supervisor}</small>
+                                  <strong>{stage.nomEntreprise}</strong><br />
+                                  <small className="text-muted">{stage.encadrant}</small>
                                 </div>
                               </div>
                             </td>
                             <td>
-                              {stage.studentName ? (
+                              {stage.nomEtudiant ? (
                                 <div className="d-flex align-items-center">
                                   <img 
-                                    src={stage.studentPhoto || '/default-avatar.png'} 
+                                    src={stage.photoEtudiant || '/default-avatar.png'} 
                                     alt="Photo"
                                     className="rounded-circle me-2"
                                     style={{ width: '30px', height: '30px', objectFit: 'cover' }}
                                   />
                                   <div>
-                                    <strong>{stage.studentName}</strong><br />
-                                    <small className="text-muted">{stage.program} - {stage.year}</small>
+                                    <strong>{stage.nomEtudiant}</strong><br />
+                                    <small className="text-muted">{stage.programme} - {stage.annee}</small>
                                   </div>
                                 </div>
                               ) : (
@@ -481,19 +481,19 @@ const GestionStages: React.FC = () => {
                               )}
                             </td>
                             <td>
-                              {stage.startDate} - {stage.endDate}
+                              {stage.dateDebut} - {stage.dateFin}
                             </td>
-                            <td>{getStatusBadge(stage.status)}</td>
+                            <td>{getStatusBadge(stage.statut)}</td>
                             <td>
-                              {stage.progress !== undefined ? (
+                              {stage.progression !== undefined ? (
                                 <div className="mb-1">
                                   <div className="d-flex justify-content-between">
-                                    <small>{stage.progress}%</small>
+                                    <small>{stage.progression}%</small>
                                   </div>
                                   <div className="progress" style={{ height: '6px' }}>
                                     <div 
-                                      className={`progress-bar bg-${getProgressColor(stage.progress)}`}
-                                      style={{ width: `${stage.progress}%` }}
+                                      className={`progress-bar bg-${getProgressColor(stage.progression)}`}
+                                      style={{ width: `${stage.progression}%` }}
                                     ></div>
                                   </div>
                                 </div>
@@ -513,7 +513,7 @@ const GestionStages: React.FC = () => {
                                 >
                                   <i className="fas fa-eye"></i>
                                 </button>
-                                {stage.status === 'available' && (
+                                {stage.statut === 'disponible' && (
                                   <button 
                                     className="btn btn-sm btn-outline-success"
                                     title="Assigner un étudiant"
@@ -559,7 +559,7 @@ const GestionStages: React.FC = () => {
               <div className="modal-header">
                 <h5 className="modal-title">
                   <i className="fas fa-briefcase me-2"></i>
-                  Détails du stage - {selectedStage.title}
+                  Détails du stage - {selectedStage.titre}
                 </h5>
                 <button 
                   type="button" 
@@ -606,33 +606,33 @@ const GestionStages: React.FC = () => {
                         <div className="row">
                           <div className="col-md-6">
                             <h6 className="text-primary mb-3">Informations générales</h6>
-                            <p><strong>Entreprise:</strong> {selectedStage.enterpriseName}</p>
-                            <p><strong>Localisation:</strong> {selectedStage.location}</p>
-                            <p><strong>Période:</strong> {selectedStage.startDate} - {selectedStage.endDate}</p>
-                            <p><strong>Superviseur:</strong> {selectedStage.supervisor}</p>
-                            <p><strong>Tuteur:</strong> {selectedStage.tutor}</p>
-                            {selectedStage.salary && (
-                              <p><strong>Salaire:</strong> {selectedStage.salary}€/mois</p>
+                            <p><strong>Entreprise:</strong> {selectedStage.nomEntreprise}</p>
+                            <p><strong>Localisation:</strong> {selectedStage.lieu}</p>
+                            <p><strong>Période:</strong> {selectedStage.dateDebut} - {selectedStage.dateFin}</p>
+                            <p><strong>Encadrant:</strong> {selectedStage.encadrant}</p>
+                            <p><strong>Tuteur:</strong> {selectedStage.tuteur}</p>
+                            {selectedStage.remuneration && (
+                              <p><strong>Rémunération:</strong> {selectedStage.remuneration}€/mois</p>
                             )}
                           </div>
                           <div className="col-md-6">
                             <h6 className="text-primary mb-3">Compétences requises</h6>
                             <div className="d-flex flex-wrap gap-2 mb-3">
-                              {selectedStage.skills.map((skill, index) => (
+                              {selectedStage.competences.map((skill, index) => (
                                 <span key={index} className="badge bg-primary">{skill}</span>
                               ))}
                             </div>
 
                             <h6 className="text-primary mb-3">Prérequis</h6>
                             <ul className="list-unstyled">
-                              {selectedStage.requirements.map((req, index) => (
-                                <li key={index}><i className="fas fa-check text-success me-2"></i>{req}</li>
+                              {selectedStage.exigences.map((exigence, index) => (
+                                <li key={index}><i className="fas fa-check text-success me-2"></i>{exigence}</li>
                               ))}
                             </ul>
                           </div>
                         </div>
 
-                        {selectedStage.progress !== undefined && (
+                        {selectedStage.progression !== undefined && (
                           <div className="mt-4">
                             <h6 className="text-primary mb-3">Progression</h6>
                             <div className="row">
@@ -640,25 +640,25 @@ const GestionStages: React.FC = () => {
                                 <div className="mb-3">
                                   <div className="d-flex justify-content-between">
                                     <span>Progression globale</span>
-                                    <span>{selectedStage.progress}%</span>
+                                    <span>{selectedStage.progression}%</span>
                                   </div>
                                   <div className="progress">
                                     <div 
-                                      className={`progress-bar bg-${getProgressColor(selectedStage.progress)}`}
-                                      style={{ width: `${selectedStage.progress}%` }}
+                                      className={`progress-bar bg-${getProgressColor(selectedStage.progression)}`}
+                                      style={{ width: `${selectedStage.progression}%` }}
                                     ></div>
                                   </div>
                                 </div>
                               </div>
                               <div className="col-md-6">
-                                {selectedStage.evaluation && (
+                                {selectedStage.noteEvaluation && (
                                   <div className="d-flex align-items-center">
-                                    <span className="me-2">Évaluation: {selectedStage.evaluation}/5</span>
+                                    <span className="me-2">Note d'évaluation: {selectedStage.noteEvaluation}/5</span>
                                     <div className="d-flex">
                                       {[...Array(5)].map((_, i) => (
                                         <i 
                                           key={i} 
-                                          className={`fas fa-star ${i < Math.floor(selectedStage.evaluation!) ? 'text-warning' : 'text-muted'}`}
+                                          className={`fas fa-star ${i < Math.floor(selectedStage.noteEvaluation!) ? 'text-warning' : 'text-muted'}`}
                                         ></i>
                                       ))}
                                     </div>
@@ -674,16 +674,16 @@ const GestionStages: React.FC = () => {
                           <div className="card-body">
                             <h6>Statistiques</h6>
                             <div className="mb-3">
-                              <strong>Candidatures:</strong> {selectedStage.applications}
+                              <strong>Candidatures:</strong> {selectedStage.nbCandidatures}
                             </div>
                             <div className="mb-3">
-                              <strong>Programme:</strong> {selectedStage.program}
+                              <strong>Programme:</strong> {selectedStage.programme}
                             </div>
                             <div className="mb-3">
-                              <strong>Année:</strong> {selectedStage.year}
+                              <strong>Année:</strong> {selectedStage.annee}
                             </div>
                             <div className="mb-3">
-                              <strong>Statut:</strong> {getStatusBadge(selectedStage.status)}
+                              <strong>Statut:</strong> {getStatusBadge(selectedStage.statut)}
                             </div>
                           </div>
                         </div>
@@ -694,24 +694,24 @@ const GestionStages: React.FC = () => {
                   {/* Onglet Étudiant */}
                   {activeTab === 'student' && (
                     <div>
-                      {selectedStage.studentName ? (
+                      {selectedStage.nomEtudiant ? (
                         <div className="row">
                           <div className="col-md-4 text-center">
                             <img 
-                              src={selectedStage.studentPhoto || '/default-avatar.png'} 
+                              src={selectedStage.photoEtudiant || '/default-avatar.png'} 
                               alt="Photo"
                               className="rounded-circle mb-3"
                               style={{ width: '120px', height: '120px', objectFit: 'cover' }}
                             />
-                            <h5>{selectedStage.studentName}</h5>
-                            <p className="text-muted">{selectedStage.program} - {selectedStage.year}</p>
+                            <h5>{selectedStage.nomEtudiant}</h5>
+                            <p className="text-muted">{selectedStage.programme} - {selectedStage.annee}</p>
                           </div>
                           <div className="col-md-8">
                             <h6 className="text-primary mb-3">Informations académiques</h6>
-                            <p><strong>ID Étudiant:</strong> {selectedStage.studentId}</p>
-                            <p><strong>Programme:</strong> {selectedStage.program}</p>
-                            <p><strong>Année:</strong> {selectedStage.year}</p>
-                            <p><strong>Tuteur:</strong> {selectedStage.tutor}</p>
+                            <p><strong>ID Étudiant:</strong> {selectedStage.idEtudiant}</p>
+                            <p><strong>Programme:</strong> {selectedStage.programme}</p>
+                            <p><strong>Année:</strong> {selectedStage.annee}</p>
+                            <p><strong>Tuteur:</strong> {selectedStage.tuteur}</p>
                           </div>
                         </div>
                       ) : (
@@ -756,18 +756,18 @@ const GestionStages: React.FC = () => {
                                 <tr key={doc.id}>
                                   <td>
                                     <i className="fas fa-file-pdf text-danger me-2"></i>
-                                    {doc.name}
+                                    {doc.nom}
                                   </td>
                                   <td>
                                     <span className="badge bg-light text-dark">{doc.type}</span>
                                   </td>
-                                  <td>{doc.uploadDate}</td>
+                                  <td>{doc.dateDepot}</td>
                                   <td>
                                     <span className={`badge ${
-                                      doc.status === 'Approuvé' ? 'bg-success' : 
-                                      doc.status === 'En attente' ? 'bg-warning' : 'bg-danger'
+                                      doc.statut === 'Approuvé' ? 'bg-success' : 
+                                      doc.statut === 'En attente' ? 'bg-warning' : 'bg-danger'
                                     }`}>
-                                      {doc.status}
+                                      {doc.statut}
                                     </span>
                                   </td>
                                   <td>
@@ -812,7 +812,7 @@ const GestionStages: React.FC = () => {
               <div className="modal-header">
                 <h5 className="modal-title">
                   <i className="fas fa-user-plus me-2"></i>
-                  Assigner un étudiant - {selectedStage.title}
+                  Assigner un étudiant - {selectedStage.titre}
                 </h5>
                 <button 
                   type="button" 
@@ -821,7 +821,7 @@ const GestionStages: React.FC = () => {
                 ></button>
               </div>
               <div className="modal-body">
-                <p>Interface d'assignation d'étudiant pour le stage "{selectedStage.title}"</p>
+                <p>Interface d'assignation d'étudiant pour le stage "{selectedStage.titre}"</p>
                 {/* Ici on ajouterait l'interface d'assignation */}
               </div>
               <div className="modal-footer">

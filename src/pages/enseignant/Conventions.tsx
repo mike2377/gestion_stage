@@ -3,36 +3,36 @@ import Sidebar from '../../components/layout/Sidebar';
 
 interface Convention {
   id: number;
-  studentId: string;
-  studentName: string;
-  studentPhoto?: string;
-  enterpriseId: number;
-  enterpriseName: string;
-  enterpriseLogo?: string;
-  stageTitle: string;
-  startDate: string;
-  endDate: string;
-  status: 'draft' | 'pending' | 'approved' | 'rejected' | 'signed';
-  supervisor: string;
-  tutor: string;
-  program: string;
-  year: number;
-  salary?: number;
-  location: string;
-  submittedDate: string;
-  reviewedDate?: string;
-  signedDate?: string;
-  comments?: string;
+  idEtudiant: string;
+  nomEtudiant: string;
+  photoEtudiant?: string;
+  idEntreprise: number;
+  nomEntreprise: string;
+  logoEntreprise?: string;
+  titreStage: string;
+  dateDebut: string;
+  dateFin: string;
+  statut: 'brouillon' | 'en_attente' | 'approuvee' | 'rejetee' | 'signee';
+  encadrant: string;
+  tuteur: string;
+  programme: string;
+  annee: number;
+  remuneration?: number;
+  lieu: string;
+  dateSoumission: string;
+  dateRevue?: string;
+  dateSignature?: string;
+  commentaires?: string;
   documents: Document[];
-  requirements: string[];
+  exigences: string[];
 }
 
 interface Document {
   id: number;
-  name: string;
+  nom: string;
   type: string;
-  uploadDate: string;
-  status: string;
+  dateDepot: string;
+  statut: string;
   url: string;
 }
 
@@ -56,179 +56,179 @@ const Conventions: React.FC = () => {
     const mockConventions: Convention[] = [
       {
         id: 1,
-        studentId: '2024001',
-        studentName: 'Jean Dupont',
-        studentPhoto: '/api/photos/student-1.jpg',
-        enterpriseId: 1,
-        enterpriseName: 'TechCorp Solutions',
-        enterpriseLogo: '/api/logos/techcorp-logo.png',
-        stageTitle: 'Développeur Web Full-Stack',
-        startDate: '01/03/2024',
-        endDate: '31/08/2024',
-        status: 'approved',
-        supervisor: 'M. Martin',
-        tutor: 'Dr. Dupont',
-        program: 'Master Informatique',
-        year: 2,
-        salary: 800,
-        location: 'Paris',
-        submittedDate: '15/02/2024',
-        reviewedDate: '20/02/2024',
-        signedDate: '25/02/2024',
-        comments: 'Convention conforme aux exigences académiques',
-        requirements: ['Master Informatique', 'Connaissances React/Node.js', 'Anglais courant'],
+        idEtudiant: '2024001',
+        nomEtudiant: 'Jean Dupont',
+        photoEtudiant: '/api/photos/student-1.jpg',
+        idEntreprise: 1,
+        nomEntreprise: 'TechCorp Solutions',
+        logoEntreprise: '/api/logos/techcorp-logo.png',
+        titreStage: 'Développeur Web Full-Stack',
+        dateDebut: '01/03/2024',
+        dateFin: '31/08/2024',
+        statut: 'approuvee',
+        encadrant: 'M. Martin',
+        tuteur: 'Dr. Dupont',
+        programme: 'Master Informatique',
+        annee: 2,
+        remuneration: 800,
+        lieu: 'Paris',
+        dateSoumission: '15/02/2024',
+        dateRevue: '20/02/2024',
+        dateSignature: '25/02/2024',
+        commentaires: 'Convention conforme aux exigences académiques',
+        exigences: ['Master Informatique', 'Connaissances React/Node.js', 'Anglais courant'],
         documents: [
           {
             id: 1,
-            name: 'Convention_stage_Jean_Dupont.pdf',
+            nom: 'Convention_stage_Jean_Dupont.pdf',
             type: 'Convention',
-            uploadDate: '15/02/2024',
-            status: 'Approuvé',
+            dateDepot: '15/02/2024',
+            statut: 'Approuvé',
             url: '/api/documents/convention-1.pdf'
           },
           {
             id: 2,
-            name: 'Annexe_technique_Jean_Dupont.pdf',
+            nom: 'Annexe_technique_Jean_Dupont.pdf',
             type: 'Annexe',
-            uploadDate: '15/02/2024',
-            status: 'Approuvé',
+            dateDepot: '15/02/2024',
+            statut: 'Approuvé',
             url: '/api/documents/annexe-1.pdf'
           }
         ]
       },
       {
         id: 2,
-        studentId: '2024002',
-        studentName: 'Marie Martin',
-        studentPhoto: '/api/photos/student-2.jpg',
-        enterpriseId: 2,
-        enterpriseName: 'MarketingPro',
-        enterpriseLogo: '/api/logos/marketingpro-logo.png',
-        stageTitle: 'Assistant Marketing Digital',
-        startDate: '01/04/2024',
-        endDate: '31/07/2024',
-        status: 'pending',
-        supervisor: 'Mme. Dubois',
-        tutor: 'Dr. Moreau',
-        program: 'Master Marketing',
-        year: 2,
-        salary: 700,
-        location: 'Lyon',
-        submittedDate: '20/03/2024',
-        requirements: ['Master Marketing', 'Expérience réseaux sociaux', 'Créativité'],
+        idEtudiant: '2024002',
+        nomEtudiant: 'Marie Martin',
+        photoEtudiant: '/api/photos/student-2.jpg',
+        idEntreprise: 2,
+        nomEntreprise: 'MarketingPro',
+        logoEntreprise: '/api/logos/marketingpro-logo.png',
+        titreStage: 'Assistant Marketing Digital',
+        dateDebut: '01/04/2024',
+        dateFin: '31/07/2024',
+        statut: 'en_attente',
+        encadrant: 'Mme. Dubois',
+        tuteur: 'Dr. Moreau',
+        programme: 'Master Marketing',
+        annee: 2,
+        remuneration: 700,
+        lieu: 'Lyon',
+        dateSoumission: '20/03/2024',
+        exigences: ['Master Marketing', 'Expérience réseaux sociaux', 'Créativité'],
         documents: [
           {
             id: 3,
-            name: 'Convention_stage_Marie_Martin.pdf',
+            nom: 'Convention_stage_Marie_Martin.pdf',
             type: 'Convention',
-            uploadDate: '20/03/2024',
-            status: 'En attente',
+            dateDepot: '20/03/2024',
+            statut: 'En attente',
             url: '/api/documents/convention-2.pdf'
           }
         ]
       },
       {
         id: 3,
-        studentId: '2024003',
-        studentName: 'Pierre Durand',
-        studentPhoto: '/api/photos/student-3.jpg',
-        enterpriseId: 3,
-        enterpriseName: 'DataCorp',
-        enterpriseLogo: '/api/logos/datacorp-logo.png',
-        stageTitle: 'Data Analyst',
-        startDate: '01/06/2024',
-        endDate: '31/12/2024',
-        status: 'draft',
-        supervisor: 'M. Bernard',
-        tutor: 'Dr. Petit',
-        program: 'Master Data Science',
-        year: 2,
-        salary: 750,
-        location: 'Marseille',
-        submittedDate: '01/05/2024',
-        requirements: ['Master Statistiques/Informatique', 'Python/R', 'SQL'],
+        idEtudiant: '2024003',
+        nomEtudiant: 'Pierre Durand',
+        photoEtudiant: '/api/photos/student-3.jpg',
+        idEntreprise: 3,
+        nomEntreprise: 'DataCorp',
+        logoEntreprise: '/api/logos/datacorp-logo.png',
+        titreStage: 'Data Analyst',
+        dateDebut: '01/06/2024',
+        dateFin: '31/12/2024',
+        statut: 'brouillon',
+        encadrant: 'M. Bernard',
+        tuteur: 'Dr. Petit',
+        programme: 'Master Data Science',
+        annee: 2,
+        remuneration: 750,
+        lieu: 'Marseille',
+        dateSoumission: '01/05/2024',
+        exigences: ['Master Statistiques/Informatique', 'Python/R', 'SQL'],
         documents: [
           {
             id: 4,
-            name: 'Convention_stage_Pierre_Durand.pdf',
+            nom: 'Convention_stage_Pierre_Durand.pdf',
             type: 'Convention',
-            uploadDate: '01/05/2024',
-            status: 'Brouillon',
+            dateDepot: '01/05/2024',
+            statut: 'Brouillon',
             url: '/api/documents/convention-3.pdf'
           }
         ]
       },
       {
         id: 4,
-        studentId: '2024004',
-        studentName: 'Sophie Bernard',
-        studentPhoto: '/api/photos/student-4.jpg',
-        enterpriseId: 4,
-        enterpriseName: 'DesignStudio',
-        enterpriseLogo: '/api/logos/designstudio-logo.png',
-        stageTitle: 'UX/UI Designer',
-        startDate: '01/09/2024',
-        endDate: '28/02/2025',
-        status: 'rejected',
-        supervisor: 'Mme. Laurent',
-        tutor: 'Dr. Roux',
-        program: 'Master Design',
-        year: 2,
-        salary: 650,
-        location: 'Toulouse',
-        submittedDate: '15/04/2024',
-        reviewedDate: '20/04/2024',
-        comments: 'Convention rejetée - conditions de travail non conformes',
-        requirements: ['Master Design/Arts', 'Portfolio', 'Outils design'],
+        idEtudiant: '2024004',
+        nomEtudiant: 'Sophie Bernard',
+        photoEtudiant: '/api/photos/student-4.jpg',
+        idEntreprise: 4,
+        nomEntreprise: 'DesignStudio',
+        logoEntreprise: '/api/logos/designstudio-logo.png',
+        titreStage: 'UX/UI Designer',
+        dateDebut: '01/09/2024',
+        dateFin: '28/02/2025',
+        statut: 'rejetee',
+        encadrant: 'Mme. Laurent',
+        tuteur: 'Dr. Roux',
+        programme: 'Master Design',
+        annee: 2,
+        remuneration: 650,
+        lieu: 'Toulouse',
+        dateSoumission: '15/04/2024',
+        dateRevue: '20/04/2024',
+        commentaires: 'Convention rejetée - conditions de travail non conformes',
+        exigences: ['Master Design/Arts', 'Portfolio', 'Outils design'],
         documents: [
           {
             id: 5,
-            name: 'Convention_stage_Sophie_Bernard.pdf',
+            nom: 'Convention_stage_Sophie_Bernard.pdf',
             type: 'Convention',
-            uploadDate: '15/04/2024',
-            status: 'Rejeté',
+            dateDepot: '15/04/2024',
+            statut: 'Rejeté',
             url: '/api/documents/convention-4.pdf'
           }
         ]
       },
       {
         id: 5,
-        studentId: '2024005',
-        studentName: 'Lucas Moreau',
-        studentPhoto: '/api/photos/student-5.jpg',
-        enterpriseId: 5,
-        enterpriseName: 'MobileTech',
-        enterpriseLogo: '/api/logos/mobiletech-logo.png',
-        stageTitle: 'Développeur Mobile',
-        startDate: '01/05/2024',
-        endDate: '31/10/2024',
-        status: 'signed',
-        supervisor: 'M. Durand',
-        tutor: 'Dr. Simon',
-        program: 'Master Informatique',
-        year: 2,
-        salary: 800,
-        location: 'Bordeaux',
-        submittedDate: '10/04/2024',
-        reviewedDate: '15/04/2024',
-        signedDate: '20/04/2024',
-        comments: 'Convention signée et validée',
-        requirements: ['Master Informatique', 'React Native', 'Swift'],
+        idEtudiant: '2024005',
+        nomEtudiant: 'Lucas Moreau',
+        photoEtudiant: '/api/photos/student-5.jpg',
+        idEntreprise: 5,
+        nomEntreprise: 'MobileTech',
+        logoEntreprise: '/api/logos/mobiletech-logo.png',
+        titreStage: 'Développeur Mobile',
+        dateDebut: '01/05/2024',
+        dateFin: '31/10/2024',
+        statut: 'signee',
+        encadrant: 'M. Durand',
+        tuteur: 'Dr. Simon',
+        programme: 'Master Informatique',
+        annee: 2,
+        remuneration: 800,
+        lieu: 'Bordeaux',
+        dateSoumission: '10/04/2024',
+        dateRevue: '15/04/2024',
+        dateSignature: '20/04/2024',
+        commentaires: 'Convention signée et validée',
+        exigences: ['Master Informatique', 'React Native', 'Swift'],
         documents: [
           {
             id: 6,
-            name: 'Convention_stage_Lucas_Moreau.pdf',
+            nom: 'Convention_stage_Lucas_Moreau.pdf',
             type: 'Convention',
-            uploadDate: '10/04/2024',
-            status: 'Signé',
+            dateDepot: '10/04/2024',
+            statut: 'Signé',
             url: '/api/documents/convention-5.pdf'
           },
           {
             id: 7,
-            name: 'Convention_signee_Lucas_Moreau.pdf',
+            nom: 'Convention_signee_Lucas_Moreau.pdf',
             type: 'Convention signée',
-            uploadDate: '20/04/2024',
-            status: 'Validé',
+            dateDepot: '20/04/2024',
+            statut: 'Validé',
             url: '/api/documents/convention-signed-5.pdf'
           }
         ]
@@ -245,16 +245,16 @@ const Conventions: React.FC = () => {
     let filtered = conventions;
 
     if (newFilters.status) {
-      filtered = filtered.filter(convention => convention.status === newFilters.status);
+      filtered = filtered.filter(convention => convention.statut === newFilters.status);
     }
     if (newFilters.program) {
-      filtered = filtered.filter(convention => convention.program === newFilters.program);
+      filtered = filtered.filter(convention => convention.programme === newFilters.program);
     }
     if (newFilters.year) {
-      filtered = filtered.filter(convention => convention.year.toString() === newFilters.year);
+      filtered = filtered.filter(convention => convention.annee.toString() === newFilters.year);
     }
     if (newFilters.enterprise) {
-      filtered = filtered.filter(convention => convention.enterpriseId.toString() === newFilters.enterprise);
+      filtered = filtered.filter(convention => convention.idEntreprise.toString() === newFilters.enterprise);
     }
 
     setFilteredConventions(filtered);
@@ -262,11 +262,11 @@ const Conventions: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      draft: { class: 'bg-secondary', text: 'Brouillon', icon: 'fas fa-edit' },
-      pending: { class: 'bg-warning', text: 'En attente', icon: 'fas fa-clock' },
-      approved: { class: 'bg-success', text: 'Approuvée', icon: 'fas fa-check' },
-      rejected: { class: 'bg-danger', text: 'Rejetée', icon: 'fas fa-times' },
-      signed: { class: 'bg-primary', text: 'Signée', icon: 'fas fa-signature' }
+      brouillon: { class: 'bg-secondary', text: 'Brouillon', icon: 'fas fa-edit' },
+      en_attente: { class: 'bg-warning', text: 'En attente', icon: 'fas fa-clock' },
+      approuvee: { class: 'bg-success', text: 'Approuvée', icon: 'fas fa-check' },
+      rejetee: { class: 'bg-danger', text: 'Rejetée', icon: 'fas fa-times' },
+      signee: { class: 'bg-primary', text: 'Signée', icon: 'fas fa-signature' }
     };
 
     const config = statusConfig[status as keyof typeof statusConfig];
@@ -279,18 +279,18 @@ const Conventions: React.FC = () => {
   };
 
   const getStatusCount = (status: string) => {
-    return conventions.filter(convention => convention.status === status).length;
+    return conventions.filter(convention => convention.statut === status).length;
   };
 
   const handleStatusChange = (conventionId: number, newStatus: string) => {
     setConventions(prev => 
       prev.map(convention => 
-        convention.id === conventionId ? { ...convention, status: newStatus as any } : convention
+        convention.id === conventionId ? { ...convention, statut: newStatus as any } : convention
       )
     );
     setFilteredConventions(prev => 
       prev.map(convention => 
-        convention.id === conventionId ? { ...convention, status: newStatus as any } : convention
+        convention.id === conventionId ? { ...convention, statut: newStatus as any } : convention
       )
     );
   };
@@ -354,7 +354,7 @@ const Conventions: React.FC = () => {
                   <div className="card-body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <h4 className="mb-0">{getStatusCount('pending')}</h4>
+                        <h4 className="mb-0">{getStatusCount('en_attente')}</h4>
                         <p className="mb-0">En attente</p>
                       </div>
                       <i className="fas fa-clock fa-2x opacity-50"></i>
@@ -367,7 +367,7 @@ const Conventions: React.FC = () => {
                   <div className="card-body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <h4 className="mb-0">{getStatusCount('approved') + getStatusCount('signed')}</h4>
+                        <h4 className="mb-0">{getStatusCount('approuvee') + getStatusCount('signee')}</h4>
                         <p className="mb-0">Approuvées</p>
                       </div>
                       <i className="fas fa-check-circle fa-2x opacity-50"></i>
@@ -380,7 +380,7 @@ const Conventions: React.FC = () => {
                   <div className="card-body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <h4 className="mb-0">{getStatusCount('rejected')}</h4>
+                        <h4 className="mb-0">{getStatusCount('rejetee')}</h4>
                         <p className="mb-0">Rejetées</p>
                       </div>
                       <i className="fas fa-times-circle fa-2x opacity-50"></i>
@@ -405,11 +405,11 @@ const Conventions: React.FC = () => {
                       onChange={(e) => handleFilterChange('status', e.target.value)}
                     >
                       <option value="">Tous les statuts</option>
-                      <option value="draft">Brouillon</option>
-                      <option value="pending">En attente</option>
-                      <option value="approved">Approuvée</option>
-                      <option value="rejected">Rejetée</option>
-                      <option value="signed">Signée</option>
+                      <option value="brouillon">Brouillon</option>
+                      <option value="en_attente">En attente</option>
+                      <option value="approuvee">Approuvée</option>
+                      <option value="rejetee">Rejetée</option>
+                      <option value="signee">Signée</option>
                     </select>
                   </div>
                   <div className="col-md-3">
@@ -489,47 +489,47 @@ const Conventions: React.FC = () => {
                             <td>
                               <div className="d-flex align-items-center">
                                 <img 
-                                  src={convention.studentPhoto || '/default-avatar.png'} 
+                                  src={convention.photoEtudiant || '/default-avatar.png'} 
                                   alt="Photo"
                                   className="rounded-circle me-3"
                                   style={{ width: '40px', height: '40px', objectFit: 'cover' }}
                                 />
                                 <div>
-                                  <strong>{convention.studentName}</strong><br />
-                                  <small className="text-muted">{convention.program} - {convention.year}</small><br />
-                                  <small className="text-muted">ID: {convention.studentId}</small>
+                                  <strong>{convention.nomEtudiant}</strong><br />
+                                  <small className="text-muted">{convention.programme} - {convention.annee}</small><br />
+                                  <small className="text-muted">ID: {convention.idEtudiant}</small>
                                 </div>
                               </div>
                             </td>
                             <td>
-                              <strong>{convention.stageTitle}</strong><br />
-                              <small className="text-muted">{convention.location}</small><br />
-                              {convention.salary && (
-                                <small className="text-muted">{convention.salary}€/mois</small>
+                              <strong>{convention.titreStage}</strong><br />
+                              <small className="text-muted">{convention.lieu}</small><br />
+                              {convention.remuneration && (
+                                <small className="text-muted">{convention.remuneration}€/mois</small>
                               )}
                             </td>
                             <td>
                               <div className="d-flex align-items-center">
                                 <img 
-                                  src={convention.enterpriseLogo || '/default-logo.png'} 
+                                  src={convention.logoEntreprise || '/default-logo.png'} 
                                   alt="Logo"
                                   className="rounded me-2"
                                   style={{ width: '30px', height: '30px', objectFit: 'contain' }}
                                 />
                                 <div>
-                                  <strong>{convention.enterpriseName}</strong><br />
-                                  <small className="text-muted">{convention.supervisor}</small>
+                                  <strong>{convention.nomEntreprise}</strong><br />
+                                  <small className="text-muted">{convention.encadrant}</small>
                                 </div>
                               </div>
                             </td>
                             <td>
-                              {convention.startDate} - {convention.endDate}
+                              {convention.dateDebut} - {convention.dateFin}
                             </td>
-                            <td>{getStatusBadge(convention.status)}</td>
+                            <td>{getStatusBadge(convention.statut)}</td>
                             <td>
-                              {convention.submittedDate}<br />
-                              {convention.reviewedDate && (
-                                <small className="text-muted">Révisée: {convention.reviewedDate}</small>
+                              {convention.dateSoumission}<br />
+                              {convention.dateRevue && (
+                                <small className="text-muted">Révisée: {convention.dateRevue}</small>
                               )}
                             </td>
                             <td>
@@ -544,12 +544,12 @@ const Conventions: React.FC = () => {
                                 >
                                   <i className="fas fa-eye"></i>
                                 </button>
-                                {convention.status === 'pending' && (
+                                {convention.statut === 'en_attente' && (
                                   <>
                                     <button 
                                       className="btn btn-sm btn-outline-success"
                                       title="Approuver"
-                                      onClick={() => handleStatusChange(convention.id, 'approved')}
+                                      onClick={() => handleStatusChange(convention.id, 'approuvee')}
                                     >
                                       <i className="fas fa-check"></i>
                                     </button>
@@ -599,7 +599,7 @@ const Conventions: React.FC = () => {
               <div className="modal-header">
                 <h5 className="modal-title">
                   <i className="fas fa-file-contract me-2"></i>
-                  Détails de la convention - {selectedConvention.studentName}
+                  Détails de la convention - {selectedConvention.nomEtudiant}
                 </h5>
                 <button 
                   type="button" 
@@ -635,21 +635,21 @@ const Conventions: React.FC = () => {
                         <div className="row">
                           <div className="col-md-6">
                             <h6 className="text-primary mb-3">Informations étudiant</h6>
-                            <p><strong>Nom:</strong> {selectedConvention.studentName}</p>
-                            <p><strong>ID Étudiant:</strong> {selectedConvention.studentId}</p>
-                            <p><strong>Programme:</strong> {selectedConvention.program}</p>
-                            <p><strong>Année:</strong> {selectedConvention.year}</p>
-                            <p><strong>Tuteur:</strong> {selectedConvention.tutor}</p>
+                            <p><strong>Nom:</strong> {selectedConvention.nomEtudiant}</p>
+                            <p><strong>ID Étudiant:</strong> {selectedConvention.idEtudiant}</p>
+                            <p><strong>Programme:</strong> {selectedConvention.programme}</p>
+                            <p><strong>Année:</strong> {selectedConvention.annee}</p>
+                            <p><strong>Tuteur:</strong> {selectedConvention.tuteur}</p>
                           </div>
                           <div className="col-md-6">
                             <h6 className="text-primary mb-3">Informations stage</h6>
-                            <p><strong>Stage:</strong> {selectedConvention.stageTitle}</p>
-                            <p><strong>Entreprise:</strong> {selectedConvention.enterpriseName}</p>
-                            <p><strong>Localisation:</strong> {selectedConvention.location}</p>
-                            <p><strong>Période:</strong> {selectedConvention.startDate} - {selectedConvention.endDate}</p>
-                            <p><strong>Superviseur:</strong> {selectedConvention.supervisor}</p>
-                            {selectedConvention.salary && (
-                              <p><strong>Salaire:</strong> {selectedConvention.salary}€/mois</p>
+                            <p><strong>Stage:</strong> {selectedConvention.titreStage}</p>
+                            <p><strong>Entreprise:</strong> {selectedConvention.nomEntreprise}</p>
+                            <p><strong>Localisation:</strong> {selectedConvention.lieu}</p>
+                            <p><strong>Période:</strong> {selectedConvention.dateDebut} - {selectedConvention.dateFin}</p>
+                            <p><strong>Encadrant:</strong> {selectedConvention.encadrant}</p>
+                            {selectedConvention.remuneration && (
+                              <p><strong>Rémunération:</strong> {selectedConvention.remuneration}€/mois</p>
                             )}
                           </div>
                         </div>
@@ -657,16 +657,16 @@ const Conventions: React.FC = () => {
                         <div className="mt-4">
                           <h6 className="text-primary mb-3">Prérequis</h6>
                           <ul className="list-unstyled">
-                            {selectedConvention.requirements.map((req, index) => (
-                              <li key={index}><i className="fas fa-check text-success me-2"></i>{req}</li>
+                            {selectedConvention.exigences.map((exigence, index) => (
+                              <li key={index}><i className="fas fa-check text-success me-2"></i>{exigence}</li>
                             ))}
                           </ul>
                         </div>
 
-                        {selectedConvention.comments && (
+                        {selectedConvention.commentaires && (
                           <div className="mt-4">
                             <h6 className="text-primary mb-3">Commentaires</h6>
-                            <p>{selectedConvention.comments}</p>
+                            <p>{selectedConvention.commentaires}</p>
                           </div>
                         )}
                       </div>
@@ -675,19 +675,19 @@ const Conventions: React.FC = () => {
                           <div className="card-body">
                             <h6>Statut et dates</h6>
                             <div className="mb-3">
-                              <strong>Statut:</strong> {getStatusBadge(selectedConvention.status)}
+                              <strong>Statut:</strong> {getStatusBadge(selectedConvention.statut)}
                             </div>
                             <div className="mb-3">
-                              <strong>Soumission:</strong> {selectedConvention.submittedDate}
+                              <strong>Soumission:</strong> {selectedConvention.dateSoumission}
                             </div>
-                            {selectedConvention.reviewedDate && (
+                            {selectedConvention.dateRevue && (
                               <div className="mb-3">
-                                <strong>Révision:</strong> {selectedConvention.reviewedDate}
+                                <strong>Révision:</strong> {selectedConvention.dateRevue}
                               </div>
                             )}
-                            {selectedConvention.signedDate && (
+                            {selectedConvention.dateSignature && (
                               <div className="mb-3">
-                                <strong>Signature:</strong> {selectedConvention.signedDate}
+                                <strong>Signature:</strong> {selectedConvention.dateSignature}
                               </div>
                             )}
                           </div>
@@ -719,19 +719,19 @@ const Conventions: React.FC = () => {
                                 <tr key={doc.id}>
                                   <td>
                                     <i className="fas fa-file-pdf text-danger me-2"></i>
-                                    {doc.name}
+                                    {doc.nom}
                                   </td>
                                   <td>
                                     <span className="badge bg-light text-dark">{doc.type}</span>
                                   </td>
-                                  <td>{doc.uploadDate}</td>
+                                  <td>{doc.dateDepot}</td>
                                   <td>
                                     <span className={`badge ${
-                                      doc.status === 'Approuvé' || doc.status === 'Validé' ? 'bg-success' : 
-                                      doc.status === 'En attente' ? 'bg-warning' : 
-                                      doc.status === 'Rejeté' ? 'bg-danger' : 'bg-secondary'
+                                      doc.statut === 'Approuvé' || doc.statut === 'Validé' ? 'bg-success' : 
+                                      doc.statut === 'En attente' ? 'bg-warning' : 
+                                      doc.statut === 'Rejeté' ? 'bg-danger' : 'bg-secondary'
                                     }`}>
-                                      {doc.status}
+                                      {doc.statut}
                                     </span>
                                   </td>
                                   <td>
@@ -762,12 +762,12 @@ const Conventions: React.FC = () => {
                 >
                   Fermer
                 </button>
-                {selectedConvention.status === 'pending' && (
+                {selectedConvention.statut === 'en_attente' && (
                   <>
                     <button 
                       type="button" 
                       className="btn btn-success"
-                      onClick={() => handleStatusChange(selectedConvention.id, 'approved')}
+                      onClick={() => handleStatusChange(selectedConvention.id, 'approuvee')}
                     >
                       <i className="fas fa-check me-2"></i>Approuver
                     </button>
@@ -805,7 +805,7 @@ const Conventions: React.FC = () => {
                 ></button>
               </div>
               <div className="modal-body">
-                <p>Convention de {selectedConvention.studentName} - {selectedConvention.stageTitle}</p>
+                <p>Convention de {selectedConvention.nomEtudiant} - {selectedConvention.titreStage}</p>
                 <form>
                   <div className="mb-3">
                     <label className="form-label">Motif du rejet *</label>
@@ -838,7 +838,7 @@ const Conventions: React.FC = () => {
                   type="button" 
                   className="btn btn-danger"
                   onClick={() => {
-                    handleStatusChange(selectedConvention.id, 'rejected');
+                    handleStatusChange(selectedConvention.id, 'rejetee');
                     setShowReviewModal(false);
                   }}
                 >

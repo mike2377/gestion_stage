@@ -1,64 +1,68 @@
 export interface User {
   id: number;
   email: string;
-  password?: string;
-  firstName: string;
-  lastName: string;
+  motDePasse?: string;
+  prenom: string;
+  nom: string;
   role: UserRole;
-  phone?: string;
+  telephone?: string;
   avatar?: string;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  actif: boolean;
+  creeLe: Date;
+  modifieLe: Date;
+  universiteId?: string; // Ajout pour filtrage par université
 }
 
 export enum UserRole {
-  STUDENT = 'student',
-  ENTERPRISE = 'enterprise',
-  TEACHER = 'teacher',
-  RESPONSIBLE = 'responsible',
-  TUTOR = 'tutor',
+  ETUDIANT = 'student',
+  ENTREPRISE = 'enterprise',
+  ENSEIGNANT = 'teacher',
+  RESPONSABLE = 'responsible',
+  TUTEUR = 'tutor',
   ADMIN = 'admin',
   SUPER_ADMIN = 'super_admin'
 }
 
 export interface Student extends User {
-  role: UserRole.STUDENT;
-  studentId: string;
-  program: string;
-  year: number;
-  department: string;
-  supervisor?: User;
+  role: UserRole.ETUDIANT;
+  matricule: string;
+  programme: string;
+  annee: number;
+  departement: string;
+  encadrant?: User;
+  universiteId?: string;
 }
 
 export interface Enterprise extends User {
-  role: UserRole.ENTERPRISE;
-  companyName: string;
-  industry: string;
-  address: string;
-  city: string;
-  postalCode: string;
-  country: string;
-  website?: string;
+  role: UserRole.ENTREPRISE;
+  nomEntreprise: string;
+  secteur: string;
+  adresse: string;
+  ville: string;
+  codePostal: string;
+  pays: string;
+  siteWeb?: string;
   description?: string;
 }
 
 export interface Teacher extends User {
-  role: UserRole.TEACHER;
-  department: string;
-  specialization: string;
-  office?: string;
+  role: UserRole.ENSEIGNANT;
+  departement: string;
+  specialite: string;
+  bureau?: string;
+  universiteId?: string;
 }
 
 export interface Responsible extends User {
-  role: UserRole.RESPONSIBLE;
-  department: string;
-  responsibilities: string[];
+  role: UserRole.RESPONSABLE;
+  departement: string;
+  responsabilites: string[];
+  universiteId?: string;
 }
 
 export interface Tutor extends User {
-  role: UserRole.TUTOR;
-  specialization: string;
+  role: UserRole.TUTEUR;
+  specialite: string;
   experience: number;
 }
 

@@ -1,141 +1,141 @@
 export interface Stage {
   id: number;
-  title: string;
+  titre: string;
   description: string;
-  requirements: string[];
-  duration: number; // en semaines
-  startDate: Date;
-  endDate: Date;
-  location: string;
-  salary?: number;
+  exigences: string[];
+  duree: number; // en semaines
+  dateDebut: Date;
+  dateFin: Date;
+  lieu: string;
+  remuneration?: number;
   type: StageType;
-  status: StageStatus;
-  enterprise: Enterprise;
-  applications: Application[];
-  supervisor?: User;
-  tutor?: User;
-  createdAt: Date;
-  updatedAt: Date;
+  statut: StageStatus;
+  entreprise: Enterprise;
+  candidatures: Application[];
+  encadrant?: User;
+  tuteur?: User;
+  creeLe: Date;
+  modifieLe: Date;
 }
 
 export enum StageType {
-  INTERNSHIP = 'internship',
-  RESEARCH = 'research',
-  PROJECT = 'project'
+  STAGE = 'internship',
+  RECHERCHE = 'research',
+  PROJET = 'project'
 }
 
 export enum StageStatus {
-  DRAFT = 'draft',
-  PUBLISHED = 'published',
-  CLOSED = 'closed',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled'
+  BROUILLON = 'draft',
+  PUBLIE = 'published',
+  FERME = 'closed',
+  EN_COURS = 'in_progress',
+  TERMINE = 'completed',
+  ANNULE = 'cancelled'
 }
 
 export interface Application {
   id: number;
   stage: Stage;
-  student: Student;
-  status: ApplicationStatus;
-  coverLetter: string;
-  resume: string;
-  submittedAt: Date;
-  reviewedAt?: Date;
-  reviewedBy?: User;
-  comments?: string;
+  etudiant: Student;
+  statut: ApplicationStatus;
+  lettreMotivation: string;
+  cv: string;
+  dateSoumission: Date;
+  dateRevue?: Date;
+  relecteur?: User;
+  commentaires?: string;
 }
 
 export enum ApplicationStatus {
-  PENDING = 'pending',
-  REVIEWED = 'reviewed',
-  ACCEPTED = 'accepted',
-  REJECTED = 'rejected',
-  WITHDRAWN = 'withdrawn'
+  EN_ATTENTE = 'pending',
+  REVUE = 'reviewed',
+  ACCEPTEE = 'accepted',
+  REFUSEE = 'rejected',
+  RETIREE = 'withdrawn'
 }
 
 export interface Convention {
   id: number;
   stage: Stage;
-  student: Student;
-  enterprise: Enterprise;
-  supervisor: User;
-  tutor?: User;
-  startDate: Date;
-  endDate: Date;
-  objectives: string[];
-  tasks: string[];
-  evaluationCriteria: string[];
-  status: ConventionStatus;
-  signedByStudent: boolean;
-  signedByEnterprise: boolean;
-  signedBySupervisor: boolean;
-  signedByTutor: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  etudiant: Student;
+  entreprise: Enterprise;
+  encadrant: User;
+  tuteur?: User;
+  dateDebut: Date;
+  dateFin: Date;
+  objectifs: string[];
+  taches: string[];
+  criteresEvaluation: string[];
+  statut: ConventionStatus;
+  signeParEtudiant: boolean;
+  signeParEntreprise: boolean;
+  signeParEncadrant: boolean;
+  signeParTuteur: boolean;
+  creeLe: Date;
+  modifieLe: Date;
 }
 
 export enum ConventionStatus {
-  DRAFT = 'draft',
-  PENDING_SIGNATURES = 'pending_signatures',
-  SIGNED = 'signed',
+  BROUILLON = 'draft',
+  EN_ATTENTE_SIGNATURES = 'pending_signatures',
+  SIGNEE = 'signed',
   ACTIVE = 'active',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled'
+  TERMINEE = 'completed',
+  ANNULEE = 'cancelled'
 }
 
 export interface Evaluation {
   id: number;
   stage: Stage;
-  student: Student;
-  evaluator: User;
+  etudiant: Student;
+  evaluateur: User;
   type: EvaluationType;
-  criteria: EvaluationCriteria[];
-  overallScore: number;
-  comments: string;
-  submittedAt: Date;
+  criteres: EvaluationCriteria[];
+  noteGlobale: number;
+  commentaires: string;
+  dateSoumission: Date;
 }
 
 export enum EvaluationType {
-  MID_TERM = 'mid_term',
-  FINAL = 'final',
-  ENTERPRISE = 'enterprise',
-  SUPERVISOR = 'supervisor'
+  MI_PARCOURS = 'mid_term',
+  FINALE = 'final',
+  ENTREPRISE = 'enterprise',
+  ENCADRANT = 'supervisor'
 }
 
 export interface EvaluationCriteria {
   id: number;
-  name: string;
+  nom: string;
   description: string;
-  weight: number;
-  score: number;
-  maxScore: number;
-  comments?: string;
+  poids: number;
+  note: number;
+  noteMax: number;
+  commentaires?: string;
 }
 
 export interface Report {
   id: number;
   stage: Stage;
-  student: Student;
+  etudiant: Student;
   type: ReportType;
-  title: string;
-  content: string;
-  attachments: string[];
-  submittedAt: Date;
-  reviewedAt?: Date;
-  reviewedBy?: User;
-  status: ReportStatus;
+  titre: string;
+  contenu: string;
+  piecesJointes: string[];
+  dateSoumission: Date;
+  dateRevue?: Date;
+  relecteur?: User;
+  statut: ReportStatus;
 }
 
 export enum ReportType {
-  WEEKLY = 'weekly',
-  MONTHLY = 'monthly',
+  HEBDOMADAIRE = 'weekly',
+  MENSUEL = 'monthly',
   FINAL = 'final'
 }
 
 export enum ReportStatus {
-  DRAFT = 'draft',
-  SUBMITTED = 'submitted',
-  APPROVED = 'approved',
-  REJECTED = 'rejected'
+  BROUILLON = 'draft',
+  SOUMIS = 'submitted',
+  APPROUVE = 'approved',
+  REFUSE = 'rejected'
 } 

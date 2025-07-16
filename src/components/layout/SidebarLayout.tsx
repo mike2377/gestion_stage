@@ -8,9 +8,11 @@ interface SidebarLayoutProps {
 
 const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
-  console.log('SidebarLayout user:', user, 'role:', user?.role);
+  if (loading || !user || !user.role) {
+    return <div style={{height: '100vh'}} className="d-flex justify-content-center align-items-center"><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Chargement...</span></div></div>;
+  }
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f8f9fa' }}>

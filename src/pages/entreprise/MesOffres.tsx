@@ -25,25 +25,25 @@ import {
   FaStar
 } from 'react-icons/fa';
 
-interface StageOffer {
+interface OffreStage {
   id: number;
-  title: string;
+  titre: string;
   description: string;
-  duration: string;
-  location: string;
-  salary: number;
-  applications: number;
-  domain: string;
-  requirements: string[];
-  startDate: string;
-  endDate: string;
-  status: 'active' | 'inactive' | 'draft' | 'expired';
-  createdAt: string;
-  updatedAt: string;
+  duree: string;
+  lieu: string;
+  remuneration: number;
+  nbCandidatures: number;
+  domaine: string;
+  exigences: string[];
+  dateDebut: string;
+  dateFin: string;
+  statut: 'active' | 'inactive' | 'brouillon' | 'expiree';
+  creeLe: string;
+  modifieLe: string;
   technologies?: string[];
-  maxApplications?: number;
-  isUrgent: boolean;
-  isFeatured: boolean;
+  nbCandidaturesMax?: number;
+  urgent: boolean;
+  enVedette: boolean;
 }
 
 interface Candidature {
@@ -60,8 +60,8 @@ interface Candidature {
 }
 
 const MesOffres: React.FC = () => {
-  const [offers, setOffers] = useState<StageOffer[]>([]);
-  const [filteredOffers, setFilteredOffers] = useState<StageOffer[]>([]);
+  const [offers, setOffers] = useState<OffreStage[]>([]);
+  const [filteredOffers, setFilteredOffers] = useState<OffreStage[]>([]);
   const [filters, setFilters] = useState({
     status: '',
     domain: '',
@@ -70,7 +70,7 @@ const MesOffres: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedOffer, setSelectedOffer] = useState<StageOffer | null>(null);
+  const [selectedOffer, setSelectedOffer] = useState<OffreStage | null>(null);
   const [newOffer, setNewOffer] = useState({
     title: '',
     description: '',
@@ -121,90 +121,90 @@ const MesOffres: React.FC = () => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [offreToDelete, setOffreToDelete] = useState<StageOffer | null>(null);
+  const [offreToDelete, setOffreToDelete] = useState<OffreStage | null>(null);
   const [activeTab, setActiveTab] = useState('offres');
 
   // Données simulées
   useEffect(() => {
-    const mockOffers: StageOffer[] = [
+    const mockOffers: OffreStage[] = [
       {
         id: 1,
-        title: 'Développeur Web Full-Stack',
+        titre: 'Développeur Web Full-Stack',
         description: 'Développement d\'une application web moderne utilisant React, Node.js et MongoDB. Vous participerez à la conception et au développement de nouvelles fonctionnalités.',
-        duration: '6 mois',
-        location: 'Paris',
-        salary: 1200,
-        applications: 5,
-        domain: 'Informatique',
-        requirements: ['React', 'Node.js', 'MongoDB', 'Git'],
-        startDate: '01/03/2024',
-        endDate: '31/08/2024',
-        status: 'active',
-        createdAt: '15/01/2024',
-        updatedAt: '20/01/2024',
+        duree: '6 mois',
+        lieu: 'Paris',
+        remuneration: 1200,
+        nbCandidatures: 5,
+        domaine: 'Informatique',
+        exigences: ['React', 'Node.js', 'MongoDB', 'Git'],
+        dateDebut: '01/03/2024',
+        dateFin: '31/08/2024',
+        statut: 'active',
+        creeLe: '15/01/2024',
+        modifieLe: '20/01/2024',
         technologies: ['React', 'Node.js', 'MongoDB', 'TypeScript'],
-        maxApplications: 10,
-        isUrgent: false,
-        isFeatured: true
+        nbCandidaturesMax: 10,
+        urgent: false,
+        enVedette: true
       },
       {
         id: 2,
-        title: 'Assistant Marketing Digital',
+        titre: 'Assistant Marketing Digital',
         description: 'Gestion des réseaux sociaux et campagnes marketing. Création de contenu, analyse des performances et optimisation des stratégies marketing.',
-        duration: '4 mois',
-        location: 'Lyon',
-        salary: 1000,
-        applications: 8,
-        domain: 'Marketing',
-        requirements: ['Marketing digital', 'Réseaux sociaux', 'Analytics'],
-        startDate: '01/04/2024',
-        endDate: '31/07/2024',
-        status: 'active',
-        createdAt: '10/01/2024',
-        updatedAt: '15/01/2024',
-        maxApplications: 15,
-        isUrgent: true,
-        isFeatured: false
+        duree: '4 mois',
+        lieu: 'Lyon',
+        remuneration: 1000,
+        nbCandidatures: 8,
+        domaine: 'Marketing',
+        exigences: ['Marketing digital', 'Réseaux sociaux', 'Analytics'],
+        dateDebut: '01/04/2024',
+        dateFin: '31/07/2024',
+        statut: 'active',
+        creeLe: '10/01/2024',
+        modifieLe: '15/01/2024',
+        nbCandidaturesMax: 15,
+        urgent: true,
+        enVedette: false
       },
       {
         id: 3,
-        title: 'Analyste de Données',
+        titre: 'Analyste de Données',
         description: 'Analyse de données et création de rapports. Utilisation d\'outils d\'analyse pour extraire des insights business.',
-        duration: '5 mois',
-        location: 'Marseille',
-        salary: 1100,
-        applications: 3,
-        domain: 'Data/Analyse',
-        requirements: ['Python', 'SQL', 'Excel', 'Tableau'],
-        startDate: '15/05/2024',
-        endDate: '15/10/2024',
-        status: 'inactive',
-        createdAt: '05/01/2024',
-        updatedAt: '12/01/2024',
+        duree: '5 mois',
+        lieu: 'Marseille',
+        remuneration: 1100,
+        nbCandidatures: 3,
+        domaine: 'Data/Analyse',
+        exigences: ['Python', 'SQL', 'Excel', 'Tableau'],
+        dateDebut: '15/05/2024',
+        dateFin: '15/10/2024',
+        statut: 'inactive',
+        creeLe: '05/01/2024',
+        modifieLe: '12/01/2024',
         technologies: ['Python', 'SQL', 'Pandas', 'Tableau'],
-        maxApplications: 8,
-        isUrgent: false,
-        isFeatured: false
+        nbCandidaturesMax: 8,
+        urgent: false,
+        enVedette: false
       },
       {
         id: 4,
-        title: 'Développeur Mobile',
+        titre: 'Développeur Mobile',
         description: 'Développement d\'applications mobiles pour iOS et Android. Utilisation de React Native et des technologies mobiles modernes.',
-        duration: '6 mois',
-        location: 'Toulouse',
-        salary: 1300,
-        applications: 0,
-        domain: 'Informatique',
-        requirements: ['React Native', 'JavaScript', 'Git'],
-        startDate: '01/06/2024',
-        endDate: '30/11/2024',
-        status: 'draft',
-        createdAt: '20/01/2024',
-        updatedAt: '20/01/2024',
+        duree: '6 mois',
+        lieu: 'Toulouse',
+        remuneration: 1300,
+        nbCandidatures: 0,
+        domaine: 'Informatique',
+        exigences: ['React Native', 'JavaScript', 'Git'],
+        dateDebut: '01/06/2024',
+        dateFin: '30/11/2024',
+        statut: 'brouillon',
+        creeLe: '20/01/2024',
+        modifieLe: '20/01/2024',
         technologies: ['React Native', 'JavaScript', 'Xcode', 'Android Studio'],
-        maxApplications: 12,
-        isUrgent: false,
-        isFeatured: false
+        nbCandidaturesMax: 12,
+        urgent: false,
+        enVedette: false
       }
     ];
     setOffers(mockOffers);
@@ -218,17 +218,17 @@ const MesOffres: React.FC = () => {
     let filtered = offers;
 
     if (newFilters.status) {
-      filtered = filtered.filter(offer => offer.status === newFilters.status);
+      filtered = filtered.filter(offer => offer.statut === newFilters.status);
     }
     if (newFilters.domain) {
-      filtered = filtered.filter(offer => offer.domain === newFilters.domain);
+      filtered = filtered.filter(offer => offer.domaine === newFilters.domain);
     }
     if (newFilters.keywords) {
       const keywords = newFilters.keywords.toLowerCase();
       filtered = filtered.filter(offer => 
-        offer.title.toLowerCase().includes(keywords) ||
+        offer.titre.toLowerCase().includes(keywords) ||
         offer.description.toLowerCase().includes(keywords) ||
-        offer.requirements.some(req => req.toLowerCase().includes(keywords))
+        offer.exigences.some(req => req.toLowerCase().includes(keywords))
       );
     }
 
@@ -239,8 +239,8 @@ const MesOffres: React.FC = () => {
     const statusConfig = {
       active: { class: 'bg-success', text: 'Active', icon: 'fas fa-check-circle' },
       inactive: { class: 'bg-secondary', text: 'Inactive', icon: 'fas fa-pause-circle' },
-      draft: { class: 'bg-warning', text: 'Brouillon', icon: 'fas fa-edit' },
-      expired: { class: 'bg-danger', text: 'Expirée', icon: 'fas fa-times-circle' }
+      brouillon: { class: 'bg-warning', text: 'Brouillon', icon: 'fas fa-edit' },
+      expiree: { class: 'bg-danger', text: 'Expirée', icon: 'fas fa-times-circle' }
     };
 
     const config = statusConfig[status as keyof typeof statusConfig];
@@ -253,7 +253,7 @@ const MesOffres: React.FC = () => {
   };
 
   const getStatusCount = (status: string) => {
-    return offers.filter(offer => offer.status === status).length;
+    return offers.filter(offer => offer.statut === status).length;
   };
 
   const handleAddOffer = () => {
@@ -288,21 +288,21 @@ const MesOffres: React.FC = () => {
 
   const filteredOffres = offers.filter(offer => {
     const matchesSearch = 
-      offer.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      offer.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       offer.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      offer.requirements.some(req => req.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesType = !filterType || offer.domain === filterType;
-    const matchesStatut = !filterStatut || offer.status === filterStatut;
+      offer.exigences.some(req => req.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesType = !filterType || offer.domaine === filterType;
+    const matchesStatut = !filterStatut || offer.statut === filterStatut;
     
     return matchesSearch && matchesType && matchesStatut;
   });
 
   // Tri des offres
   const sortedOffres = [...filteredOffres].sort((a, b) => {
-    let aValue = a[sortField as keyof StageOffer];
-    let bValue = b[sortField as keyof StageOffer];
+    let aValue = a[sortField as keyof OffreStage];
+    let bValue = b[sortField as keyof OffreStage];
     
-    if (sortField === 'startDate' || sortField === 'endDate') {
+    if (sortField === 'dateDebut' || sortField === 'dateFin') {
       aValue = new Date(aValue as string).getTime();
       bValue = new Date(bValue as string).getTime();
     }
@@ -371,12 +371,12 @@ const MesOffres: React.FC = () => {
     }
   };
 
-  const handleEdit = (offer: StageOffer) => {
+  const handleEdit = (offer: OffreStage) => {
     setSelectedOffer(offer);
     setShowModal(true);
   };
 
-  const handleDelete = (offer: StageOffer) => {
+  const handleDelete = (offer: OffreStage) => {
     setOffreToDelete(offer);
     setShowDeleteModal(true);
   };
@@ -390,8 +390,8 @@ const MesOffres: React.FC = () => {
   };
 
   const totalOffres = offers.length;
-  const offresActives = offers.filter(o => o.status === 'active').length;
-  const totalCandidatures = offers.reduce((sum, offre) => sum + offre.applications, 0);
+  const offresActives = offers.filter(o => o.statut === 'active').length;
+  const totalCandidatures = offers.reduce((sum, offre) => sum + offre.nbCandidatures, 0);
   const noteMoyenne = candidatures.length > 0 
     ? candidatures.reduce((sum, c) => sum + c.note, 0) / candidatures.length 
     : 0;
@@ -604,9 +604,9 @@ const MesOffres: React.FC = () => {
                           <th>
                             <button 
                               className="btn btn-link p-0 text-decoration-none"
-                              onClick={() => handleSort('title')}
+                              onClick={() => handleSort('titre')}
                             >
-                              Titre {getSortIcon('title')}
+                              Titre {getSortIcon('titre')}
                             </button>
                           </th>
                           <th>Type</th>
@@ -615,9 +615,9 @@ const MesOffres: React.FC = () => {
                           <th>
                             <button 
                               className="btn btn-link p-0 text-decoration-none"
-                              onClick={() => handleSort('endDate')}
+                              onClick={() => handleSort('dateFin')}
                             >
-                              Date Expiration {getSortIcon('endDate')}
+                              Date Expiration {getSortIcon('dateFin')}
                             </button>
                           </th>
                           <th>Actions</th>
@@ -628,26 +628,26 @@ const MesOffres: React.FC = () => {
                           <tr key={offer.id}>
                             <td>
                               <div>
-                                <strong>{offer.title}</strong>
-                                {offer.isUrgent && (
+                                <strong>{offer.titre}</strong>
+                                {offer.urgent && (
                                   <span className="badge bg-danger ms-2">Urgent</span>
                                 )}
-                                {offer.isFeatured && (
+                                {offer.enVedette && (
                                   <span className="badge bg-warning ms-1">À la une</span>
                                 )}
                                 <br />
                                 <small className="text-muted">{offer.description.substring(0, 100)}...</small>
                               </div>
                             </td>
-                            <td>{getTypeBadge(offer.domain)}</td>
-                            <td>{getStatutBadge(offer.status)}</td>
+                            <td>{getTypeBadge(offer.domaine)}</td>
+                            <td>{getStatutBadge(offer.statut)}</td>
                             <td>
                               <div>
-                                <span className="badge bg-primary">{offer.applications} candidatures</span>
+                                <span className="badge bg-primary">{offer.nbCandidatures} candidatures</span>
                                 <br />
                                 <small className="text-muted">
-                                  {offer.maxApplications && (
-                                    <span>/{offer.maxApplications}</span>
+                                  {offer.nbCandidaturesMax && (
+                                    <span>/{offer.nbCandidaturesMax}</span>
                                   )}
                                 </small>
                               </div>
@@ -655,7 +655,7 @@ const MesOffres: React.FC = () => {
                             <td>
                               <div>
                                 <FaCalendarAlt className="me-1 text-muted" />
-                                {offer.endDate}
+                                {offer.dateFin}
                               </div>
                             </td>
                             <td>
@@ -1008,12 +1008,12 @@ const MesOffres: React.FC = () => {
                       <input
                         type="text"
                         className="form-control"
-                        defaultValue={selectedOffer.title}
+                        defaultValue={selectedOffer.titre}
                       />
                     </div>
                     <div className="col-md-4 mb-3">
                       <label className="form-label">Type</label>
-                      <select className="form-select" defaultValue={selectedOffer.domain}>
+                      <select className="form-select" defaultValue={selectedOffer.domaine}>
                         {types.map(type => (
                           <option key={type} value={type}>
                             {type === 'stage' ? 'Stage' :
@@ -1037,7 +1037,7 @@ const MesOffres: React.FC = () => {
                       <input
                         type="text"
                         className="form-control"
-                        defaultValue={selectedOffer.location}
+                        defaultValue={selectedOffer.lieu}
                       />
                     </div>
                     <div className="col-md-6 mb-3">
@@ -1045,7 +1045,7 @@ const MesOffres: React.FC = () => {
                       <input
                         type="text"
                         className="form-control"
-                        defaultValue={selectedOffer.salary.toString()}
+                        defaultValue={selectedOffer.remuneration.toString()}
                       />
                     </div>
                   </div>
@@ -1055,7 +1055,7 @@ const MesOffres: React.FC = () => {
                       <input
                         type="date"
                         className="form-control"
-                        defaultValue={selectedOffer.startDate}
+                        defaultValue={selectedOffer.dateDebut}
                       />
                     </div>
                     <div className="col-md-6 mb-3">
@@ -1063,7 +1063,7 @@ const MesOffres: React.FC = () => {
                       <input
                         type="date"
                         className="form-control"
-                        defaultValue={selectedOffer.endDate}
+                        defaultValue={selectedOffer.dateFin}
                       />
                     </div>
                   </div>
@@ -1073,7 +1073,7 @@ const MesOffres: React.FC = () => {
                       <input
                         type="date"
                         className="form-control"
-                        defaultValue={selectedOffer.endDate}
+                        defaultValue={selectedOffer.dateFin}
                       />
                     </div>
                     <div className="col-md-6 mb-3">
@@ -1081,7 +1081,7 @@ const MesOffres: React.FC = () => {
                       <input
                         type="number"
                         className="form-control"
-                        defaultValue={selectedOffer.maxApplications}
+                        defaultValue={selectedOffer.nbCandidaturesMax}
                       />
                     </div>
                   </div>
@@ -1090,12 +1090,12 @@ const MesOffres: React.FC = () => {
                     <textarea
                       className="form-control"
                       rows={3}
-                      defaultValue={selectedOffer.requirements.join(', ')}
+                      defaultValue={selectedOffer.exigences.join(', ')}
                     />
                   </div>
                   <div className="mb-3">
                     <label className="form-label">Statut</label>
-                    <select className="form-select" defaultValue={selectedOffer.status}>
+                    <select className="form-select" defaultValue={selectedOffer.statut}>
                       {statuts.map(statut => (
                         <option key={statut} value={statut}>
                           {statut === 'active' ? 'Active' :
@@ -1140,7 +1140,7 @@ const MesOffres: React.FC = () => {
               </div>
               <div className="modal-body">
                 <p>
-                  Êtes-vous sûr de vouloir supprimer l'offre <strong>"{selectedOffer?.title}"</strong> ?
+                  Êtes-vous sûr de vouloir supprimer l'offre <strong>"{selectedOffer?.titre}"</strong> ?
                 </p>
                 <p className="text-danger">
                   Cette action supprimera également toutes les candidatures associées.

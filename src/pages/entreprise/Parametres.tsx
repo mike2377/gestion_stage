@@ -41,14 +41,14 @@ interface Parametres {
   securite: {
     authentificationDouble: boolean;
     motDePasseComplexe: boolean;
-    sessionTimeout: number;
+    delaiSession: number;
     connexionsSimultanees: number;
     historiqueConnexions: boolean;
   };
   interface: {
-    theme: 'light' | 'dark' | 'auto';
+    theme: 'clair' | 'sombre' | 'auto';
     langue: 'fr' | 'en';
-    timezone: string;
+    fuseauHoraire: string;
     formatDate: string;
     formatHeure: string;
   };
@@ -83,14 +83,14 @@ const Parametres: React.FC = () => {
     securite: {
       authentificationDouble: false,
       motDePasseComplexe: true,
-      sessionTimeout: 30,
+      delaiSession: 30,
       connexionsSimultanees: 3,
       historiqueConnexions: true
     },
     interface: {
-      theme: 'light',
+      theme: 'clair',
       langue: 'fr',
-      timezone: 'Africa/Abidjan',
+      fuseauHoraire: 'Africa/Abidjan',
       formatDate: 'DD/MM/YYYY',
       formatHeure: '24h'
     },
@@ -115,7 +115,7 @@ const Parametres: React.FC = () => {
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
-  const themes = ['light', 'dark', 'auto'];
+  const themes = ['clair', 'sombre', 'auto'];
   const langues = ['fr', 'en'];
   const timezones = ['Africa/Abidjan', 'Europe/Paris', 'America/New_York', 'Asia/Tokyo'];
   const formatsDate = ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'];
@@ -430,8 +430,8 @@ const Parametres: React.FC = () => {
                   <input
                     type="number"
                     className="form-control"
-                    value={parametres.securite.sessionTimeout}
-                    onChange={(e) => handleSecuriteChange('sessionTimeout', parseInt(e.target.value))}
+                    value={parametres.securite.delaiSession}
+                    onChange={(e) => handleSecuriteChange('delaiSession', parseInt(e.target.value))}
                     min="5"
                     max="480"
                   />
@@ -529,8 +529,8 @@ const Parametres: React.FC = () => {
                   >
                     {themes.map(theme => (
                       <option key={theme} value={theme}>
-                        {theme === 'light' ? 'Clair' :
-                         theme === 'dark' ? 'Sombre' : 'Automatique'}
+                        {theme === 'clair' ? 'Clair' :
+                         theme === 'sombre' ? 'Sombre' : 'Automatique'}
                       </option>
                     ))}
                   </select>
@@ -559,8 +559,8 @@ const Parametres: React.FC = () => {
                   <label className="form-label">Fuseau horaire</label>
                   <select
                     className="form-select"
-                    value={parametres.interface.timezone}
-                    onChange={(e) => handleInterfaceChange('timezone', e.target.value)}
+                    value={parametres.interface.fuseauHoraire}
+                    onChange={(e) => handleInterfaceChange('fuseauHoraire', e.target.value)}
                   >
                     {timezones.map(timezone => (
                       <option key={timezone} value={timezone}>{timezone}</option>

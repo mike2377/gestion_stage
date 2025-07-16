@@ -28,29 +28,31 @@ const Sidebar: React.FC<SidebarProps> = ({ user, isCollapsed = false, onToggle }
 
     switch (user.role) {
       case UserRole.STUDENT:
+      case 'etudiant':
         return [
-          { path: '/dashboard', icon: 'fas fa-tachometer-alt', label: 'Tableau de bord' },
+          { path: '/etudiant/dashboard', icon: 'fas fa-tachometer-alt', label: 'Tableau de bord' },
           { path: '/etudiant/rechercher', icon: 'fas fa-search', label: 'Rechercher des stages' },
           { path: '/etudiant/stages', icon: 'fas fa-briefcase', label: 'Mes stages' },
           { path: '/etudiant/documents', icon: 'fas fa-folder', label: 'Mes documents' },
           { path: '/etudiant/taches', icon: 'fas fa-tasks', label: 'Tâches hebdomadaires' },
           { path: '/etudiant/profil', icon: 'fas fa-user', label: 'Mon profil' },
         ];
-
       case UserRole.ENTERPRISE:
+      case 'entreprise':
         return [
-          { path: '/dashboard', icon: 'fas fa-tachometer-alt', label: 'Tableau de bord' },
+          { path: '/entreprise/dashboard', icon: 'fas fa-tachometer-alt', label: 'Tableau de bord' },
           { path: '/entreprise/offres', icon: 'fas fa-briefcase', label: 'Mes offres' },
           { path: '/entreprise/candidatures', icon: 'fas fa-inbox', label: 'Candidatures reçues' },
           { path: '/entreprise/stagiaires', icon: 'fas fa-users', label: 'Mes stagiaires' },
           { path: '/entreprise/taches', icon: 'fas fa-tasks', label: 'Tâches stagiaires' },
           { path: '/entreprise/profil', icon: 'fas fa-building', label: 'Profil entreprise' },
+          { path: '/entreprise/contact', icon: 'fas fa-envelope', label: 'Contact' },
           { path: '/entreprise/parametres', icon: 'fas fa-cog', label: 'Paramètres' },
         ];
-
       case UserRole.TEACHER:
+      case 'enseignant':
         return [
-          { path: '/dashboard', icon: 'fas fa-tachometer-alt', label: 'Tableau de bord' },
+          { path: '/enseignant/dashboard', icon: 'fas fa-tachometer-alt', label: 'Tableau de bord' },
           { path: '/enseignant/stages', icon: 'fas fa-briefcase', label: 'Gestion stages' },
           { path: '/enseignant/conventions', icon: 'fas fa-file-contract', label: 'Conventions' },
           { path: '/enseignant/evaluations', icon: 'fas fa-star', label: 'Évaluations' },
@@ -58,29 +60,32 @@ const Sidebar: React.FC<SidebarProps> = ({ user, isCollapsed = false, onToggle }
           { path: '/enseignant/suivi', icon: 'fas fa-clipboard-check', label: 'Suivi pédagogique' },
           { path: '/enseignant/taches', icon: 'fas fa-tasks', label: 'Tâches stagiaires' },
         ];
-
       case UserRole.RESPONSIBLE:
+      case 'responsable':
         return [
-          { path: '/dashboard', icon: 'fas fa-tachometer-alt', label: 'Tableau de bord' },
-          { path: '/responsable/stages', icon: 'fas fa-briefcase', label: 'Gestion stages' },
+          { path: '/responsable/dashboard', icon: 'fas fa-tachometer-alt', label: 'Tableau de bord' },
+          { path: '/responsable/gestion-stages', icon: 'fas fa-briefcase', label: 'Gestion stages' },
           { path: '/responsable/conventions', icon: 'fas fa-file-contract', label: 'Conventions' },
           { path: '/responsable/evaluations', icon: 'fas fa-star', label: 'Évaluations' },
-          { path: '/responsable/utilisateurs-gestion', icon: 'fas fa-users', label: 'Gestion utilisateurs' },
-          { path: '/responsable/entreprises-gestion', icon: 'fas fa-building', label: 'Gestion entreprises' },
+          { path: '/responsable/rapports', icon: 'fas fa-chart-bar', label: 'Rapports' },
+          { path: '/responsable/statistiques', icon: 'fas fa-chart-pie', label: 'Statistiques' },
+          { path: '/responsable/entreprises', icon: 'fas fa-building', label: 'Entreprises' },
+          { path: '/responsable/utilisateurs', icon: 'fas fa-users', label: 'Utilisateurs' },
           { path: '/responsable/parametres', icon: 'fas fa-cog', label: 'Paramètres' },
+          { path: '/responsable/profil', icon: 'fas fa-user', label: 'Profil' },
         ];
-
       case UserRole.TUTOR:
+      case 'tuteur':
         return [
-          { path: '/dashboard', icon: 'fas fa-tachometer-alt', label: 'Tableau de bord' },
+          { path: '/tuteur/dashboard', icon: 'fas fa-tachometer-alt', label: 'Tableau de bord' },
           { path: '/tuteur/suivi', icon: 'fas fa-clipboard-check', label: 'Suivi pédagogique' },
           { path: '/tuteur/evaluations', icon: 'fas fa-star', label: 'Évaluations' },
           { path: '/tuteur/rapports', icon: 'fas fa-chart-bar', label: 'Rapports' },
           { path: '/tuteur/taches', icon: 'fas fa-tasks', label: 'Tâches stagiaires' },
           { path: '/tuteur/parametres', icon: 'fas fa-cog', label: 'Paramètres' },
         ];
-
       case UserRole.ADMIN:
+      case 'admin':
         return [
           { path: '/admin/dashboard', icon: 'fas fa-tachometer-alt', label: 'Tableau de bord' },
           { path: '/admin/users', icon: 'fas fa-users', label: 'Gestion utilisateurs' },
@@ -90,8 +95,8 @@ const Sidebar: React.FC<SidebarProps> = ({ user, isCollapsed = false, onToggle }
           { path: '/admin/statistics', icon: 'fas fa-chart-pie', label: 'Statistiques' },
           { path: '/admin/settings', icon: 'fas fa-cog', label: 'Paramètres système' },
         ];
-
       case UserRole.SUPER_ADMIN:
+      case 'super_admin':
         return [
                   { path: '/super-admin/dashboard', icon: 'fas fa-tachometer-alt', label: 'Tableau de bord' },
         { path: '/super-admin/gestion-utilisateurs', icon: 'fas fa-users', label: 'Gestion utilisateurs' },

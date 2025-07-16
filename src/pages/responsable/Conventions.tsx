@@ -422,15 +422,9 @@ const Conventions: React.FC = () => {
   return (
     <div className="dashboard-container">
       <div className="row g-0">
-        <div className={`col-auto ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-          <Sidebar 
-            user={user} 
-            isCollapsed={isSidebarCollapsed}
-            onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          />
-        </div>
+        {/* Supprimer toute inclusion de Sidebar ou SidebarLayout. Retourner uniquement le contenu principal. */}
         <div className="col">
-          <div className="dashboard-content p-4">
+      <div className="dashboard-content p-4">
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
               <div>
@@ -735,9 +729,9 @@ const Conventions: React.FC = () => {
                 )}
               </div>
             </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
       {/* Modal Détails Convention */}
       {showDetailsModal && selectedConvention && (

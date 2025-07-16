@@ -25,69 +25,69 @@ import {
   FaSortDown
 } from 'react-icons/fa';
 
-interface Intern {
+interface Stagiaire {
   id: number;
-  studentId: string;
-  firstName: string;
-  lastName: string;
+  matricule: string;
+  prenom: string;
+  nom: string;
   email: string;
-  phone: string;
+  telephone: string;
   photo?: string;
-  stageTitle: string;
-  stageId: number;
-  startDate: string;
-  endDate: string;
-  status: 'active' | 'completed' | 'terminated';
-  supervisor: string;
-  tutor: string;
-  university: string;
-  program: string;
-  year: number;
-  evaluation: number;
-  progress: number;
-  tasks: Task[];
+  titreStage: string;
+  idStage: number;
+  dateDebut: string;
+  dateFin: string;
+  statut: 'actif' | 'termine' | 'termine_anticipé';
+  encadrant: string;
+  tuteur: string;
+  universite: string;
+  programme: string;
+  annee: number;
+  noteEvaluation: number;
+  progression: number;
+  taches: Tache[];
   documents: Document[];
   evaluations: Evaluation[];
 }
 
-interface Task {
+interface Tache {
   id: number;
-  title: string;
+  titre: string;
   description: string;
-  dueDate: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'overdue';
-  priority: 'low' | 'medium' | 'high';
-  assignedDate: string;
-  completedDate?: string;
+  dateEcheance: string;
+  statut: 'en_attente' | 'en_cours' | 'terminee' | 'retard';
+  priorite: 'basse' | 'moyenne' | 'haute';
+  dateAttribution: string;
+  dateTerminaison?: string;
 }
 
 interface Document {
   id: number;
-  name: string;
+  nom: string;
   type: string;
-  uploadDate: string;
-  status: string;
+  dateDepot: string;
+  statut: string;
 }
 
 interface Evaluation {
   id: number;
   date: string;
-  type: 'midterm' | 'final';
-  grade: number;
-  comments: string;
-  evaluator: string;
+  type: 'mi_parcours' | 'finale';
+  note: number;
+  commentaires: string;
+  evaluateur: string;
 }
 
 const MesStagiaires: React.FC = () => {
-  const [interns, setInterns] = useState<Intern[]>([]);
-  const [filteredInterns, setFilteredInterns] = useState<Intern[]>([]);
+  const [stagiaires, setStagiaires] = useState<Stagiaire[]>([]);
+  const [filteredStagiaires, setFilteredStagiaires] = useState<Stagiaire[]>([]);
   const [filters, setFilters] = useState({
-    status: '',
+    statut: '',
     stage: '',
-    supervisor: ''
+    encadrant: ''
   });
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [selectedIntern, setSelectedIntern] = useState<Intern | null>(null);
+  const [selectedStagiaire, setSelectedStagiaire] = useState<Stagiaire | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showEvaluationModal, setShowEvaluationModal] = useState(false);
@@ -95,209 +95,209 @@ const MesStagiaires: React.FC = () => {
 
   // Données simulées
   useEffect(() => {
-    const mockInterns: Intern[] = [
+    const mockStagiaires: Stagiaire[] = [
       {
         id: 1,
-        studentId: '2024001',
-        firstName: 'Jean',
-        lastName: 'Dupont',
+        matricule: '2024001',
+        prenom: 'Jean',
+        nom: 'Dupont',
         email: 'jean.dupont@email.com',
-        phone: '06 12 34 56 78',
+        telephone: '06 12 34 56 78',
         photo: '/api/photos/student-1.jpg',
-        stageTitle: 'Développeur Web Full-Stack',
-        stageId: 1,
-        startDate: '01/03/2024',
-        endDate: '31/08/2024',
-        status: 'active',
-        supervisor: 'M. Martin',
-        tutor: 'Dr. Dupont',
-        university: 'Université de Paris',
-        program: 'Master Informatique',
-        year: 2,
-        evaluation: 4.5,
-        progress: 75,
-        tasks: [
+        titreStage: 'Développeur Web Full-Stack',
+        idStage: 1,
+        dateDebut: '01/03/2024',
+        dateFin: '31/08/2024',
+        statut: 'actif',
+        encadrant: 'M. Martin',
+        tuteur: 'Dr. Dupont',
+        universite: 'Université de Paris',
+        programme: 'Master Informatique',
+        annee: 2,
+        noteEvaluation: 4.5,
+        progression: 75,
+        taches: [
           {
             id: 1,
-            title: 'Développement du frontend',
+            titre: 'Développement du frontend',
             description: 'Créer les interfaces utilisateur avec React',
-            dueDate: '15/04/2024',
-            status: 'completed',
-            priority: 'high',
-            assignedDate: '01/03/2024',
-            completedDate: '10/04/2024'
+            dateEcheance: '15/04/2024',
+            statut: 'terminee',
+            priorite: 'haute',
+            dateAttribution: '01/03/2024',
+            dateTerminaison: '10/04/2024'
           },
           {
             id: 2,
-            title: 'Intégration API',
+            titre: 'Intégration API',
             description: 'Connecter le frontend aux APIs backend',
-            dueDate: '30/04/2024',
-            status: 'in_progress',
-            priority: 'high',
-            assignedDate: '15/03/2024'
+            dateEcheance: '30/04/2024',
+            statut: 'en_cours',
+            priorite: 'haute',
+            dateAttribution: '15/03/2024'
           },
           {
             id: 3,
-            title: 'Tests unitaires',
+            titre: 'Tests unitaires',
             description: 'Écrire les tests pour les composants',
-            dueDate: '15/05/2024',
-            status: 'pending',
-            priority: 'medium',
-            assignedDate: '01/04/2024'
+            dateEcheance: '15/05/2024',
+            statut: 'en_attente',
+            priorite: 'moyenne',
+            dateAttribution: '01/04/2024'
           }
         ],
         documents: [
           {
             id: 1,
-            name: 'Convention_stage_Jean_Dupont.pdf',
+            nom: 'Convention_stage_Jean_Dupont.pdf',
             type: 'Convention',
-            uploadDate: '28/02/2024',
-            status: 'Approuvé'
+            dateDepot: '28/02/2024',
+            statut: 'Approuvé'
           },
           {
             id: 2,
-            name: 'Rapport_mensuel_Jean_Dupont.pdf',
+            nom: 'Rapport_mensuel_Jean_Dupont.pdf',
             type: 'Rapport',
-            uploadDate: '01/04/2024',
-            status: 'En attente'
+            dateDepot: '01/04/2024',
+            statut: 'En attente'
           }
         ],
         evaluations: [
           {
             id: 1,
             date: '01/04/2024',
-            type: 'midterm',
-            grade: 4.5,
-            comments: 'Excellent travail, très autonome et créatif',
-            evaluator: 'M. Martin'
+            type: 'mi_parcours',
+            note: 4.5,
+            commentaires: 'Excellent travail, très autonome et créatif',
+            evaluateur: 'M. Martin'
           }
         ]
       },
       {
         id: 2,
-        studentId: '2024002',
-        firstName: 'Marie',
-        lastName: 'Martin',
+        matricule: '2024002',
+        prenom: 'Marie',
+        nom: 'Martin',
         email: 'marie.martin@email.com',
-        phone: '06 98 76 54 32',
+        telephone: '06 98 76 54 32',
         photo: '/api/photos/student-2.jpg',
-        stageTitle: 'Assistant Marketing Digital',
-        stageId: 2,
-        startDate: '01/04/2024',
-        endDate: '31/07/2024',
-        status: 'active',
-        supervisor: 'Mme. Dubois',
-        tutor: 'Dr. Moreau',
-        university: 'Université de Lyon',
-        program: 'Master Marketing',
-        year: 2,
-        evaluation: 4.2,
-        progress: 60,
-        tasks: [
+        titreStage: 'Assistant Marketing Digital',
+        idStage: 2,
+        dateDebut: '01/04/2024',
+        dateFin: '31/07/2024',
+        statut: 'actif',
+        encadrant: 'Mme. Dubois',
+        tuteur: 'Dr. Moreau',
+        universite: 'Université de Lyon',
+        programme: 'Master Marketing',
+        annee: 2,
+        noteEvaluation: 4.2,
+        progression: 60,
+        taches: [
           {
             id: 4,
-            title: 'Gestion réseaux sociaux',
+            titre: 'Gestion réseaux sociaux',
             description: 'Créer et publier du contenu sur les réseaux',
-            dueDate: '15/04/2024',
-            status: 'completed',
-            priority: 'high',
-            assignedDate: '01/04/2024',
-            completedDate: '12/04/2024'
+            dateEcheance: '15/04/2024',
+            statut: 'terminee',
+            priorite: 'haute',
+            dateAttribution: '01/04/2024',
+            dateTerminaison: '12/04/2024'
           },
           {
             id: 5,
-            title: 'Analyse des performances',
+            titre: 'Analyse des performances',
             description: 'Analyser les métriques des campagnes',
-            dueDate: '30/04/2024',
-            status: 'in_progress',
-            priority: 'medium',
-            assignedDate: '10/04/2024'
+            dateEcheance: '30/04/2024',
+            statut: 'en_cours',
+            priorite: 'moyenne',
+            dateAttribution: '10/04/2024'
           }
         ],
         documents: [
           {
             id: 3,
-            name: 'Convention_stage_Marie_Martin.pdf',
+            nom: 'Convention_stage_Marie_Martin.pdf',
             type: 'Convention',
-            uploadDate: '25/03/2024',
-            status: 'Approuvé'
+            dateDepot: '25/03/2024',
+            statut: 'Approuvé'
           }
         ],
         evaluations: []
       },
       {
         id: 3,
-        studentId: '2024003',
-        firstName: 'Sophie',
-        lastName: 'Bernard',
+        matricule: '2024003',
+        prenom: 'Sophie',
+        nom: 'Bernard',
         email: 'sophie.bernard@email.com',
-        phone: '06 55 66 77 88',
+        telephone: '06 55 66 77 88',
         photo: '/api/photos/student-4.jpg',
-        stageTitle: 'Développeur Web Full-Stack',
-        stageId: 1,
-        startDate: '01/06/2023',
-        endDate: '31/12/2023',
-        status: 'completed',
-        supervisor: 'M. Martin',
-        tutor: 'Dr. Dupont',
-        university: 'Université de Toulouse',
-        program: 'Master Informatique',
-        year: 2,
-        evaluation: 4.8,
-        progress: 100,
-        tasks: [],
+        titreStage: 'Développeur Web Full-Stack',
+        idStage: 1,
+        dateDebut: '01/06/2023',
+        dateFin: '31/12/2023',
+        statut: 'termine',
+        encadrant: 'M. Martin',
+        tuteur: 'Dr. Dupont',
+        universite: 'Université de Toulouse',
+        programme: 'Master Informatique',
+        annee: 2,
+        noteEvaluation: 4.8,
+        progression: 100,
+        taches: [],
         documents: [
           {
             id: 4,
-            name: 'Rapport_final_Sophie_Bernard.pdf',
+            nom: 'Rapport_final_Sophie_Bernard.pdf',
             type: 'Rapport final',
-            uploadDate: '15/12/2023',
-            status: 'Approuvé'
+            dateDepot: '15/12/2023',
+            statut: 'Approuvé'
           }
         ],
         evaluations: [
           {
             id: 2,
             date: '15/12/2023',
-            type: 'final',
-            grade: 4.8,
-            comments: 'Excellente stagiaire, travail de qualité exceptionnelle',
-            evaluator: 'M. Martin'
+            type: 'finale',
+            note: 4.8,
+            commentaires: 'Excellente stagiaire, travail de qualité exceptionnelle',
+            evaluateur: 'M. Martin'
           }
         ]
       }
     ];
-    setInterns(mockInterns);
-    setFilteredInterns(mockInterns);
+    setStagiaires(mockStagiaires);
+    setFilteredStagiaires(mockStagiaires);
   }, []);
 
   const handleFilterChange = (name: string, value: string) => {
     const newFilters = { ...filters, [name]: value };
     setFilters(newFilters);
 
-    let filtered = interns;
+    let filtered = stagiaires;
 
-    if (newFilters.status) {
-      filtered = filtered.filter(intern => intern.status === newFilters.status);
+    if (newFilters.statut) {
+      filtered = filtered.filter(stagiaire => stagiaire.statut === newFilters.statut);
     }
     if (newFilters.stage) {
-      filtered = filtered.filter(intern => intern.stageId.toString() === newFilters.stage);
+      filtered = filtered.filter(stagiaire => stagiaire.idStage.toString() === newFilters.stage);
     }
-    if (newFilters.supervisor) {
-      filtered = filtered.filter(intern => intern.supervisor === newFilters.supervisor);
+    if (newFilters.encadrant) {
+      filtered = filtered.filter(stagiaire => stagiaire.encadrant === newFilters.encadrant);
     }
 
-    setFilteredInterns(filtered);
+    setFilteredStagiaires(filtered);
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (statut: string) => {
     const statusConfig = {
-      active: { class: 'bg-success', text: 'En cours', icon: 'fas fa-play' },
-      completed: { class: 'bg-primary', text: 'Terminé', icon: 'fas fa-check' },
-      terminated: { class: 'bg-danger', text: 'Terminé', icon: 'fas fa-times' }
+      actif: { class: 'bg-success', text: 'En cours', icon: 'fas fa-play' },
+      termine: { class: 'bg-primary', text: 'Terminé', icon: 'fas fa-check' },
+      termine_anticipé: { class: 'bg-danger', text: 'Terminé', icon: 'fas fa-times' }
     };
 
-    const config = statusConfig[status as keyof typeof statusConfig];
+    const config = statusConfig[statut as keyof typeof statusConfig];
     return (
       <span className={`badge ${config.class}`}>
         <i className={`${config.icon} me-1`}></i>
@@ -306,26 +306,26 @@ const MesStagiaires: React.FC = () => {
     );
   };
 
-  const getTaskStatusBadge = (status: string) => {
+  const getTaskStatusBadge = (statut: string) => {
     const statusConfig = {
-      pending: { class: 'bg-secondary', text: 'En attente' },
-      in_progress: { class: 'bg-info', text: 'En cours' },
-      completed: { class: 'bg-success', text: 'Terminé' },
-      overdue: { class: 'bg-danger', text: 'En retard' }
+      en_attente: { class: 'bg-secondary', text: 'En attente' },
+      en_cours: { class: 'bg-info', text: 'En cours' },
+      terminee: { class: 'bg-success', text: 'Terminé' },
+      retard: { class: 'bg-danger', text: 'En retard' }
     };
 
-    const config = statusConfig[status as keyof typeof statusConfig];
+    const config = statusConfig[statut as keyof typeof statusConfig];
     return <span className={`badge ${config.class}`}>{config.text}</span>;
   };
 
-  const getStatusCount = (status: string) => {
-    return interns.filter(intern => intern.status === status).length;
+  const getStatusCount = (statut: string) => {
+    return stagiaires.filter(stagiaire => stagiaire.statut === statut).length;
   };
 
-  const getProgressColor = (progress: number) => {
-    if (progress >= 80) return 'success';
-    if (progress >= 60) return 'info';
-    if (progress >= 40) return 'warning';
+  const getProgressColor = (progression: number) => {
+    if (progression >= 80) return 'success';
+    if (progression >= 60) return 'info';
+    if (progression >= 40) return 'warning';
     return 'danger';
   };
 
@@ -368,7 +368,7 @@ const MesStagiaires: React.FC = () => {
                   <div className="text-xs font-weight-bold text-primary text-uppercase mb-1">
                     Total Stagiaires
                   </div>
-                  <div className="h5 mb-0 font-weight-bold text-gray-800">{interns.length}</div>
+                  <div className="h5 mb-0 font-weight-bold text-gray-800">{stagiaires.length}</div>
                 </div>
                 <div className="col-auto">
                   <FaUsers className="fa-2x text-gray-300" />
@@ -386,7 +386,7 @@ const MesStagiaires: React.FC = () => {
                   <div className="text-xs font-weight-bold text-success text-uppercase mb-1">
                     Stages en Cours
                   </div>
-                  <div className="h5 mb-0 font-weight-bold text-gray-800">{getStatusCount('active')}</div>
+                  <div className="h5 mb-0 font-weight-bold text-gray-800">{getStatusCount('actif')}</div>
                 </div>
                 <div className="col-auto">
                   <FaClock className="fa-2x text-gray-300" />
@@ -404,7 +404,7 @@ const MesStagiaires: React.FC = () => {
                   <div className="text-xs font-weight-bold text-info text-uppercase mb-1">
                     Stages Terminés
                   </div>
-                  <div className="h5 mb-0 font-weight-bold text-gray-800">{getStatusCount('completed')}</div>
+                  <div className="h5 mb-0 font-weight-bold text-gray-800">{getStatusCount('termine')}</div>
                 </div>
                 <div className="col-auto">
                   <FaCheckCircle className="fa-2x text-gray-300" />
@@ -422,7 +422,7 @@ const MesStagiaires: React.FC = () => {
                   <div className="text-xs font-weight-bold text-warning text-uppercase mb-1">
                     Note Moyenne
                   </div>
-                  <div className="h5 mb-0 font-weight-bold text-gray-800">{interns.length > 0 ? (interns.reduce((sum, s) => sum + s.evaluation, 0) / interns.length).toFixed(1) : 'N/A'}</div>
+                  <div className="h5 mb-0 font-weight-bold text-gray-800">{stagiaires.length > 0 ? (stagiaires.reduce((sum, s) => sum + s.noteEvaluation, 0) / stagiaires.length).toFixed(1) : 'N/A'}</div>
                 </div>
                 <div className="col-auto">
                   <FaStar className="fa-2x text-gray-300" />
@@ -449,21 +449,21 @@ const MesStagiaires: React.FC = () => {
                   type="text"
                   className="form-control"
                   placeholder="Rechercher un stagiaire..."
-                  value={filters.supervisor}
-                  onChange={(e) => handleFilterChange('supervisor', e.target.value)}
+                  value={filters.encadrant}
+                  onChange={(e) => handleFilterChange('encadrant', e.target.value)}
                 />
               </div>
             </div>
             <div className="col-md-3 mb-3">
               <select
                 className="form-select"
-                value={filters.status}
-                onChange={(e) => handleFilterChange('status', e.target.value)}
+                value={filters.statut}
+                onChange={(e) => handleFilterChange('statut', e.target.value)}
               >
                 <option value="">Tous les statuts</option>
-                <option value="active">En cours</option>
-                <option value="completed">Terminé</option>
-                <option value="terminated">Terminé</option>
+                <option value="actif">En cours</option>
+                <option value="termine">Terminé</option>
+                <option value="termine_anticipé">Terminé</option>
               </select>
             </div>
             <div className="col-md-3 mb-3">
@@ -520,9 +520,9 @@ const MesStagiaires: React.FC = () => {
                     <th>
                       <button 
                         className="btn btn-link p-0 text-decoration-none"
-                        onClick={() => handleSort('lastName')}
+                        onClick={() => handleSort('nom')}
                       >
-                        Stagiaire {getSortIcon('lastName')}
+                        Stagiaire {getSortIcon('nom')}
                       </button>
                     </th>
                     <th>Formation</th>
@@ -532,66 +532,66 @@ const MesStagiaires: React.FC = () => {
                     <th>
                       <button 
                         className="btn btn-link p-0 text-decoration-none"
-                        onClick={() => handleSort('startDate')}
+                        onClick={() => handleSort('dateDebut')}
                       >
-                        Date Début {getSortIcon('startDate')}
+                        Date Début {getSortIcon('dateDebut')}
                       </button>
                     </th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredInterns.map((intern) => (
-                    <tr key={intern.id}>
+                  {filteredStagiaires.map((stagiaire) => (
+                    <tr key={stagiaire.id}>
                       <td>
                         <div>
-                          <strong>{intern.firstName} {intern.lastName}</strong>
+                          <strong>{stagiaire.prenom} {stagiaire.nom}</strong>
                           <br />
                           <small className="text-muted">
                             <FaEnvelope className="me-1" />
-                            {intern.email}
+                            {stagiaire.email}
                           </small>
                           <br />
                           <small className="text-muted">
                             <FaPhone className="me-1" />
-                            {intern.phone}
+                            {stagiaire.telephone}
                           </small>
                         </div>
                       </td>
                       <td>
                         <div>
                           <FaGraduationCap className="me-1 text-muted" />
-                          {intern.stageTitle}
+                          {stagiaire.titreStage}
                           <br />
                           <small className="text-muted">
                             <FaBuilding className="me-1" />
-                            {intern.university}
+                            {stagiaire.universite}
                           </small>
                         </div>
                       </td>
-                      <td>{getStatusBadge(intern.status)}</td>
+                      <td>{getStatusBadge(stagiaire.statut)}</td>
                       <td>
                         <div className="progress" style={{ height: '20px' }}>
                           <div
                             className="progress-bar"
-                            style={{ width: `${intern.progress}%` }}
+                            style={{ width: `${stagiaire.progression}%` }}
                           >
-                            {intern.progress}%
+                            {stagiaire.progression}%
                           </div>
                         </div>
                       </td>
                       <td>
-                        <div className={`${getProgressColor(intern.evaluation)}`}>
-                          {intern.evaluation.toFixed(1)}
+                        <div className={`${getProgressColor(stagiaire.noteEvaluation)}`}>
+                          {stagiaire.noteEvaluation.toFixed(1)}
                         </div>
                       </td>
                       <td>
                         <div>
                           <FaCalendarAlt className="me-1 text-muted" />
-                          {intern.startDate}
+                          {stagiaire.dateDebut}
                           <br />
                           <small className="text-muted">
-                            Fin: {intern.endDate}
+                            Fin: {stagiaire.dateFin}
                           </small>
                         </div>
                       </td>
@@ -600,7 +600,7 @@ const MesStagiaires: React.FC = () => {
                           <button
                             className="btn btn-sm btn-outline-primary"
                             onClick={() => {
-                              setSelectedIntern(intern);
+                              setSelectedStagiaire(stagiaire);
                               setShowDetailsModal(true);
                             }}
                             title="Voir détails"
@@ -639,15 +639,15 @@ const MesStagiaires: React.FC = () => {
               <div className="col-md-6">
                 <h6>Répartition par statut</h6>
                 <div className="chart-container mb-4">
-                  {['active', 'completed', 'terminated'].map(statut => {
-                    const count = interns.filter(s => s.status === statut).length;
-                    const percentage = interns.length > 0 ? (count / interns.length) * 100 : 0;
+                  {['actif', 'termine', 'termine_anticipé'].map(statut => {
+                    const count = stagiaires.filter(s => s.statut === statut).length;
+                    const percentage = stagiaires.length > 0 ? (count / stagiaires.length) * 100 : 0;
                     return (
                       <div key={statut} className="mb-3">
                         <div className="d-flex justify-content-between mb-1">
                           <span className="text-xs font-weight-bold">
-                            {statut === 'active' ? 'En cours' :
-                             statut === 'completed' ? 'Terminé' : 'Terminé'}
+                            {statut === 'actif' ? 'En cours' :
+                             statut === 'termine' ? 'Terminé' : 'Terminé'}
                           </span>
                           <span className="text-xs font-weight-bold">
                             {count} ({percentage.toFixed(1)}%)
@@ -658,8 +658,8 @@ const MesStagiaires: React.FC = () => {
                             className="progress-bar"
                             style={{ 
                               width: `${percentage}%`,
-                              backgroundColor: statut === 'active' ? '#007bff' :
-                                              statut === 'completed' ? '#28a745' : '#dc3545'
+                              backgroundColor: statut === 'actif' ? '#007bff' :
+                                              statut === 'termine' ? '#28a745' : '#dc3545'
                             }}
                           ></div>
                         </div>
@@ -674,12 +674,12 @@ const MesStagiaires: React.FC = () => {
                   <div className="mb-3">
                     <div className="d-flex justify-content-between mb-1">
                       <span>Évaluation</span>
-                      <span>{(interns.reduce((sum, s) => sum + s.evaluation, 0) / interns.length).toFixed(1)}</span>
+                      <span>{(stagiaires.reduce((sum, s) => sum + s.noteEvaluation, 0) / stagiaires.length).toFixed(1)}</span>
                     </div>
                     <div className="progress mb-2" style={{ height: '15px' }}>
                       <div
                         className="progress-bar bg-primary"
-                        style={{ width: `${(interns.reduce((sum, s) => sum + s.evaluation, 0) / interns.length) * 20}%` }}
+                        style={{ width: `${(stagiaires.reduce((sum, s) => sum + s.noteEvaluation, 0) / stagiaires.length) * 20}%` }}
                       ></div>
                     </div>
                   </div>
@@ -691,13 +691,13 @@ const MesStagiaires: React.FC = () => {
       </div>
 
       {/* Modal Détails Stagiaire */}
-      {showDetailsModal && selectedIntern && (
+      {showDetailsModal && selectedStagiaire && (
         <div className="modal fade show" style={{ display: 'block' }} tabIndex={-1}>
           <div className="modal-dialog modal-xl">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">
-                  Détails du stagiaire - {selectedIntern.firstName} {selectedIntern.lastName}
+                  Détails du stagiaire - {selectedStagiaire.prenom} {selectedStagiaire.nom}
                 </h5>
                 <button
                   type="button"
@@ -709,17 +709,17 @@ const MesStagiaires: React.FC = () => {
                 <div className="row">
                   <div className="col-md-6">
                     <h6>Informations personnelles</h6>
-                    <p><strong>Email:</strong> {selectedIntern.email}</p>
-                    <p><strong>Téléphone:</strong> {selectedIntern.phone}</p>
-                    <p><strong>Statut:</strong> {getStatusBadge(selectedIntern.status)}</p>
-                    <p><strong>Université:</strong> {selectedIntern.university}</p>
+                    <p><strong>Email:</strong> {selectedStagiaire.email}</p>
+                    <p><strong>Téléphone:</strong> {selectedStagiaire.telephone}</p>
+                    <p><strong>Statut:</strong> {getStatusBadge(selectedStagiaire.statut)}</p>
+                    <p><strong>Université:</strong> {selectedStagiaire.universite}</p>
                   </div>
                   <div className="col-md-6">
                     <h6>Informations du stage</h6>
-                    <p><strong>Formation:</strong> {selectedIntern.stageTitle}</p>
-                    <p><strong>Tuteur:</strong> {selectedIntern.tutor}</p>
-                    <p><strong>Superviseur:</strong> {selectedIntern.supervisor}</p>
-                    <p><strong>Période:</strong> {selectedIntern.startDate} - {selectedIntern.endDate}</p>
+                    <p><strong>Formation:</strong> {selectedStagiaire.titreStage}</p>
+                    <p><strong>Tuteur:</strong> {selectedStagiaire.tuteur}</p>
+                    <p><strong>Encadrant:</strong> {selectedStagiaire.encadrant}</p>
+                    <p><strong>Période:</strong> {selectedStagiaire.dateDebut} - {selectedStagiaire.dateFin}</p>
                   </div>
                 </div>
                 <div className="row mt-3">
@@ -728,9 +728,9 @@ const MesStagiaires: React.FC = () => {
                     <div className="progress mb-3" style={{ height: '25px' }}>
                       <div
                         className="progress-bar"
-                        style={{ width: `${selectedIntern.progress}%` }}
+                        style={{ width: `${selectedStagiaire.progression}%` }}
                       >
-                        {selectedIntern.progress}%
+                        {selectedStagiaire.progression}%
                       </div>
                     </div>
                   </div>
@@ -739,11 +739,11 @@ const MesStagiaires: React.FC = () => {
                   <div className="col-md-6">
                     <h6>Évaluations</h6>
                     <p><strong>Note globale:</strong> 
-                      <span className={`${getProgressColor(selectedIntern.evaluation)} ms-2`}>
-                        {selectedIntern.evaluation.toFixed(1)}
+                      <span className={`${getProgressColor(selectedStagiaire.noteEvaluation)} ms-2`}>
+                        {selectedStagiaire.noteEvaluation.toFixed(1)}
                       </span>
                     </p>
-                    <p><strong>Évaluation:</strong> {selectedIntern.evaluation}/5</p>
+                    <p><strong>Évaluation:</strong> {selectedStagiaire.noteEvaluation}/5</p>
                   </div>
                   <div className="col-md-6">
                     <h6>Compétences</h6>
@@ -752,10 +752,10 @@ const MesStagiaires: React.FC = () => {
                     </div>
                     <h6>Tâches en cours</h6>
                     <ul className="list-unstyled">
-                      {selectedIntern.tasks.map((task, index) => (
+                      {selectedStagiaire.taches.map((tache, index) => (
                         <li key={index} className="mb-1">
                           <FaFileAlt className="me-2 text-muted" />
-                          {task.title}
+                          {tache.titre}
                         </li>
                       ))}
                     </ul>

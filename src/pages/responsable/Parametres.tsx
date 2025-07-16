@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../../components/layout/Sidebar';
+// SUPPRIMER: import Sidebar from '../../components/layout/Sidebar';
+import { useAuth } from '../../context/AuthContext';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../../config/firebase';
 
 interface Settings {
   notifications: {
@@ -48,6 +51,23 @@ const Parametres: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('notifications');
   const [isSaving, setIsSaving] = useState(false);
+  const [universite, setUniversite] = useState<any>(null);
+  const [universiteForm, setUniversiteForm] = useState<any>(null);
+  const [universiteLoading, setUniversiteLoading] = useState(false);
+  const [universiteSuccess, setUniversiteSuccess] = useState<string|null>(null);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user || !user.universiteId) return;
+    setUniversiteLoading(true);
+    getDoc(doc(db, 'universites', user.universiteId)).then(snap => {
+      if (snap.exists()) {
+        setUniversite(snap.data());
+        setUniversiteForm(snap.data());
+      }
+      setUniversiteLoading(false);
+    });
+  }, [user]);
 
   const handleSettingChange = (category: keyof Settings, key: string, value: any) => {
     setSettings(prev => ({
@@ -67,24 +87,23 @@ const Parametres: React.FC = () => {
     alert('Paramètres sauvegardés avec succès !');
   };
 
-  const user = {
-    role: 'responsable',
-    firstName: 'M. Responsable',
-    lastName: 'Stage'
+  const handleUniversiteChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setUniversiteForm({ ...universiteForm, [e.target.name]: e.target.value });
+  };
+
+  const handleUniversiteSave = async () => {
+    if (!user || !user.universiteId) return;
+    setUniversiteLoading(true);
+    await updateDoc(doc(db, 'universites', user.universiteId), universiteForm);
+    setUniversite(universiteForm);
+    setUniversiteLoading(false);
+    setUniversiteSuccess('Informations mises à jour !');
+    setTimeout(() => setUniversiteSuccess(null), 2000);
   };
 
   return (
     <div className="dashboard-container">
-      <div className="row g-0">
-        <div className={`col-auto ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-          <Sidebar 
-            user={user} 
-            isCollapsed={isSidebarCollapsed}
-            onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          />
-        </div>
-        <div className="col">
-          <div className="dashboard-content p-4">
+      <div className="dashboard-content p-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
               <div>
                 <h1 className="h3 mb-0">
@@ -155,6 +174,15 @@ const Parametres: React.FC = () => {
                           Workflow
                         </button>
                       </li>
+                  <li className="nav-item">
+                    <button 
+                      className={`nav-link w-100 text-start ${activeTab === 'universite' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('universite')}
+                    >
+                      <i className="fas fa-university me-2"></i>
+                      Université
+                    </button>
+                  </li>
                     </ul>
                   </div>
                 </div>
@@ -342,9 +370,53 @@ const Parametres: React.FC = () => {
                           />
                         </div>
                       </div>
+                )}
+
+                {/* Université */}
+                {activeTab === 'universite' && (
+                  <div>
+                    <h5 className="mb-4">
+                      <i className="fas fa-university me-2"></i>
+                      Informations sur l'université
+                    </h5>
+                    {universiteLoading ? (
+                      <div>Chargement...</div>
+                    ) : universiteForm ? (
+                      <form onSubmit={e => { e.preventDefault(); handleUniversiteSave(); }}>
+                        <div className="mb-3">
+                          <label className="form-label">Nom</label>
+                          <input className="form-control" name="nom" value={universiteForm.nom || ''} onChange={handleUniversiteChange} required />
+                        </div>
+                        <div className="mb-3">
+                          <label className="form-label">Adresse</label>
+                          <input className="form-control" name="adresse" value={universiteForm.adresse || ''} onChange={handleUniversiteChange} />
+                        </div>
+                        <div className="mb-3">
+                          <label className="form-label">Téléphone</label>
+                          <input className="form-control" name="telephone" value={universiteForm.telephone || ''} onChange={handleUniversiteChange} />
+                        </div>
+                        <div className="mb-3">
+                          <label className="form-label">Email</label>
+                          <input className="form-control" name="email" value={universiteForm.email || ''} onChange={handleUniversiteChange} />
+                        </div>
+                        <div className="mb-3">
+                          <label className="form-label">Site web</label>
+                          <input className="form-control" name="site_web" value={universiteForm.site_web || ''} onChange={handleUniversiteChange} />
+                        </div>
+                        <div className="mb-3">
+                          <label className="form-label">Description</label>
+                          <textarea className="form-control" name="description" value={universiteForm.description || ''} onChange={handleUniversiteChange} />
+                        </div>
+                        <button className="btn btn-primary" type="submit" disabled={universiteLoading}>
+                          {universiteLoading ? 'Sauvegarde...' : 'Sauvegarder'}
+                        </button>
+                        {universiteSuccess && <span className="text-success ms-3">{universiteSuccess}</span>}
+                      </form>
+                    ) : (
+                      <div className="alert alert-warning">Aucune information d'université trouvée.</div>
                     )}
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

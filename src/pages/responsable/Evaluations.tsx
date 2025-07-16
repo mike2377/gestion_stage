@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../../components/layout/Sidebar';
 
 interface Evaluation {
   id: number;
@@ -161,15 +160,9 @@ const Evaluations: React.FC = () => {
   return (
     <div className="dashboard-container">
       <div className="row g-0">
-        <div className={`col-auto ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-          <Sidebar 
-            user={user} 
-            isCollapsed={isSidebarCollapsed}
-            onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          />
-        </div>
+        {/* Supprimer toute inclusion de Sidebar ou SidebarLayout. Retourner uniquement le contenu principal. */}
         <div className="col">
-          <div className="dashboard-content p-4">
+      <div className="dashboard-content p-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
               <div>
                 <h1 className="h3 mb-0">
@@ -298,9 +291,9 @@ const Evaluations: React.FC = () => {
                 )}
               </div>
             </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
       {/* Modal Détails Evaluation */}
       {showDetailsModal && selectedEvaluation && (
         <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>

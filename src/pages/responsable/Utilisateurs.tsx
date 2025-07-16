@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/layout/Sidebar';
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
+import { useAuth } from '../../context/AuthContext';
 
 interface User {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
-  role: 'etudiant' | 'enseignant' | 'responsable' | 'entreprise' | 'tuteur' | 'admin';
+  role: 'student' | 'teacher' | 'responsible' | 'enterprise' | 'tutor' | 'admin';
   status: 'active' | 'inactive' | 'pending';
   program?: string;
   year?: number;
@@ -17,9 +18,11 @@ interface User {
   createdAt: string;
   phone?: string;
   photo?: string;
+  universiteId?: string;
 }
 
 const Utilisateurs: React.FC = () => {
+  const { user } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [filters, setFilters] = useState({
@@ -34,87 +37,77 @@ const Utilisateurs: React.FC = () => {
   const [pendingStudents, setPendingStudents] = useState<any[]>([]);
   const [toast, setToast] = useState<string | null>(null);
 
-  useEffect(() => {
-    const mockUsers: User[] = [
-      {
-        id: 1,
-        firstName: 'Jean',
-        lastName: 'Dupont',
-        email: 'jean.dupont@email.com',
-        role: 'etudiant',
-        status: 'active',
-        program: 'Master Informatique',
-        year: 2,
-        lastLogin: '2024-04-15 14:30',
-        createdAt: '2023-09-01',
-        phone: '06 12 34 56 78',
-        photo: '/api/photos/student-1.jpg'
-      },
-      {
-        id: 2,
-        firstName: 'Marie',
-        lastName: 'Martin',
-        email: 'marie.martin@email.com',
-        role: 'etudiant',
-        status: 'active',
-        program: 'Master Marketing',
-        year: 2,
-        lastLogin: '2024-04-14 09:15',
-        createdAt: '2023-09-01',
-        phone: '06 98 76 54 32',
-        photo: '/api/photos/student-2.jpg'
-      },
-      {
-        id: 3,
-        firstName: 'Dr. Dupont',
-        lastName: 'Enseignant',
-        email: 'dupont@university.edu',
-        role: 'enseignant',
-        status: 'active',
-        lastLogin: '2024-04-15 16:45',
-        createdAt: '2020-09-01',
-        phone: '01 23 45 67 89'
-      },
-      {
-        id: 4,
-        firstName: 'M. Martin',
-        lastName: 'Superviseur',
-        email: 'martin@techcorp.com',
-        role: 'entreprise',
-        status: 'active',
-        enterpriseName: 'TechCorp Solutions',
-        lastLogin: '2024-04-15 11:20',
-        createdAt: '2023-01-15',
-        phone: '01 98 76 54 32'
-      },
-      {
-        id: 5,
-        firstName: 'Sophie',
-        lastName: 'Bernard',
-        email: 'sophie.bernard@email.com',
-        role: 'etudiant',
-        status: 'inactive',
-        program: 'Master Data Science',
-        year: 2,
-        lastLogin: '2024-01-15 10:30',
-        createdAt: '2022-09-01',
-        phone: '06 55 66 77 88',
-        photo: '/api/photos/student-3.jpg'
-      }
-    ];
-    setUsers(mockUsers);
-    setFilteredUsers(mockUsers);
-  }, []);
+  const ROLE_LABELS: Record<string, string> = {
+    student: 'Étudiant',
+    etudiant: 'Étudiant',
+    teacher: 'Enseignant',
+    enseignant: 'Enseignant',
+    responsible: 'Responsable',
+    responsable: 'Responsable',
+    enterprise: 'Entreprise',
+    entreprise: 'Entreprise',
+  };
+  const ROLE_BADGE: Record<string, string> = {
+    student: 'bg-primary',
+    etudiant: 'bg-primary',
+    teacher: 'bg-success',
+    enseignant: 'bg-success',
+    responsible: 'bg-warning',
+    responsable: 'bg-warning',
+    enterprise: 'bg-info',
+    entreprise: 'bg-info',
+  };
 
   useEffect(() => {
-    // Charger les étudiants en attente depuis Firestore
+    if (!user || !user.universiteId) return;
+    const fetchUsers = async () => {
+      const q = query(
+        collection(db, 'utilisateurs'),
+        where('universiteId', '==', user.universiteId),
+        where('role', 'in', [
+          'student', 'etudiant', 'teacher', 'enseignant',
+          'responsible', 'responsable', 'enterprise', 'entreprise'])
+      );
+      const querySnapshot = await getDocs(q);
+      const usersData: User[] = querySnapshot.docs.map(docSnap => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          firstName: data.firstName || data.prenom || '',
+          lastName: data.lastName || data.nom || '',
+          email: data.email || '',
+          role: data.role,
+          status: data.isActive ? 'active' : 'inactive',
+          program: data.program,
+          year: data.year,
+          lastLogin: data.lastLogin || '',
+          createdAt: data.createdAt ? (data.createdAt.toDate ? data.createdAt.toDate().toLocaleDateString() : data.createdAt) : '',
+          phone: data.phone,
+          photo: data.avatar,
+          universiteId: data.universiteId,
+        };
+      });
+      setUsers(usersData);
+      setFilteredUsers(usersData);
+    };
+    fetchUsers();
+  }, [user]);
+
+  useEffect(() => {
+    // Charger les étudiants en attente depuis Firestore pour cette université
+    if (!user || !user.universiteId) return;
     const fetchPendingStudents = async () => {
-      const q = query(collection(db, 'utilisateurs'), where('role', '==', 'student'), where('statut', '==', 'en_attente'));
+      const q = query(
+        collection(db, 'utilisateurs'),
+        where('role', 'in', ['student', 'etudiant']),
+        where('universiteId', '==', user.universiteId),
+        where('statut', '==', 'en_attente')
+      );
       const querySnapshot = await getDocs(q);
       setPendingStudents(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     };
     fetchPendingStudents();
-  }, []);
+  }, [user]);
 
   const handleFilterChange = (name: string, value: string) => {
     const newFilters = { ...filters, [name]: value };
@@ -133,16 +126,9 @@ const Utilisateurs: React.FC = () => {
   };
 
   const getRoleBadge = (role: string) => {
-    const roleConfig = {
-      etudiant: { class: 'bg-primary', text: 'Étudiant' },
-      enseignant: { class: 'bg-success', text: 'Enseignant' },
-      responsable: { class: 'bg-warning', text: 'Responsable' },
-      entreprise: { class: 'bg-info', text: 'Entreprise' },
-      tuteur: { class: 'bg-secondary', text: 'Tuteur' },
-      admin: { class: 'bg-dark', text: 'Admin' }
-    };
-    const config = roleConfig[role as keyof typeof roleConfig];
-    return <span className={`badge ${config.class}`}>{config.text}</span>;
+    const badge = ROLE_BADGE[role] || 'bg-secondary';
+    const label = ROLE_LABELS[role] || role;
+    return <span className={`badge ${badge}`}>{label}</span>;
   };
 
   const getStatusBadge = (status: string) => {
@@ -159,12 +145,6 @@ const Utilisateurs: React.FC = () => {
     return users.filter(user => user.role === role).length;
   };
 
-  const user = {
-    role: 'responsable',
-    firstName: 'M. Responsable',
-    lastName: 'Stage'
-  };
-
   const handleValidate = async (studentId: string) => {
     await updateDoc(doc(db, 'utilisateurs', studentId), { statut: 'validé' });
     setPendingStudents(pendingStudents.filter(s => s.id !== studentId));
@@ -177,6 +157,14 @@ const Utilisateurs: React.FC = () => {
     setToast("Étudiant rejeté.");
     setTimeout(() => setToast(null), 3000);
   };
+
+  const ALL_ROLES = [
+    { value: '', label: 'Tous les rôles' },
+    { value: 'student', label: 'Étudiant' },
+    { value: 'teacher', label: 'Enseignant' },
+    { value: 'responsible', label: 'Responsable' },
+    { value: 'enterprise', label: 'Entreprise' },
+  ];
 
   return (
     <div className="dashboard-container">
@@ -198,13 +186,6 @@ const Utilisateurs: React.FC = () => {
         </div>
       )}
       <div className="row g-0">
-        <div className={`col-auto ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-          <Sidebar 
-            user={user} 
-            isCollapsed={isSidebarCollapsed}
-            onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          />
-        </div>
         <div className="col">
           <div className="dashboard-content p-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
@@ -231,52 +212,28 @@ const Utilisateurs: React.FC = () => {
             </div>
 
             {/* Statistiques */}
-            <div className="row g-4 mb-4">
-              <div className="col-md-2">
-                <div className="card bg-primary text-white">
+            <div className="row mb-4" style={{ rowGap: 0 }}>
+              <div className="col-12 col-md-4">
+                <div className="card bg-primary text-white h-100">
                   <div className="card-body text-center">
-                    <h4 className="mb-0">{users.length}</h4>
-                    <p className="mb-0">Total</p>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-2">
-                <div className="card bg-success text-white">
-                  <div className="card-body text-center">
-                    <h4 className="mb-0">{getRoleCount('etudiant')}</h4>
+                    <h4 className="mb-0">{getRoleCount('student') + getRoleCount('etudiant')}</h4>
                     <p className="mb-0">Étudiants</p>
                   </div>
                 </div>
               </div>
-              <div className="col-md-2">
-                <div className="card bg-info text-white">
+              <div className="col-12 col-md-4">
+                <div className="card bg-success text-white h-100">
                   <div className="card-body text-center">
-                    <h4 className="mb-0">{getRoleCount('enseignant')}</h4>
+                    <h4 className="mb-0">{getRoleCount('teacher') + getRoleCount('enseignant')}</h4>
                     <p className="mb-0">Enseignants</p>
                   </div>
                 </div>
               </div>
-              <div className="col-md-2">
-                <div className="card bg-warning text-white">
+              <div className="col-12 col-md-4">
+                <div className="card bg-info text-white h-100">
                   <div className="card-body text-center">
-                    <h4 className="mb-0">{getRoleCount('entreprise')}</h4>
+                    <h4 className="mb-0">{getRoleCount('enterprise') + getRoleCount('entreprise')}</h4>
                     <p className="mb-0">Entreprises</p>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-2">
-                <div className="card bg-secondary text-white">
-                  <div className="card-body text-center">
-                    <h4 className="mb-0">{getRoleCount('tuteur')}</h4>
-                    <p className="mb-0">Tuteurs</p>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-2">
-                <div className="card bg-dark text-white">
-                  <div className="card-body text-center">
-                    <h4 className="mb-0">{getRoleCount('admin')}</h4>
-                    <p className="mb-0">Admins</p>
                   </div>
                 </div>
               </div>
@@ -296,13 +253,7 @@ const Utilisateurs: React.FC = () => {
                       value={filters.role}
                       onChange={(e) => handleFilterChange('role', e.target.value)}
                     >
-                      <option value="">Tous les rôles</option>
-                      <option value="etudiant">Étudiant</option>
-                      <option value="enseignant">Enseignant</option>
-                      <option value="responsable">Responsable</option>
-                      <option value="entreprise">Entreprise</option>
-                      <option value="tuteur">Tuteur</option>
-                      <option value="admin">Admin</option>
+                      {ALL_ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
                     </select>
                   </div>
                   <div className="col-md-3">
@@ -370,7 +321,6 @@ const Utilisateurs: React.FC = () => {
                           <th>Email</th>
                           <th>Rôle</th>
                           <th>Statut</th>
-                          <th>Dernière connexion</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
@@ -399,7 +349,6 @@ const Utilisateurs: React.FC = () => {
                             <td>{user.email}</td>
                             <td>{getRoleBadge(user.role)}</td>
                             <td>{getStatusBadge(user.status)}</td>
-                            <td>{user.lastLogin}</td>
                             <td>
                               <div className="btn-group" role="group">
                                 <button 
@@ -585,12 +534,10 @@ const Utilisateurs: React.FC = () => {
                       <label className="form-label">Rôle *</label>
                       <select className="form-select" required>
                         <option value="">Sélectionner un rôle</option>
-                        <option value="etudiant">Étudiant</option>
-                        <option value="enseignant">Enseignant</option>
-                        <option value="responsable">Responsable</option>
-                        <option value="entreprise">Entreprise</option>
-                        <option value="tuteur">Tuteur</option>
-                        <option value="admin">Admin</option>
+                        <option value="student">Étudiant</option>
+                        <option value="teacher">Enseignant</option>
+                        <option value="responsible">Responsable</option>
+                        <option value="enterprise">Entreprise</option>
                       </select>
                     </div>
                     <div className="col-md-6">

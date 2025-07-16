@@ -14,6 +14,7 @@ import RechercherStages from './pages/etudiant/RechercherStages';
 import MesDocuments from './pages/etudiant/MesDocuments';
 import MonProfilEtudiant from './pages/etudiant/MonProfil';
 import TachesHebdomadaires from './pages/etudiant/TachesHebdomadaires';
+import Dashboard from './pages/etudiant/Dashboard';
 
 // Pages Entreprise
 import MesOffres from './pages/entreprise/MesOffres';
@@ -22,6 +23,7 @@ import MesStagiaires from './pages/entreprise/MesStagiaires';
 import MonProfilEntreprise from './pages/entreprise/MonProfil';
 import TachesStagiaires from './pages/entreprise/TachesStagiaires';
 import ParametresEntreprise from './pages/entreprise/Parametres';
+import DashboardEntreprise from './pages/entreprise/Dashboard';
 
 // Pages Enseignant
 import GestionStages from './pages/enseignant/GestionStages';
@@ -30,6 +32,7 @@ import Evaluations from './pages/enseignant/Evaluations';
 import Rapports from './pages/enseignant/Rapports';
 import SuiviPedagogique from './pages/enseignant/SuiviPedagogique';
 import TachesStagiairesEnseignant from './pages/enseignant/TachesStagiaires';
+import DashboardEnseignant from './pages/enseignant/Dashboard';
 
 // Pages Responsable
 import GestionStagesResponsable from './pages/responsable/GestionStages';
@@ -38,6 +41,10 @@ import EvaluationsResponsable from './pages/responsable/Evaluations';
 import UtilisateursResponsable from './pages/responsable/Utilisateurs';
 import EntreprisesResponsable from './pages/responsable/Entreprises';
 import ParametresResponsable from './pages/responsable/Parametres';
+import DashboardResponsable from './pages/responsable/Dashboard';
+import RapportsResponsable from './pages/responsable/Rapports';
+import StatistiquesResponsable from './pages/responsable/Statistiques';
+import ProfilResponsable from './pages/responsable/Profil';
 
 // Pages Tuteur
 import SuiviTuteur from './pages/tuteur/SuiviTuteur';
@@ -45,6 +52,7 @@ import EvaluationsTuteur from './pages/tuteur/Evaluations';
 import RapportsTuteur from './pages/tuteur/Rapports';
 import TachesStagiairesTuteur from './pages/tuteur/TachesStagiaires';
 import ParametresTuteur from './pages/tuteur/Parametres';
+import DashboardTuteur from './pages/tuteur/Dashboard';
 
 // Pages Communes
 import ContactCommun from './pages/Contact';
@@ -216,7 +224,7 @@ function App() {
           } />
 
           {/* Routes Responsable avec Sidebar directe */}
-          <Route path="/responsable/stages" element={
+          <Route path="/responsable/gestion-stages" element={
             <ProtectedRoute allowedRoles={['responsable']}>
             <SidebarLayout>
               <GestionStagesResponsable />
@@ -237,17 +245,31 @@ function App() {
             </SidebarLayout>
             </ProtectedRoute>
           } />
-          <Route path="/responsable/utilisateurs-gestion" element={
+          <Route path="/responsable/rapports" element={
             <ProtectedRoute allowedRoles={['responsable']}>
             <SidebarLayout>
-              <UtilisateursResponsable />
+              <RapportsResponsable />
             </SidebarLayout>
             </ProtectedRoute>
           } />
-          <Route path="/responsable/entreprises-gestion" element={
+          <Route path="/responsable/statistiques" element={
+            <ProtectedRoute allowedRoles={['responsable']}>
+            <SidebarLayout>
+              <StatistiquesResponsable />
+            </SidebarLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/responsable/entreprises" element={
             <ProtectedRoute allowedRoles={['responsable']}>
             <SidebarLayout>
               <EntreprisesResponsable />
+            </SidebarLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/responsable/utilisateurs" element={
+            <ProtectedRoute allowedRoles={['responsable']}>
+            <SidebarLayout>
+              <UtilisateursResponsable />
             </SidebarLayout>
             </ProtectedRoute>
           } />
@@ -255,6 +277,20 @@ function App() {
             <ProtectedRoute allowedRoles={['responsable']}>
             <SidebarLayout>
               <ParametresResponsable />
+            </SidebarLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/responsable/profil" element={
+            <ProtectedRoute allowedRoles={['responsable']}>
+            <SidebarLayout>
+              <ProfilResponsable />
+            </SidebarLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/responsable/dashboard" element={
+            <ProtectedRoute allowedRoles={['responsable']}>
+            <SidebarLayout>
+              <DashboardResponsable />
             </SidebarLayout>
             </ProtectedRoute>
           } />
@@ -307,42 +343,42 @@ function App() {
           <Route path="/etudiant/dashboard" element={
             <ProtectedRoute allowedRoles={['etudiant']}>
               <SidebarLayout>
-                <import('./pages/etudiant/Dashboard').then(m => <m.default />)}
+                <Dashboard />
               </SidebarLayout>
             </ProtectedRoute>
           } />
           <Route path="/entreprise/dashboard" element={
             <ProtectedRoute allowedRoles={['entreprise']}>
               <SidebarLayout>
-                <import('./pages/entreprise/Dashboard').then(m => <m.default />)}
+                <DashboardEntreprise />
               </SidebarLayout>
             </ProtectedRoute>
           } />
           <Route path="/enseignant/dashboard" element={
             <ProtectedRoute allowedRoles={['enseignant']}>
               <SidebarLayout>
-                <import('./pages/enseignant/Dashboard').then(m => <m.default />)}
+                <DashboardEnseignant />
               </SidebarLayout>
             </ProtectedRoute>
           } />
           <Route path="/responsable/dashboard" element={
             <ProtectedRoute allowedRoles={['responsable']}>
               <SidebarLayout>
-                <import('./pages/responsable/Dashboard').then(m => <m.default />)}
+                <DashboardResponsable />
               </SidebarLayout>
             </ProtectedRoute>
           } />
           <Route path="/tuteur/dashboard" element={
             <ProtectedRoute allowedRoles={['tuteur']}>
               <SidebarLayout>
-                <import('./pages/tuteur/Dashboard').then(m => <m.default />)}
+                <DashboardTuteur />
               </SidebarLayout>
             </ProtectedRoute>
           } />
           <Route path="/super-admin/dashboard" element={
             <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
               <SidebarLayout>
-                <import('./pages/super-admin/Dashboard').then(m => <m.default />)}
+                <DashboardSuperAdmin />
               </SidebarLayout>
             </ProtectedRoute>
           } />

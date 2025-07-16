@@ -1,45 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/layout/Sidebar';
 
-interface Report {
+interface Rapport {
   id: number;
-  studentId: string;
-  studentName: string;
-  studentPhoto?: string;
-  enterpriseId: number;
-  enterpriseName: string;
-  enterpriseLogo?: string;
-  stageTitle: string;
-  reportType: 'monthly' | 'final' | 'interim';
-  title: string;
-  submissionDate: string;
-  dueDate: string;
-  status: 'draft' | 'submitted' | 'reviewed' | 'approved' | 'rejected';
-  grade?: number;
-  supervisor: string;
-  tutor: string;
-  program: string;
-  year: number;
-  content: string;
-  summary: string;
-  keywords: string[];
-  attachments: Document[];
-  comments?: string;
+  idEtudiant: string;
+  nomEtudiant: string;
+  photoEtudiant?: string;
+  idEntreprise: number;
+  nomEntreprise: string;
+  logoEntreprise?: string;
+  titreStage: string;
+  typeRapport: 'mensuel' | 'final' | 'intermediaire';
+  titre: string;
+  dateSoumission: string;
+  dateLimite: string;
+  statut: 'brouillon' | 'soumis' | 'revise' | 'approuve' | 'rejete';
+  note?: number;
+  encadrant: string;
+  tuteur: string;
+  programme: string;
+  annee: number;
+  contenu: string;
+  resume: string;
+  motsCles: string[];
+  fichiers: Document[];
+  commentaires?: string;
   feedback?: string;
 }
 
 interface Document {
   id: number;
-  name: string;
+  nom: string;
   type: string;
-  uploadDate: string;
-  status: string;
+  dateDepot: string;
+  statut: string;
   url: string;
 }
 
 const Rapports: React.FC = () => {
-  const [reports, setReports] = useState<Report[]>([]);
-  const [filteredReports, setFilteredReports] = useState<Report[]>([]);
+  const [reports, setReports] = useState<Rapport[]>([]);
+  const [filteredReports, setFilteredReports] = useState<Rapport[]>([]);
   const [filters, setFilters] = useState({
     status: '',
     type: '',
@@ -47,195 +47,195 @@ const Rapports: React.FC = () => {
     year: ''
   });
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [selectedReport, setSelectedReport] = useState<Rapport | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
   // Données simulées
   useEffect(() => {
-    const mockReports: Report[] = [
+    const mockReports: Rapport[] = [
       {
         id: 1,
-        studentId: '2024001',
-        studentName: 'Jean Dupont',
-        studentPhoto: '/api/photos/student-1.jpg',
-        enterpriseId: 1,
-        enterpriseName: 'TechCorp Solutions',
-        enterpriseLogo: '/api/logos/techcorp-logo.png',
-        stageTitle: 'Développeur Web Full-Stack',
-        reportType: 'monthly',
-        title: 'Rapport mensuel - Mars 2024',
-        submissionDate: '01/04/2024',
-        dueDate: '05/04/2024',
-        status: 'approved',
-        grade: 4.5,
-        supervisor: 'M. Martin',
-        tutor: 'Dr. Dupont',
-        program: 'Master Informatique',
-        year: 2,
-        content: 'Ce rapport présente les activités réalisées lors du premier mois de stage. J\'ai principalement travaillé sur le développement du frontend de l\'application web en utilisant React et TypeScript. Les principales réalisations incluent la création des composants de base, l\'implémentation de l\'authentification et la mise en place de l\'architecture du projet.',
-        summary: 'Développement frontend avec React, implémentation authentification, architecture projet',
-        keywords: ['React', 'TypeScript', 'Frontend', 'Authentification', 'Architecture'],
-        comments: 'Excellent rapport, bien structuré et détaillé',
+        idEtudiant: '2024001',
+        nomEtudiant: 'Jean Dupont',
+        photoEtudiant: '/api/photos/student-1.jpg',
+        idEntreprise: 1,
+        nomEntreprise: 'TechCorp Solutions',
+        logoEntreprise: '/api/logos/techcorp-logo.png',
+        titreStage: 'Développeur Web Full-Stack',
+        typeRapport: 'mensuel',
+        titre: 'Rapport mensuel - Mars 2024',
+        dateSoumission: '01/04/2024',
+        dateLimite: '05/04/2024',
+        statut: 'approuve',
+        note: 4.5,
+        encadrant: 'M. Martin',
+        tuteur: 'Dr. Dupont',
+        programme: 'Master Informatique',
+        annee: 2,
+        contenu: 'Ce rapport présente les activités réalisées lors du premier mois de stage. J\'ai principalement travaillé sur le développement du frontend de l\'application web en utilisant React et TypeScript. Les principales réalisations incluent la création des composants de base, l\'implémentation de l\'authentification et la mise en place de l\'architecture du projet.',
+        resume: 'Développement frontend avec React, implémentation authentification, architecture projet',
+        motsCles: ['React', 'TypeScript', 'Frontend', 'Authentification', 'Architecture'],
+        commentaires: 'Excellent rapport, bien structuré et détaillé',
         feedback: 'Continuer dans cette voie, excellent travail technique',
-        attachments: [
+        fichiers: [
           {
             id: 1,
-            name: 'Rapport_mensuel_Mars_Jean_Dupont.pdf',
+            nom: 'Rapport_mensuel_Mars_Jean_Dupont.pdf',
             type: 'Rapport',
-            uploadDate: '01/04/2024',
-            status: 'Approuvé',
+            dateDepot: '01/04/2024',
+            statut: 'Approuvé',
             url: '/api/documents/rapport-1.pdf'
           },
           {
             id: 2,
-            name: 'Screenshots_application.pdf',
+            nom: 'Screenshots_application.pdf',
             type: 'Annexe',
-            uploadDate: '01/04/2024',
-            status: 'Approuvé',
+            dateDepot: '01/04/2024',
+            statut: 'Approuvé',
             url: '/api/documents/screenshots-1.pdf'
           }
         ]
       },
       {
         id: 2,
-        studentId: '2024002',
-        studentName: 'Marie Martin',
-        studentPhoto: '/api/photos/student-2.jpg',
-        enterpriseId: 2,
-        enterpriseName: 'MarketingPro',
-        enterpriseLogo: '/api/logos/marketingpro-logo.png',
-        stageTitle: 'Assistant Marketing Digital',
-        reportType: 'monthly',
-        title: 'Rapport mensuel - Avril 2024',
-        submissionDate: '01/05/2024',
-        dueDate: '05/05/2024',
-        status: 'submitted',
-        supervisor: 'Mme. Dubois',
-        tutor: 'Dr. Moreau',
-        program: 'Master Marketing',
-        year: 2,
-        content: 'Ce rapport détaille les activités marketing digital réalisées au cours du mois d\'avril. J\'ai géré les réseaux sociaux de l\'entreprise, créé du contenu engageant et analysé les performances des campagnes. Les résultats montrent une augmentation de 15% de l\'engagement sur les réseaux sociaux.',
-        summary: 'Gestion réseaux sociaux, création contenu, analyse performances',
-        keywords: ['Marketing Digital', 'Réseaux sociaux', 'Contenu', 'Analytics'],
-        attachments: [
+        idEtudiant: '2024002',
+        nomEtudiant: 'Marie Martin',
+        photoEtudiant: '/api/photos/student-2.jpg',
+        idEntreprise: 2,
+        nomEntreprise: 'MarketingPro',
+        logoEntreprise: '/api/logos/marketingpro-logo.png',
+        titreStage: 'Assistant Marketing Digital',
+        typeRapport: 'mensuel',
+        titre: 'Rapport mensuel - Avril 2024',
+        dateSoumission: '01/05/2024',
+        dateLimite: '05/05/2024',
+        statut: 'soumis',
+        encadrant: 'Mme. Dubois',
+        tuteur: 'Dr. Moreau',
+        programme: 'Master Marketing',
+        annee: 2,
+        contenu: 'Ce rapport détaille les activités marketing digital réalisées au cours du mois d\'avril. J\'ai géré les réseaux sociaux de l\'entreprise, créé du contenu engageant et analysé les performances des campagnes. Les résultats montrent une augmentation de 15% de l\'engagement sur les réseaux sociaux.',
+        resume: 'Gestion réseaux sociaux, création contenu, analyse performances',
+        motsCles: ['Marketing Digital', 'Réseaux sociaux', 'Contenu', 'Analytics'],
+        fichiers: [
           {
             id: 3,
-            name: 'Rapport_mensuel_Avril_Marie_Martin.pdf',
+            nom: 'Rapport_mensuel_Avril_Marie_Martin.pdf',
             type: 'Rapport',
-            uploadDate: '01/05/2024',
-            status: 'En attente',
+            dateDepot: '01/05/2024',
+            statut: 'En attente',
             url: '/api/documents/rapport-2.pdf'
           }
         ]
       },
       {
         id: 3,
-        studentId: '2024003',
-        studentName: 'Sophie Bernard',
-        studentPhoto: '/api/photos/student-4.jpg',
-        enterpriseId: 3,
-        enterpriseName: 'DataCorp',
-        enterpriseLogo: '/api/logos/datacorp-logo.png',
-        stageTitle: 'Data Analyst',
-        reportType: 'final',
-        title: 'Rapport final de stage',
-        submissionDate: '15/12/2023',
-        dueDate: '31/12/2023',
-        status: 'approved',
-        grade: 4.8,
-        supervisor: 'M. Bernard',
-        tutor: 'Dr. Petit',
-        program: 'Master Data Science',
-        year: 2,
-        content: 'Ce rapport final présente l\'ensemble du travail réalisé lors de mon stage de 6 mois chez DataCorp. J\'ai contribué à plusieurs projets d\'analyse de données, développé des modèles prédictifs et créé des dashboards interactifs. Les résultats ont permis d\'améliorer les processus décisionnels de l\'entreprise.',
-        summary: 'Analyse données, modèles prédictifs, dashboards, amélioration processus',
-        keywords: ['Data Science', 'Machine Learning', 'Analytics', 'Dashboard', 'Prédiction'],
-        comments: 'Rapport exceptionnel, travail de très haute qualité',
+        idEtudiant: '2024003',
+        nomEtudiant: 'Sophie Bernard',
+        photoEtudiant: '/api/photos/student-4.jpg',
+        idEntreprise: 3,
+        nomEntreprise: 'DataCorp',
+        logoEntreprise: '/api/logos/datacorp-logo.png',
+        titreStage: 'Data Analyst',
+        typeRapport: 'final',
+        titre: 'Rapport final de stage',
+        dateSoumission: '15/12/2023',
+        dateLimite: '31/12/2023',
+        statut: 'approuve',
+        note: 4.8,
+        encadrant: 'M. Bernard',
+        tuteur: 'Dr. Petit',
+        programme: 'Master Data Science',
+        annee: 2,
+        contenu: 'Ce rapport final présente l\'ensemble du travail réalisé lors de mon stage de 6 mois chez DataCorp. J\'ai contribué à plusieurs projets d\'analyse de données, développé des modèles prédictifs et créé des dashboards interactifs. Les résultats ont permis d\'améliorer les processus décisionnels de l\'entreprise.',
+        resume: 'Analyse données, modèles prédictifs, dashboards, amélioration processus',
+        motsCles: ['Data Science', 'Machine Learning', 'Analytics', 'Dashboard', 'Prédiction'],
+        commentaires: 'Rapport exceptionnel, travail de très haute qualité',
         feedback: 'Excellente contribution à l\'entreprise, recommandation forte',
-        attachments: [
+        fichiers: [
           {
             id: 4,
-            name: 'Rapport_final_Sophie_Bernard.pdf',
+            nom: 'Rapport_final_Sophie_Bernard.pdf',
             type: 'Rapport final',
-            uploadDate: '15/12/2023',
-            status: 'Approuvé',
+            dateDepot: '15/12/2023',
+            statut: 'Approuvé',
             url: '/api/documents/rapport-final-3.pdf'
           },
           {
             id: 5,
-            name: 'Annexes_techniques.pdf',
+            nom: 'Annexes_techniques.pdf',
             type: 'Annexe',
-            uploadDate: '15/12/2023',
-            status: 'Approuvé',
+            dateDepot: '15/12/2023',
+            statut: 'Approuvé',
             url: '/api/documents/annexes-3.pdf'
           }
         ]
       },
       {
         id: 4,
-        studentId: '2024004',
-        studentName: 'Pierre Durand',
-        studentPhoto: '/api/photos/student-3.jpg',
-        enterpriseId: 4,
-        enterpriseName: 'DesignStudio',
-        enterpriseLogo: '/api/logos/designstudio-logo.png',
-        stageTitle: 'UX/UI Designer',
-        reportType: 'interim',
-        title: 'Rapport intermédiaire',
-        submissionDate: '15/05/2024',
-        dueDate: '20/05/2024',
-        status: 'draft',
-        supervisor: 'Mme. Laurent',
-        tutor: 'Dr. Roux',
-        program: 'Master Design',
-        year: 2,
-        content: 'Rapport intermédiaire présentant les premières réalisations en design UX/UI. J\'ai travaillé sur la refonte de l\'interface utilisateur d\'une application mobile, en créant des wireframes et des prototypes interactifs.',
-        summary: 'Refonte interface mobile, wireframes, prototypes',
-        keywords: ['UX/UI', 'Design', 'Mobile', 'Wireframes', 'Prototypes'],
-        attachments: [
+        idEtudiant: '2024004',
+        nomEtudiant: 'Pierre Durand',
+        photoEtudiant: '/api/photos/student-3.jpg',
+        idEntreprise: 4,
+        nomEntreprise: 'DesignStudio',
+        logoEntreprise: '/api/logos/designstudio-logo.png',
+        titreStage: 'UX/UI Designer',
+        typeRapport: 'intermediaire',
+        titre: 'Rapport intermédiaire',
+        dateSoumission: '15/05/2024',
+        dateLimite: '20/05/2024',
+        statut: 'brouillon',
+        encadrant: 'Mme. Laurent',
+        tuteur: 'Dr. Roux',
+        programme: 'Master Design',
+        annee: 2,
+        contenu: 'Rapport intermédiaire présentant les premières réalisations en design UX/UI. J\'ai travaillé sur la refonte de l\'interface utilisateur d\'une application mobile, en créant des wireframes et des prototypes interactifs.',
+        resume: 'Refonte interface mobile, wireframes, prototypes',
+        motsCles: ['UX/UI', 'Design', 'Mobile', 'Wireframes', 'Prototypes'],
+        fichiers: [
           {
             id: 6,
-            name: 'Rapport_intermediaire_Pierre_Durand.pdf',
+            nom: 'Rapport_intermediaire_Pierre_Durand.pdf',
             type: 'Rapport',
-            uploadDate: '15/05/2024',
-            status: 'Brouillon',
+            dateDepot: '15/05/2024',
+            statut: 'Brouillon',
             url: '/api/documents/rapport-4.pdf'
           }
         ]
       },
       {
         id: 5,
-        studentId: '2024005',
-        studentName: 'Lucas Moreau',
-        studentPhoto: '/api/photos/student-5.jpg',
-        enterpriseId: 5,
-        enterpriseName: 'MobileTech',
-        enterpriseLogo: '/api/logos/mobiletech-logo.png',
-        stageTitle: 'Développeur Mobile',
-        reportType: 'monthly',
-        title: 'Rapport mensuel - Mai 2024',
-        submissionDate: '01/06/2024',
-        dueDate: '05/06/2024',
-        status: 'reviewed',
-        grade: 3.8,
-        supervisor: 'M. Durand',
-        tutor: 'Dr. Simon',
-        program: 'Master Informatique',
-        year: 2,
-        content: 'Rapport mensuel sur le développement mobile. J\'ai travaillé sur l\'application iOS en Swift, implémentant de nouvelles fonctionnalités et corrigeant des bugs. Le développement progresse bien malgré quelques difficultés techniques.',
-        summary: 'Développement iOS, Swift, nouvelles fonctionnalités, corrections bugs',
-        keywords: ['iOS', 'Swift', 'Développement mobile', 'Fonctionnalités'],
-        comments: 'Bon travail, quelques améliorations possibles',
+        idEtudiant: '2024005',
+        nomEtudiant: 'Lucas Moreau',
+        photoEtudiant: '/api/photos/student-5.jpg',
+        idEntreprise: 5,
+        nomEntreprise: 'MobileTech',
+        logoEntreprise: '/api/logos/mobiletech-logo.png',
+        titreStage: 'Développeur Mobile',
+        typeRapport: 'mensuel',
+        titre: 'Rapport mensuel - Mai 2024',
+        dateSoumission: '01/06/2024',
+        dateLimite: '05/06/2024',
+        statut: 'revise',
+        note: 3.8,
+        encadrant: 'M. Durand',
+        tuteur: 'Dr. Simon',
+        programme: 'Master Informatique',
+        annee: 2,
+        contenu: 'Rapport mensuel sur le développement mobile. J\'ai travaillé sur l\'application iOS en Swift, implémentant de nouvelles fonctionnalités et corrigeant des bugs. Le développement progresse bien malgré quelques difficultés techniques.',
+        resume: 'Développement iOS, Swift, nouvelles fonctionnalités, corrections bugs',
+        motsCles: ['iOS', 'Swift', 'Développement mobile', 'Fonctionnalités'],
+        commentaires: 'Bon travail, quelques améliorations possibles',
         feedback: 'Continuer les efforts, attention à la qualité du code',
-        attachments: [
+        fichiers: [
           {
             id: 7,
-            name: 'Rapport_mensuel_Mai_Lucas_Moreau.pdf',
+            nom: 'Rapport_mensuel_Mai_Lucas_Moreau.pdf',
             type: 'Rapport',
-            uploadDate: '01/06/2024',
-            status: 'Révisé',
+            dateDepot: '01/06/2024',
+            statut: 'Révisé',
             url: '/api/documents/rapport-5.pdf'
           }
         ]
@@ -252,16 +252,16 @@ const Rapports: React.FC = () => {
     let filtered = reports;
 
     if (newFilters.status) {
-      filtered = filtered.filter(report => report.status === newFilters.status);
+      filtered = filtered.filter(report => report.statut === newFilters.status);
     }
     if (newFilters.type) {
-      filtered = filtered.filter(report => report.reportType === newFilters.type);
+      filtered = filtered.filter(report => report.typeRapport === newFilters.type);
     }
     if (newFilters.program) {
-      filtered = filtered.filter(report => report.program === newFilters.program);
+      filtered = filtered.filter(report => report.programme === newFilters.program);
     }
     if (newFilters.year) {
-      filtered = filtered.filter(report => report.year.toString() === newFilters.year);
+      filtered = filtered.filter(report => report.annee.toString() === newFilters.year);
     }
 
     setFilteredReports(filtered);
@@ -269,11 +269,11 @@ const Rapports: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      draft: { class: 'bg-secondary', text: 'Brouillon', icon: 'fas fa-edit' },
-      submitted: { class: 'bg-warning', text: 'Soumis', icon: 'fas fa-paper-plane' },
-      reviewed: { class: 'bg-info', text: 'Révisé', icon: 'fas fa-eye' },
-      approved: { class: 'bg-success', text: 'Approuvé', icon: 'fas fa-check' },
-      rejected: { class: 'bg-danger', text: 'Rejeté', icon: 'fas fa-times' }
+      brouillon: { class: 'bg-secondary', text: 'Brouillon', icon: 'fas fa-edit' },
+      soumis: { class: 'bg-warning', text: 'Soumis', icon: 'fas fa-paper-plane' },
+      revise: { class: 'bg-info', text: 'Révisé', icon: 'fas fa-eye' },
+      approuve: { class: 'bg-success', text: 'Approuvé', icon: 'fas fa-check' },
+      rejete: { class: 'bg-danger', text: 'Rejeté', icon: 'fas fa-times' }
     };
 
     const config = statusConfig[status as keyof typeof statusConfig];
@@ -287,9 +287,9 @@ const Rapports: React.FC = () => {
 
   const getTypeBadge = (type: string) => {
     const typeConfig = {
-      monthly: { class: 'bg-primary', text: 'Mensuel' },
+      mensuel: { class: 'bg-primary', text: 'Mensuel' },
       final: { class: 'bg-success', text: 'Final' },
-      interim: { class: 'bg-warning', text: 'Intermédiaire' }
+      intermediaire: { class: 'bg-warning', text: 'Intermédiaire' }
     };
 
     const config = typeConfig[type as keyof typeof typeConfig];
@@ -297,7 +297,7 @@ const Rapports: React.FC = () => {
   };
 
   const getStatusCount = (status: string) => {
-    return reports.filter(report => report.status === status).length;
+    return reports.filter(report => report.statut === status).length;
   };
 
   const getGradeColor = (grade: number) => {
@@ -366,7 +366,7 @@ const Rapports: React.FC = () => {
                   <div className="card-body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <h4 className="mb-0">{getStatusCount('submitted')}</h4>
+                        <h4 className="mb-0">{getStatusCount('soumis')}</h4>
                         <p className="mb-0">Soumis</p>
                       </div>
                       <i className="fas fa-paper-plane fa-2x opacity-50"></i>
@@ -379,7 +379,7 @@ const Rapports: React.FC = () => {
                   <div className="card-body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <h4 className="mb-0">{getStatusCount('reviewed')}</h4>
+                        <h4 className="mb-0">{getStatusCount('revise')}</h4>
                         <p className="mb-0">Révisés</p>
                       </div>
                       <i className="fas fa-eye fa-2x opacity-50"></i>
@@ -392,7 +392,7 @@ const Rapports: React.FC = () => {
                   <div className="card-body">
                     <div className="d-flex justify-content-between">
                       <div>
-                        <h4 className="mb-0">{getStatusCount('approved')}</h4>
+                        <h4 className="mb-0">{getStatusCount('approuve')}</h4>
                         <p className="mb-0">Approuvés</p>
                       </div>
                       <i className="fas fa-check-circle fa-2x opacity-50"></i>
@@ -417,11 +417,11 @@ const Rapports: React.FC = () => {
                       onChange={(e) => handleFilterChange('status', e.target.value)}
                     >
                       <option value="">Tous les statuts</option>
-                      <option value="draft">Brouillon</option>
-                      <option value="submitted">Soumis</option>
-                      <option value="reviewed">Révisé</option>
-                      <option value="approved">Approuvé</option>
-                      <option value="rejected">Rejeté</option>
+                      <option value="brouillon">Brouillon</option>
+                      <option value="soumis">Soumis</option>
+                      <option value="revise">Révisé</option>
+                      <option value="approuve">Approuvé</option>
+                      <option value="rejete">Rejeté</option>
                     </select>
                   </div>
                   <div className="col-md-3">
@@ -432,9 +432,9 @@ const Rapports: React.FC = () => {
                       onChange={(e) => handleFilterChange('type', e.target.value)}
                     >
                       <option value="">Tous les types</option>
-                      <option value="monthly">Mensuel</option>
+                      <option value="mensuel">Mensuel</option>
                       <option value="final">Final</option>
-                      <option value="interim">Intermédiaire</option>
+                      <option value="intermediaire">Intermédiaire</option>
                     </select>
                   </div>
                   <div className="col-md-3">
@@ -503,51 +503,51 @@ const Rapports: React.FC = () => {
                             <td>
                               <div className="d-flex align-items-center">
                                 <img 
-                                  src={report.studentPhoto || '/default-avatar.png'} 
+                                  src={report.photoEtudiant || '/default-avatar.png'} 
                                   alt="Photo"
                                   className="rounded-circle me-3"
                                   style={{ width: '40px', height: '40px', objectFit: 'cover' }}
                                 />
                                 <div>
-                                  <strong>{report.studentName}</strong><br />
-                                  <small className="text-muted">{report.program} - {report.year}</small><br />
-                                  <small className="text-muted">ID: {report.studentId}</small>
+                                  <strong>{report.nomEtudiant}</strong><br />
+                                  <small className="text-muted">{report.programme} - {report.annee}</small><br />
+                                  <small className="text-muted">ID: {report.idEtudiant}</small>
                                 </div>
                               </div>
                             </td>
                             <td>
-                              <strong>{report.title}</strong><br />
-                              <small className="text-muted">{report.stageTitle}</small>
+                              <strong>{report.titre}</strong><br />
+                              <small className="text-muted">{report.titreStage}</small>
                             </td>
-                            <td>{getTypeBadge(report.reportType)}</td>
+                            <td>{getTypeBadge(report.typeRapport)}</td>
                             <td>
                               <div className="d-flex align-items-center">
                                 <img 
-                                  src={report.enterpriseLogo || '/default-logo.png'} 
+                                  src={report.logoEntreprise || '/default-logo.png'} 
                                   alt="Logo"
                                   className="rounded me-2"
                                   style={{ width: '30px', height: '30px', objectFit: 'contain' }}
                                 />
                                 <div>
-                                  <strong>{report.enterpriseName}</strong>
+                                  <strong>{report.nomEntreprise}</strong>
                                 </div>
                               </div>
                             </td>
                             <td>
-                              {report.submissionDate}<br />
-                              <small className="text-muted">Échéance: {report.dueDate}</small>
+                              {report.dateSoumission}<br />
+                              <small className="text-muted">Échéance: {report.dateLimite}</small>
                             </td>
                             <td>
-                              {report.grade ? (
+                              {report.note ? (
                                 <div className="d-flex align-items-center">
-                                  <span className={`me-2 text-${getGradeColor(report.grade)}`}>
-                                    {report.grade}/5
+                                  <span className={`me-2 text-${getGradeColor(report.note)}`}>
+                                    {report.note}/5
                                   </span>
                                   <div className="d-flex">
                                     {[...Array(5)].map((_, i) => (
                                       <i 
                                         key={i} 
-                                        className={`fas fa-star ${i < Math.floor(report.grade!) ? 'text-warning' : 'text-muted'}`}
+                                        className={`fas fa-star ${i < Math.floor(report.note!) ? 'text-warning' : 'text-muted'}`}
                                       ></i>
                                     ))}
                                   </div>
@@ -556,7 +556,7 @@ const Rapports: React.FC = () => {
                                 <span className="text-muted">-</span>
                               )}
                             </td>
-                            <td>{getStatusBadge(report.status)}</td>
+                            <td>{getStatusBadge(report.statut)}</td>
                             <td>
                               <div className="btn-group" role="group">
                                 <button 
@@ -569,7 +569,7 @@ const Rapports: React.FC = () => {
                                 >
                                   <i className="fas fa-eye"></i>
                                 </button>
-                                {report.status === 'submitted' && (
+                                {report.statut === 'soumis' && (
                                   <button 
                                     className="btn btn-sm btn-outline-success"
                                     title="Approuver"
@@ -615,7 +615,7 @@ const Rapports: React.FC = () => {
               <div className="modal-header">
                 <h5 className="modal-title">
                   <i className="fas fa-file-alt me-2"></i>
-                  Détails du rapport - {selectedReport.studentName}
+                  Détails du rapport - {selectedReport.nomEtudiant}
                 </h5>
                 <button 
                   type="button" 
@@ -659,48 +659,48 @@ const Rapports: React.FC = () => {
                         <div className="row">
                           <div className="col-md-6">
                             <h6 className="text-primary mb-3">Informations étudiant</h6>
-                            <p><strong>Nom:</strong> {selectedReport.studentName}</p>
-                            <p><strong>ID Étudiant:</strong> {selectedReport.studentId}</p>
-                            <p><strong>Programme:</strong> {selectedReport.program}</p>
-                            <p><strong>Année:</strong> {selectedReport.year}</p>
-                            <p><strong>Tuteur:</strong> {selectedReport.tutor}</p>
+                            <p><strong>Nom:</strong> {selectedReport.nomEtudiant}</p>
+                            <p><strong>ID Étudiant:</strong> {selectedReport.idEtudiant}</p>
+                            <p><strong>Programme:</strong> {selectedReport.programme}</p>
+                            <p><strong>Année:</strong> {selectedReport.annee}</p>
+                            <p><strong>Tuteur:</strong> {selectedReport.tuteur}</p>
                           </div>
                           <div className="col-md-6">
                             <h6 className="text-primary mb-3">Informations rapport</h6>
-                            <p><strong>Titre:</strong> {selectedReport.title}</p>
-                            <p><strong>Type:</strong> {getTypeBadge(selectedReport.reportType)}</p>
-                            <p><strong>Stage:</strong> {selectedReport.stageTitle}</p>
-                            <p><strong>Entreprise:</strong> {selectedReport.enterpriseName}</p>
-                            <p><strong>Superviseur:</strong> {selectedReport.supervisor}</p>
+                            <p><strong>Titre:</strong> {selectedReport.titre}</p>
+                            <p><strong>Type:</strong> {getTypeBadge(selectedReport.typeRapport)}</p>
+                            <p><strong>Stage:</strong> {selectedReport.titreStage}</p>
+                            <p><strong>Entreprise:</strong> {selectedReport.nomEntreprise}</p>
+                            <p><strong>Encadrant:</strong> {selectedReport.encadrant}</p>
                           </div>
                         </div>
 
                         <div className="mt-4">
                           <h6 className="text-primary mb-3">Résumé</h6>
-                          <p>{selectedReport.summary}</p>
+                          <p>{selectedReport.resume}</p>
                         </div>
 
                         <div className="mt-4">
                           <h6 className="text-primary mb-3">Mots-clés</h6>
                           <div className="d-flex flex-wrap gap-2">
-                            {selectedReport.keywords.map((keyword, index) => (
+                            {selectedReport.motsCles.map((keyword, index) => (
                               <span key={index} className="badge bg-light text-dark">{keyword}</span>
                             ))}
                           </div>
                         </div>
 
-                        {selectedReport.grade && (
+                        {selectedReport.note && (
                           <div className="mt-4">
                             <h6 className="text-primary mb-3">Note</h6>
                             <div className="d-flex align-items-center">
-                              <span className={`h4 me-3 text-${getGradeColor(selectedReport.grade)}`}>
-                                {selectedReport.grade}/5
+                              <span className={`h4 me-3 text-${getGradeColor(selectedReport.note)}`}>
+                                {selectedReport.note}/5
                               </span>
                               <div className="d-flex">
                                 {[...Array(5)].map((_, i) => (
                                   <i 
                                     key={i} 
-                                    className={`fas fa-star ${i < Math.floor(selectedReport.grade!) ? 'text-warning' : 'text-muted'}`}
+                                    className={`fas fa-star ${i < Math.floor(selectedReport.note!) ? 'text-warning' : 'text-muted'}`}
                                   ></i>
                                 ))}
                               </div>
@@ -708,10 +708,10 @@ const Rapports: React.FC = () => {
                           </div>
                         )}
 
-                        {selectedReport.comments && (
+                        {selectedReport.commentaires && (
                           <div className="mt-4">
                             <h6 className="text-primary mb-3">Commentaires</h6>
-                            <p>{selectedReport.comments}</p>
+                            <p>{selectedReport.commentaires}</p>
                           </div>
                         )}
 
@@ -727,13 +727,13 @@ const Rapports: React.FC = () => {
                           <div className="card-body">
                             <h6>Statut et dates</h6>
                             <div className="mb-3">
-                              <strong>Statut:</strong> {getStatusBadge(selectedReport.status)}
+                              <strong>Statut:</strong> {getStatusBadge(selectedReport.statut)}
                             </div>
                             <div className="mb-3">
-                              <strong>Date de soumission:</strong> {selectedReport.submissionDate}
+                              <strong>Date de soumission:</strong> {selectedReport.dateSoumission}
                             </div>
                             <div className="mb-3">
-                              <strong>Date limite:</strong> {selectedReport.dueDate}
+                              <strong>Date limite:</strong> {selectedReport.dateLimite}
                             </div>
                           </div>
                         </div>
@@ -747,7 +747,7 @@ const Rapports: React.FC = () => {
                       <h6 className="text-primary mb-3">Contenu du rapport</h6>
                       <div className="card">
                         <div className="card-body">
-                          <p>{selectedReport.content}</p>
+                          <p>{selectedReport.contenu}</p>
                         </div>
                       </div>
                     </div>
@@ -757,7 +757,7 @@ const Rapports: React.FC = () => {
                   {activeTab === 'documents' && (
                     <div>
                       <h6 className="text-primary mb-3">Documents joints</h6>
-                      {selectedReport.attachments.length === 0 ? (
+                      {selectedReport.fichiers.length === 0 ? (
                         <p className="text-muted">Aucun document joint.</p>
                       ) : (
                         <div className="table-responsive">
@@ -772,23 +772,23 @@ const Rapports: React.FC = () => {
                               </tr>
                             </thead>
                             <tbody>
-                              {selectedReport.attachments.map((doc) => (
+                              {selectedReport.fichiers.map((doc) => (
                                 <tr key={doc.id}>
                                   <td>
                                     <i className="fas fa-file-pdf text-danger me-2"></i>
-                                    {doc.name}
+                                    {doc.nom}
                                   </td>
                                   <td>
                                     <span className="badge bg-light text-dark">{doc.type}</span>
                                   </td>
-                                  <td>{doc.uploadDate}</td>
+                                  <td>{doc.dateDepot}</td>
                                   <td>
                                     <span className={`badge ${
-                                      doc.status === 'Approuvé' || doc.status === 'Validé' ? 'bg-success' : 
-                                      doc.status === 'En attente' ? 'bg-warning' : 
-                                      doc.status === 'Rejeté' ? 'bg-danger' : 'bg-secondary'
+                                      doc.statut === 'Approuvé' || doc.statut === 'Validé' ? 'bg-success' : 
+                                      doc.statut === 'En attente' ? 'bg-warning' : 
+                                      doc.statut === 'Rejeté' ? 'bg-danger' : 'bg-secondary'
                                     }`}>
-                                      {doc.status}
+                                      {doc.statut}
                                     </span>
                                   </td>
                                   <td>
@@ -819,7 +819,7 @@ const Rapports: React.FC = () => {
                 >
                   Fermer
                 </button>
-                {selectedReport.status === 'submitted' && (
+                {selectedReport.statut === 'soumis' && (
                   <button 
                     type="button" 
                     className="btn btn-success"
@@ -853,7 +853,7 @@ const Rapports: React.FC = () => {
                 ></button>
               </div>
               <div className="modal-body">
-                <p>Rapport de {selectedReport.studentName} - {selectedReport.title}</p>
+                <p>Rapport de {selectedReport.nomEtudiant} - {selectedReport.titre}</p>
                 <form>
                   <div className="mb-3">
                     <label className="form-label">Note *</label>
