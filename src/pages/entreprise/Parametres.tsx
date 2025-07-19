@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   FaCog, 
   FaSave, 
@@ -25,8 +25,13 @@ import {
   FaUsers,
   FaHandshake,
   FaStar,
-  FaExclamationTriangle
+  FaExclamationTriangle,
+  FaBuilding,
+  FaEdit
 } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
+import { db } from '../../config/firebase';
+import { collection, doc, getDocs, where } from 'firebase/firestore';
 
 interface Parametres {
   notifications: {
@@ -70,6 +75,7 @@ interface Parametres {
 }
 
 const Parametres: React.FC = () => {
+  const { user } = useAuth();
   const [parametres, setParametres] = useState<Parametres>({
     notifications: {
       email: true,
@@ -110,6 +116,19 @@ const Parametres: React.FC = () => {
       documentsObligatoires: ['CV', 'Lettre de motivation', 'Relevé de notes', 'Convention de stage']
     }
   });
+
+  useEffect(() => {
+    if (!user || !user.entrepriseId) return;
+    const fetchParametres = async () => {
+      const entrepriseRef = doc(db, 'entreprises', user.entrepriseId);
+      const entrepriseDoc = await getDocs(entrepriseRef);
+      if (!entrepriseDoc.empty) {
+        const entrepriseData = entrepriseDoc.docs[0].data();
+        setParametres(entrepriseData);
+      }
+    };
+    fetchParametres();
+  }, [user]);
 
   const [activeTab, setActiveTab] = useState('notifications');
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);

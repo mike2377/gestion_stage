@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../../components/layout/Sidebar';
 import { 
   FaUsers, 
   FaSearch, 
@@ -95,6 +94,7 @@ const MesStagiaires: React.FC = () => {
 
   // Données simulées
   useEffect(() => {
+    if (!user || !user.entrepriseId) return;
     const mockStagiaires: Stagiaire[] = [
       {
         id: 1,
@@ -269,7 +269,7 @@ const MesStagiaires: React.FC = () => {
     ];
     setStagiaires(mockStagiaires);
     setFilteredStagiaires(mockStagiaires);
-  }, []);
+  }, [user]);
 
   const handleFilterChange = (name: string, value: string) => {
     const newFilters = { ...filters, [name]: value };
@@ -332,7 +332,8 @@ const MesStagiaires: React.FC = () => {
   const user = {
     role: 'enterprise',
     firstName: 'TechCorp',
-    lastName: 'Admin'
+    lastName: 'Admin',
+    entrepriseId: 'your_enterprise_id_here' // Placeholder for actual user data
   };
 
   return (
@@ -505,7 +506,7 @@ const MesStagiaires: React.FC = () => {
                 className={`nav-link ${activeTab === 'statistiques' ? 'active' : ''}`}
                 onClick={() => setActiveTab('statistiques')}
               >
-                <FaChartLine className="me-2" />
+                {/* FaChartLine is not imported, so it's removed */}
                 Statistiques
               </button>
             </li>

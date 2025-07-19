@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../../config/firebase';
 
 interface Evaluation {
   id: number;
@@ -19,6 +22,7 @@ interface Evaluation {
 }
 
 const Evaluations: React.FC = () => {
+  const { user } = useAuth();
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [filteredEvaluations, setFilteredEvaluations] = useState<Evaluation[]>([]);
   const [filters, setFilters] = useState({
@@ -29,101 +33,53 @@ const Evaluations: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [selectedEvaluation, setSelectedEvaluation] = useState<Evaluation | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [evaluators, setEvaluators] = useState<{ id: string, name: string }[]>([]);
 
   useEffect(() => {
-    const mockEvaluations: Evaluation[] = [
-      {
-        id: 1,
-        studentId: '2024001',
-        studentName: 'Jean Dupont',
-        studentPhoto: '/api/photos/student-1.jpg',
-        program: 'Master Informatique',
-        year: 2,
-        enterpriseName: 'TechCorp Solutions',
-        stageTitle: 'Développeur Web Full-Stack',
-        evaluator: 'Dr. Dupont',
-        evaluatorRole: 'enseignant',
-        date: '15/04/2024',
-        score: 4.5,
-        status: 'completed',
-        comments: 'Très bon stage, étudiant motivé et compétent.',
-        criteria: [
-          { label: 'Compétences techniques', score: 5, max: 5 },
-          { label: 'Autonomie', score: 4, max: 5 },
-          { label: 'Communication', score: 4, max: 5 },
-          { label: 'Respect des délais', score: 5, max: 5 }
-        ]
-      },
-      {
-        id: 2,
-        studentId: '2024002',
-        studentName: 'Marie Martin',
-        studentPhoto: '/api/photos/student-2.jpg',
-        program: 'Master Marketing',
-        year: 2,
-        enterpriseName: 'MarketingPro',
-        stageTitle: 'Assistant Marketing Digital',
-        evaluator: 'Mme. Dubois',
-        evaluatorRole: 'tuteur',
-        date: '10/04/2024',
-        score: 4.2,
-        status: 'completed',
-        comments: 'Bonne intégration, créativité appréciée.',
-        criteria: [
-          { label: 'Créativité', score: 5, max: 5 },
-          { label: 'Rigueur', score: 4, max: 5 },
-          { label: 'Travail en équipe', score: 4, max: 5 },
-          { label: 'Respect des consignes', score: 4, max: 5 }
-        ]
-      },
-      {
-        id: 3,
-        studentId: '2024003',
-        studentName: 'Sophie Bernard',
-        studentPhoto: '/api/photos/student-3.jpg',
-        program: 'Master Data Science',
-        year: 2,
-        enterpriseName: 'DataCorp',
-        stageTitle: 'Data Analyst',
-        evaluator: 'M. Bernard',
-        evaluatorRole: 'entreprise',
-        date: '15/12/2023',
-        score: 4.8,
-        status: 'completed',
-        comments: 'Stage exceptionnel, embauche recommandée.',
-        criteria: [
-          { label: 'Analyse de données', score: 5, max: 5 },
-          { label: 'Innovation', score: 5, max: 5 },
-          { label: 'Présentation', score: 4, max: 5 },
-          { label: 'Autonomie', score: 5, max: 5 }
-        ]
-      },
-      {
-        id: 4,
-        studentId: '2024001',
-        studentName: 'Jean Dupont',
-        studentPhoto: '/api/photos/student-1.jpg',
-        program: 'Master Informatique',
-        year: 2,
-        enterpriseName: 'TechCorp Solutions',
-        stageTitle: 'Développeur Web Full-Stack',
-        evaluator: 'M. Martin',
-        evaluatorRole: 'tuteur',
-        date: '01/04/2024',
-        score: 4.3,
-        status: 'completed',
-        comments: 'Bon travail, progression constante.',
-        criteria: [
-          { label: 'Compétences techniques', score: 4, max: 5 },
-          { label: 'Autonomie', score: 4, max: 5 },
-          { label: 'Communication', score: 5, max: 5 },
-          { label: 'Respect des délais', score: 4, max: 5 }
-        ]
-      }
-    ];
-    setEvaluations(mockEvaluations);
-    setFilteredEvaluations(mockEvaluations);
-  }, []);
+    if (!user || !user.universiteId) return;
+    const fetchEvaluations = async () => {
+      // On suppose que chaque évaluation a un champ universiteId
+      const q = query(collection(db, 'evaluations'), where('universiteId', '==', user.universiteId));
+      const snap = await getDocs(q);
+      const evals: Evaluation[] = snap.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          studentId: data.studentId || data.idEtudiant || '',
+          studentName: data.studentName || data.nomEtudiant || '',
+          studentPhoto: data.studentPhoto || data.photoEtudiant || '',
+          program: data.program || data.programme || '',
+          year: data.year || data.annee || '',
+          enterpriseName: data.enterpriseName || data.nomEntreprise || '',
+          stageTitle: data.stageTitle || data.titreStage || '',
+          evaluator: data.evaluator || data.encadrant || data.tuteur || '',
+          evaluatorRole: data.evaluatorRole || data.typeEvaluation || '',
+          date: data.date || data.dateEvaluation || '',
+          score: data.score || data.noteGlobale || 0,
+          status: data.status || data.statut || '',
+          comments: data.comments || data.commentaires || '',
+          criteria: data.criteria || data.notes || [],
+        };
+      });
+      setEvaluations(evals);
+      setFilteredEvaluations(evals);
+    };
+    fetchEvaluations();
+    // Charger les évaluateurs (enseignants et tuteurs)
+    const fetchEvaluators = async () => {
+      const q = query(
+        collection(db, 'utilisateurs'),
+        where('universiteId', '==', user.universiteId),
+        where('role', 'in', ['teacher', 'enseignant', 'tutor', 'tuteur'])
+      );
+      const snap = await getDocs(q);
+      setEvaluators(snap.docs.map(doc => ({
+        id: doc.id,
+        name: (doc.data().firstName || doc.data().prenom || '') + ' ' + (doc.data().lastName || doc.data().nom || '')
+      })));
+    };
+    fetchEvaluators();
+  }, [user]);
 
   const handleFilterChange = (name: string, value: string) => {
     const newFilters = { ...filters, [name]: value };
@@ -149,12 +105,6 @@ const Evaluations: React.FC = () => {
     };
     const config = statusConfig[status as keyof typeof statusConfig];
     return <span className={`badge ${config.class}`}>{config.text}</span>;
-  };
-
-  const user = {
-    role: 'responsable',
-    firstName: 'M. Responsable',
-    lastName: 'Stage'
   };
 
   return (
@@ -206,11 +156,10 @@ const Evaluations: React.FC = () => {
                   <div className="col-md-3">
                     <label className="form-label">Évaluateur</label>
                     <select className="form-select" value={filters.evaluator} onChange={e => handleFilterChange('evaluator', e.target.value)}>
-                      <option value="">Tous</option>
-                      <option value="Dr. Dupont">Dr. Dupont</option>
-                      <option value="Mme. Dubois">Mme. Dubois</option>
-                      <option value="M. Bernard">M. Bernard</option>
-                      <option value="M. Martin">M. Martin</option>
+                      <option value="">Tous les évaluateurs</option>
+                      {evaluators.map(ev => (
+                        <option key={ev.id} value={ev.name}>{ev.name}</option>
+                      ))}
                     </select>
                   </div>
                   <div className="col-md-3 d-flex align-items-end">

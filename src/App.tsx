@@ -80,6 +80,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/entreprise" element={<Navigate to="/entreprise/dashboard" replace />} />
           
           {/* Routes avec Layout */}
           <Route path="/contact" element={
@@ -136,47 +137,18 @@ function App() {
           } />
 
           {/* Routes Entreprise avec Sidebar directe */}
-          <Route path="/entreprise/offres" element={
-            <ProtectedRoute allowedRoles={['entreprise']}>
+          <Route path="/entreprise/*" element={
             <SidebarLayout>
-              <MesOffres />
+              <Routes>
+                <Route path="dashboard" element={<DashboardEntreprise />} />
+                <Route path="offres" element={<MesOffres />} />
+                <Route path="candidatures" element={<Candidatures />} />
+                <Route path="stagiaires" element={<MesStagiaires />} />
+                <Route path="profil" element={<MonProfilEntreprise />} />
+                <Route path="taches" element={<TachesStagiaires />} />
+                <Route path="parametres" element={<ParametresEntreprise />} />
+              </Routes>
             </SidebarLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/entreprise/candidatures" element={
-            <ProtectedRoute allowedRoles={['entreprise']}>
-            <SidebarLayout>
-              <Candidatures />
-            </SidebarLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/entreprise/stagiaires" element={
-            <ProtectedRoute allowedRoles={['entreprise']}>
-            <SidebarLayout>
-              <MesStagiaires />
-            </SidebarLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/entreprise/profil" element={
-            <ProtectedRoute allowedRoles={['entreprise']}>
-            <SidebarLayout>
-              <MonProfilEntreprise />
-            </SidebarLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/entreprise/taches" element={
-            <ProtectedRoute allowedRoles={['entreprise']}>
-            <SidebarLayout>
-              <TachesStagiaires />
-            </SidebarLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/entreprise/parametres" element={
-            <ProtectedRoute allowedRoles={['entreprise']}>
-            <SidebarLayout>
-              <ParametresEntreprise />
-            </SidebarLayout>
-            </ProtectedRoute>
           } />
 
           {/* Routes Enseignant avec Sidebar directe */}
@@ -348,11 +320,9 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/entreprise/dashboard" element={
-            <ProtectedRoute allowedRoles={['entreprise']}>
-              <SidebarLayout>
-                <DashboardEntreprise />
-              </SidebarLayout>
-            </ProtectedRoute>
+            <SidebarLayout>
+              <DashboardEntreprise />
+            </SidebarLayout>
           } />
           <Route path="/enseignant/dashboard" element={
             <ProtectedRoute allowedRoles={['enseignant']}>

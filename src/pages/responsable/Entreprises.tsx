@@ -93,9 +93,9 @@ const Entreprises: React.FC = () => {
     <div className="dashboard-container">
       <div className="dashboard-content p-4">
         <h1 className="h3 mb-4">
-          <i className="fas fa-building me-2 text-primary"></i>
+                  <i className="fas fa-building me-2 text-primary"></i>
           Entreprises partenaires de mon université
-        </h1>
+                </h1>
         {loading ? (
           <div>Chargement...</div>
         ) : (
@@ -126,7 +126,7 @@ const Entreprises: React.FC = () => {
                       <td>
                         <button className="btn btn-sm btn-outline-danger" disabled={actionLoading === e.id} onClick={() => dissocierEntreprise(e.id)}>
                           {actionLoading === e.id ? '...' : 'Retirer'}
-                        </button>
+                </button>
                       </td>
                     </tr>
                   ))}
@@ -162,7 +162,7 @@ const Entreprises: React.FC = () => {
                         </button>
                         <button className="btn btn-sm btn-outline-danger ms-2" disabled={actionLoading === e.id} onClick={() => dissocierEntreprise(e.id)}>
                           {actionLoading === e.id ? '...' : 'Refuser'}
-                        </button>
+                    </button>
                       </td>
                     </tr>
                   ))}
@@ -170,19 +170,19 @@ const Entreprises: React.FC = () => {
               </table>
             </div>
             <h5 className="mb-3">Entreprises non associées</h5>
-            <div className="table-responsive">
-              <table className="table table-hover">
-                <thead>
-                  <tr>
-                    <th>Entreprise</th>
-                    <th>Secteur</th>
-                    <th>Localisation</th>
-                    <th>Contact</th>
-                    <th>Statut</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
+                  <div className="table-responsive">
+                    <table className="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Entreprise</th>
+                          <th>Secteur</th>
+                          <th>Localisation</th>
+                          <th>Contact</th>
+                          <th>Statut</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
                   {nonAssociees.length === 0 ? (
                     <tr><td colSpan={6} className="text-center text-muted">Aucune entreprise à associer</td></tr>
                   ) : nonAssociees.map(e => (
@@ -195,17 +195,17 @@ const Entreprises: React.FC = () => {
                       <td>
                         <button className="btn btn-sm btn-outline-success" disabled={actionLoading === e.id} onClick={() => associerEntreprise(e.id)}>
                           {actionLoading === e.id ? '...' : 'Associer'}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                                </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
           </>
-        )}
-      </div>
-    </div>
+                )}
+              </div>
+            </div>
   );
 };
 

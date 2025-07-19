@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../../components/layout/Sidebar';
 import { 
   FaBuilding, 
   FaSave, 
@@ -85,69 +84,27 @@ const MonProfil: React.FC = () => {
 
   // Données simulées
   useEffect(() => {
-    const mockProfile: ProfilEntreprise = {
-      id: 1,
-      nom: 'TechCorp Solutions',
-      siret: '12345678901234',
-      adresse: '123 Rue de l\'Innovation',
-      ville: 'Paris',
-      codePostal: '75001',
-      pays: 'France',
-      telephone: '+33 1 23 45 67 89',
-      email: 'contact@techcorp-solutions.fr',
-      siteWeb: 'https://www.techcorp-solutions.fr',
-      secteur: 'Technologies de l\'information',
-      taille: '50-100 employés',
-      description: 'TechCorp Solutions est une entreprise innovante spécialisée dans le développement de solutions logicielles modernes. Nous créons des applications web et mobiles de haute qualité pour nos clients.',
-      logo: '/api/logos/techcorp-logo.png',
-      anneeCreation: 2018,
-      nbEmployes: 75,
-      contact: {
-        prenom: 'Jean',
-        nom: 'Martin',
-        poste: 'Directeur des Ressources Humaines',
-        email: 'jean.martin@techcorp-solutions.fr',
-        telephone: '+33 1 23 45 67 90'
-      },
-      reseauxSociaux: {
-        linkedin: 'https://linkedin.com/company/techcorp-solutions',
-        twitter: 'https://twitter.com/techcorp_sol',
-        facebook: 'https://facebook.com/techcorpsolutions'
-      },
-      documents: [
-        {
-          id: 1,
-          nom: 'Kbis_TechCorp_Solutions.pdf',
-          type: 'Kbis',
-          dateDepot: '15/01/2024',
-          statut: 'Approuvé'
-        },
-        {
-          id: 2,
-          nom: 'Attestation_assurance_TechCorp.pdf',
-          type: 'Attestation d\'assurance',
-          dateDepot: '20/01/2024',
-          statut: 'Approuvé'
-        },
-        {
-          id: 3,
-          nom: 'Convention_stage_template.pdf',
-          type: 'Convention type',
-          dateDepot: '25/01/2024',
-          statut: 'En attente'
+    if (!user || !user.entrepriseId) return;
+    const fetchProfile = async () => {
+      try {
+        const q = query(collection(db, 'entreprises'), where('id', '==', user.entrepriseId));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const entrepriseDoc = snap.docs[0];
+          setProfile({
+            id: entrepriseDoc.id,
+            ...entrepriseDoc.data()
+          } as ProfilEntreprise);
+        } else {
+          setProfile(null); // No profile found
         }
-      ],
-      statistiques: {
-        nbStagiairesTotal: 12,
-        nbStagiairesActifs: 3,
-        nbStagiairesTermines: 9,
-        noteMoyenne: 4.6,
-        nbOffresTotal: 8,
-        nbOffresActives: 2
+      } catch (e) {
+        console.error("Erreur lors de la récupération du profil de l'entreprise:", e);
+        setProfile(null);
       }
     };
-    setProfile(mockProfile);
-  }, []);
+    fetchProfile();
+  }, [user]);
 
   const handleSave = async () => {
     setIsEditing(false);
@@ -186,7 +143,8 @@ const MonProfil: React.FC = () => {
   const user = {
     role: 'enterprise',
     firstName: 'TechCorp',
-    lastName: 'Admin'
+    lastName: 'Admin',
+    entrepriseId: '1234567890abcdef1234567890abcdef' // This should be replaced with the actual entrepriseId from the profile
   };
 
   if (!profile) {
@@ -197,11 +155,7 @@ const MonProfil: React.FC = () => {
     <div className="container-fluid">
       <div className="row g-0">
         <div className={`col-auto ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-          <Sidebar 
-            user={user} 
-            isCollapsed={isSidebarCollapsed}
-            onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          />
+          {/* Sidebar removed */}
         </div>
         <div className="col">
           <div className="dashboard-content p-4">

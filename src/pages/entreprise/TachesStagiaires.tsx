@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../../components/layout/Sidebar';
+// Supprimer : import Sidebar from '../../components/layout/Sidebar';
 
 interface Tache {
   id: number;
@@ -47,163 +47,9 @@ const TachesStagiaires: React.FC = () => {
 
   // Données simulées
   useEffect(() => {
-    const mockTasks: Tache[] = [
-      {
-        id: 1,
-        titre: 'Développement du module authentification',
-        description: 'Créer un système d\'authentification sécurisé avec JWT pour l\'application web. Inclure la gestion des rôles et permissions.',
-        idStagiaire: 1,
-        nomStagiaire: 'Jean Dupont',
-        photoStagiaire: '/api/photos/student-1.jpg',
-        titreStage: 'Développeur Web Full-Stack',
-        dateAttribution: '01/03/2024',
-        dateEcheance: '15/04/2024',
-        statut: 'en_cours',
-        priorite: 'haute',
-        categorie: 'Développement',
-        heuresEstimees: 40,
-        heuresReelles: 25,
-        encadrant: 'M. Martin',
-        fichiers: ['specs-auth.pdf', 'mockups-auth.png'],
-        progression: 62,
-        commentaires: [
-          {
-            id: 1,
-            auteur: 'M. Martin',
-            contenu: 'Bon début, n\'oubliez pas de tester les cas d\'erreur',
-            date: '05/03/2024',
-            estEncadrant: true
-          },
-          {
-            id: 2,
-            auteur: 'Jean Dupont',
-            contenu: 'Merci, je vais ajouter les tests unitaires',
-            date: '06/03/2024',
-            estEncadrant: false
-          }
-        ]
-      },
-      {
-        id: 2,
-        titre: 'Création de la base de données',
-        description: 'Concevoir et implémenter le schéma de base de données pour le projet e-commerce. Inclure les relations et contraintes.',
-        idStagiaire: 1,
-        nomStagiaire: 'Jean Dupont',
-        photoStagiaire: '/api/photos/student-1.jpg',
-        titreStage: 'Développeur Web Full-Stack',
-        dateAttribution: '10/03/2024',
-        dateEcheance: '25/03/2024',
-        statut: 'terminee',
-        priorite: 'moyenne',
-        categorie: 'Base de données',
-        heuresEstimees: 20,
-        heuresReelles: 18,
-        encadrant: 'M. Martin',
-        progression: 100,
-        commentaires: [
-          {
-            id: 3,
-            auteur: 'M. Martin',
-            contenu: 'Excellent travail, la structure est bien pensée',
-            date: '20/03/2024',
-            estEncadrant: true
-          }
-        ]
-      },
-      {
-        id: 3,
-        titre: 'Gestion des réseaux sociaux',
-        description: 'Créer et publier du contenu sur les réseaux sociaux de l\'entreprise. Analyser les performances et proposer des améliorations.',
-        idStagiaire: 2,
-        nomStagiaire: 'Marie Martin',
-        photoStagiaire: '/api/photos/student-2.jpg',
-        titreStage: 'Assistant Marketing Digital',
-        dateAttribution: '01/04/2024',
-        dateEcheance: '30/04/2024',
-        statut: 'en_cours',
-        priorite: 'moyenne',
-        categorie: 'Marketing',
-        heuresEstimees: 30,
-        heuresReelles: 15,
-        encadrant: 'Mme. Dubois',
-        progression: 50,
-        commentaires: [
-          {
-            id: 4,
-            auteur: 'Mme. Dubois',
-            contenu: 'Le contenu est de bonne qualité, continuez ainsi',
-            date: '10/04/2024',
-            estEncadrant: true
-          }
-        ]
-      },
-      {
-        id: 4,
-        titre: 'Tests unitaires et d\'intégration',
-        description: 'Écrire des tests complets pour tous les modules développés. Assurer une couverture de code d\'au moins 80%.',
-        idStagiaire: 1,
-        nomStagiaire: 'Jean Dupont',
-        photoStagiaire: '/api/photos/student-1.jpg',
-        titreStage: 'Développeur Web Full-Stack',
-        dateAttribution: '20/03/2024',
-        dateEcheance: '10/04/2024',
-        statut: 'en_attente',
-        priorite: 'haute',
-        categorie: 'Tests',
-        heuresEstimees: 25,
-        encadrant: 'M. Martin',
-        progression: 0,
-        commentaires: []
-      },
-      {
-        id: 5,
-        titre: 'Analyse des performances SEO',
-        description: 'Analyser le SEO du site web actuel et proposer des améliorations pour optimiser le référencement.',
-        idStagiaire: 2,
-        nomStagiaire: 'Marie Martin',
-        photoStagiaire: '/api/photos/student-2.jpg',
-        titreStage: 'Assistant Marketing Digital',
-        dateAttribution: '15/04/2024',
-        dateEcheance: '15/05/2024',
-        statut: 'en_attente',
-        priorite: 'basse',
-        categorie: 'SEO',
-        heuresEstimees: 35,
-        encadrant: 'Mme. Dubois',
-        progression: 0,
-        commentaires: []
-      },
-      {
-        id: 6,
-        titre: 'Déploiement en production',
-        description: 'Préparer et effectuer le déploiement de l\'application en production. Configurer l\'environnement et les variables.',
-        idStagiaire: 1,
-        nomStagiaire: 'Jean Dupont',
-        photoStagiaire: '/api/photos/student-1.jpg',
-        titreStage: 'Développeur Web Full-Stack',
-        dateAttribution: '01/05/2024',
-        dateEcheance: '15/05/2024',
-        statut: 'retard',
-        priorite: 'urgente',
-        categorie: 'DevOps',
-        heuresEstimees: 15,
-        heuresReelles: 20,
-        encadrant: 'M. Martin',
-        progression: 85,
-        commentaires: [
-          {
-            id: 5,
-            auteur: 'M. Martin',
-            contenu: 'Attention aux délais, cette tâche est critique',
-            date: '10/05/2024',
-            estEncadrant: true
-          }
-        ]
-      }
-    ];
-    setTasks(mockTasks);
-    setFilteredTasks(mockTasks);
-  }, []);
+    if (!user || !user.entrepriseId) return;
+    // ... requête Firestore avec where('entrepriseId', '==', user.entrepriseId') ...
+  }, [user]);
 
   const handleFilterChange = (name: string, value: string) => {
     const newFilters = { ...filters, [name]: value };
@@ -291,11 +137,11 @@ const TachesStagiaires: React.FC = () => {
     <div className="dashboard-container">
       <div className="row g-0">
         <div className={`col-auto ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-          <Sidebar 
+          {/* Supprimer : <Sidebar 
             user={user} 
             isCollapsed={isSidebarCollapsed}
             onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          />
+          /> */}
         </div>
         <div className="col">
           <div className="dashboard-content p-4">

@@ -25,7 +25,7 @@ const Login: React.FC = () => {
       } else if (role === 'student') {
         navigate('/etudiant/stages', { replace: true });
       } else if (role === 'enterprise') {
-        navigate('/entreprise/offres', { replace: true });
+        navigate('/entreprise', { replace: true });
       } else if (role === 'teacher') {
         navigate('/enseignant/stages', { replace: true });
       } else if (role === 'responsible') {

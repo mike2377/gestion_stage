@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../../config/firebase';
 
 interface StatData {
   totalStudents: number;
@@ -13,51 +16,122 @@ interface StatData {
 }
 
 const Statistiques: React.FC = () => {
+  const { user } = useAuth();
   const [stats, setStats] = useState<StatData | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('2024');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const mockStats: StatData = {
-      totalStudents: 156,
-      activeInternships: 89,
-      completedInternships: 234,
-      totalEnterprises: 45,
-      totalApplications: 567,
-      averageScore: 4.2,
-      monthlyStats: [
-        { month: 'Jan', applications: 45, completions: 12 },
-        { month: 'Fév', applications: 52, completions: 18 },
-        { month: 'Mar', applications: 38, completions: 15 },
-        { month: 'Avr', applications: 67, completions: 22 },
-        { month: 'Mai', applications: 73, completions: 28 },
-        { month: 'Juin', applications: 89, completions: 35 }
-      ],
-      programStats: [
-        { program: 'Master Informatique', count: 45 },
-        { program: 'Master Marketing', count: 32 },
-        { program: 'Master Data Science', count: 28 },
-        { program: 'Master Design', count: 23 },
-        { program: 'Master Finance', count: 18 }
-      ],
-      enterpriseStats: [
-        { enterprise: 'TechCorp Solutions', internships: 12, students: 15 },
-        { enterprise: 'MarketingPro', internships: 8, students: 10 },
-        { enterprise: 'DataCorp', internships: 6, students: 8 },
-        { enterprise: 'DesignStudio', internships: 5, students: 7 },
-        { enterprise: 'FinanceGroup', internships: 4, students: 6 }
-      ]
+    if (!user || !user.universiteId) return;
+    setLoading(true);
+    const fetchStats = async () => {
+      // 1. Étudiants
+      const studentsQ = query(
+        collection(db, 'utilisateurs'),
+        where('universiteId', '==', user.universiteId),
+        where('role', 'in', ['student', 'etudiant'])
+      );
+      const studentsSnap = await getDocs(studentsQ);
+      const students = studentsSnap.docs.map(doc => doc.data());
+      const totalStudents = students.length;
+
+      // 2. Stages (tous)
+      const stagesQ = query(
+        collection(db, 'stages'),
+        where('universiteId', '==', user.universiteId)
+      );
+      const stagesSnap = await getDocs(stagesQ);
+      const stages = stagesSnap.docs.map(doc => doc.data());
+      const activeInternships = stages.filter(s => s.statut === 'published').length;
+      const completedInternships = stages.filter(s => s.statut === 'termine' || s.statut === 'completed').length;
+
+      // 3. Entreprises (toutes)
+      const entreprisesSnap = await getDocs(collection(db, 'entreprises'));
+      const entreprises = entreprisesSnap.docs.map(doc => doc.data());
+      const totalEnterprises = entreprises.length;
+
+      // 4. Candidatures (somme)
+      let totalApplications = 0;
+      stages.forEach(stage => {
+        if (Array.isArray(stage.candidatures)) {
+          totalApplications += stage.candidatures.length;
+        }
+      });
+
+      // 5. Note moyenne (stages terminés)
+      let totalScore = 0, nbScores = 0;
+      stages.forEach(stage => {
+        if ((stage.statut === 'termine' || stage.statut === 'completed') && typeof stage.noteEvaluation === 'number') {
+          totalScore += stage.noteEvaluation;
+          nbScores++;
+        }
+      });
+      const averageScore = nbScores > 0 ? totalScore / nbScores : 0;
+
+      // 6. Évolution mensuelle (année sélectionnée)
+      const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+      const monthlyStats = months.map((month, idx) => {
+        const monthNum = (idx + 1).toString().padStart(2, '0');
+        // Candidatures du mois
+        let applications = 0;
+        let completions = 0;
+        stages.forEach(stage => {
+          if (Array.isArray(stage.candidatures)) {
+            applications += stage.candidatures.filter(c => c.appliedDate && c.appliedDate.startsWith(`${selectedPeriod}-${monthNum}`)).length;
+          }
+          if (stage.date_fin && stage.date_fin.startsWith(`${selectedPeriod}-${monthNum}`) && (stage.statut === 'termine' || stage.statut === 'completed')) {
+            completions++;
+          }
+        });
+        return { month, applications, completions };
+      });
+
+      // 7. Par programme
+      const programMap: Record<string, number> = {};
+      students.forEach(s => {
+        if (s.program) {
+          programMap[s.program] = (programMap[s.program] || 0) + 1;
+        }
+      });
+      const programStats = Object.entries(programMap).map(([program, count]) => ({ program, count }));
+
+      // 8. Top entreprises
+      const enterpriseMap: Record<string, { internships: number; students: Set<string>; }> = {};
+      stages.forEach(stage => {
+        const ent = stage.entreprise?.nom || stage.entreprise?.companyName || stage.entreprise?.name;
+        if (!ent) return;
+        if (!enterpriseMap[ent]) enterpriseMap[ent] = { internships: 0, students: new Set() };
+        enterpriseMap[ent].internships++;
+        if (Array.isArray(stage.candidatures)) {
+          stage.candidatures.forEach((c: any) => {
+            if (c.studentId) enterpriseMap[ent].students.add(c.studentId);
+          });
+        }
+      });
+      const enterpriseStats = Object.entries(enterpriseMap).map(([enterprise, data]) => ({
+        enterprise,
+        internships: data.internships,
+        students: data.students.size
+      })).sort((a, b) => b.internships - a.internships).slice(0, 5);
+
+      setStats({
+        totalStudents,
+        activeInternships,
+        completedInternships,
+        totalEnterprises,
+        totalApplications,
+        averageScore,
+        monthlyStats,
+        programStats,
+        enterpriseStats,
+      });
+      setLoading(false);
     };
-    setStats(mockStats);
-  }, []);
+    fetchStats();
+  }, [user, selectedPeriod]);
 
-  const user = {
-    role: 'responsable',
-    firstName: 'M. Responsable',
-    lastName: 'Stage'
-  };
-
-  if (!stats) return <div>Chargement...</div>;
+  if (loading || !stats) return <div>Chargement...</div>;
 
   return (
     <div className="dashboard-container">

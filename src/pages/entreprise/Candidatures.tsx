@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../../components/layout/Sidebar';
 
 interface Application {
   id: number;
@@ -42,8 +41,16 @@ const Candidatures: React.FC = () => {
   const [showInterviewModal, setShowInterviewModal] = useState(false);
   const [showEvaluationModal, setShowEvaluationModal] = useState(false);
 
+  const user = {
+    role: 'enterprise',
+    firstName: 'TechCorp',
+    lastName: 'Admin',
+    entrepriseId: 'your_enterprise_id_here' // This will be replaced by the actual user's enterpriseId
+  };
+
   // Données simulées
   useEffect(() => {
+    if (!user || !user.entrepriseId) return;
     const mockApplications: Application[] = [
       {
         id: 1,
@@ -157,7 +164,7 @@ const Candidatures: React.FC = () => {
     ];
     setApplications(mockApplications);
     setFilteredApplications(mockApplications);
-  }, []);
+  }, [user]);
 
   const handleFilterChange = (name: string, value: string) => {
     const newFilters = { ...filters, [name]: value };
@@ -233,21 +240,11 @@ const Candidatures: React.FC = () => {
     );
   };
 
-  const user = {
-    role: 'enterprise',
-    firstName: 'TechCorp',
-    lastName: 'Admin'
-  };
-
   return (
     <div className="dashboard-container">
       <div className="row g-0">
         <div className={`col-auto ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-          <Sidebar 
-            user={user} 
-            isCollapsed={isSidebarCollapsed}
-            onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          />
+          {/* Sidebar removed */}
         </div>
         <div className="col">
           <div className="dashboard-content p-4">
