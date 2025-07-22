@@ -44,6 +44,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user, isCollapsed = false, onToggle }
           { path: '/entreprise/offres', icon: 'fas fa-briefcase', label: 'Mes offres' },
           { path: '/entreprise/candidatures', icon: 'fas fa-inbox', label: 'Candidatures reçues' },
           { path: '/entreprise/stagiaires', icon: 'fas fa-users', label: 'Mes stagiaires' },
+          { path: '/entreprise/employes', icon: 'fas fa-user-tie', label: 'Employés' },
           { path: '/entreprise/taches', icon: 'fas fa-tasks', label: 'Tâches stagiaires' },
           { path: '/entreprise/profil', icon: 'fas fa-building', label: 'Profil entreprise' },
           { path: '/entreprise/contact', icon: 'fas fa-envelope', label: 'Contact' },

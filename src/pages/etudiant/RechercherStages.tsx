@@ -1,5 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import Sidebar from '../../components/layout/Sidebar';
+import React, { useState, useEffect, useRef } from 'react';
+import { collection, getDocs, query, where, doc, getDoc, addDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../../config/firebase';
+// Supprimer : import Sidebar from '../../components/layout/Sidebar';
+import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-toastify';
+import styles from '../../styles/pages/RechercherStages.module.css';
 
 interface StageOffer {
   id: number;
@@ -17,6 +23,8 @@ interface StageOffer {
   isNew: boolean;
   isUrgent: boolean;
   technologies?: string[];
+  logoEntreprise?: string; // Added for the new logo
+  entrepriseId?: string; // Added for the new entrepriseId
 }
 
 const RechercherStages: React.FC = () => {
@@ -28,119 +36,85 @@ const RechercherStages: React.FC = () => {
     duration: '',
     keywords: ''
   });
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  // Supprimer : const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [selectedOffer, setSelectedOffer] = useState<StageOffer | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [sortBy, setSortBy] = useState('date');
+  const [entrepriseInfo, setEntrepriseInfo] = useState<any | null>(null);
+  const [enterpriseNames, setEnterpriseNames] = useState<{ [entrepriseId: string]: string }>({});
+  const { user } = useAuth();
+  const [isApplying, setIsApplying] = useState(false);
+  const [hasApplied, setHasApplied] = useState<{ [offerId: string]: boolean }>({});
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [etudiantInfo, setEtudiantInfo] = useState<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Données simulées
+  // Charger les offres actives depuis Firestore et les noms d'entreprise
   useEffect(() => {
-    const mockOffers: StageOffer[] = [
-      {
-        id: 1,
-        title: 'Développeur Web Full-Stack',
-        enterprise: 'TechCorp',
-        description: 'Développement d\'une application web moderne utilisant React, Node.js et MongoDB. Vous participerez à la conception et au développement de nouvelles fonctionnalités.',
-        duration: '6 mois',
-        location: 'Paris',
-        salary: 1200,
-        applications: 5,
-        domain: 'Informatique',
-        requirements: ['React', 'Node.js', 'MongoDB', 'Git'],
-        startDate: '01/03/2024',
-        endDate: '31/08/2024',
-        isNew: true,
-        isUrgent: false,
-        technologies: ['React', 'Node.js', 'MongoDB', 'TypeScript']
-      },
-      {
-        id: 2,
-        title: 'Assistant Marketing Digital',
-        enterprise: 'InnovateX',
-        description: 'Gestion des réseaux sociaux et campagnes marketing. Création de contenu, analyse des performances et optimisation des stratégies marketing.',
-        duration: '4 mois',
-        location: 'Lyon',
-        salary: 1000,
-        applications: 8,
-        domain: 'Marketing',
-        requirements: ['Marketing digital', 'Réseaux sociaux', 'Analytics'],
-        startDate: '01/04/2024',
-        endDate: '31/07/2024',
-        isNew: false,
-        isUrgent: true
-      },
-      {
-        id: 3,
-        title: 'Analyste de Données',
-        enterprise: 'DataPlus',
-        description: 'Analyse de données et création de rapports. Utilisation d\'outils d\'analyse pour extraire des insights business.',
-        duration: '5 mois',
-        location: 'Marseille',
-        salary: 1100,
-        applications: 3,
-        domain: 'Data/Analyse',
-        requirements: ['Python', 'SQL', 'Excel', 'Tableau'],
-        startDate: '15/05/2024',
-        endDate: '15/10/2024',
-        isNew: false,
-        isUrgent: false,
-        technologies: ['Python', 'SQL', 'Pandas', 'Tableau']
-      },
-      {
-        id: 4,
-        title: 'Développeur Mobile iOS/Android',
-        enterprise: 'MobileTech',
-        description: 'Développement d\'applications mobiles pour iOS et Android. Utilisation de React Native et des technologies mobiles modernes.',
-        duration: '6 mois',
-        location: 'Toulouse',
-        salary: 1300,
-        applications: 2,
-        domain: 'Informatique',
-        requirements: ['React Native', 'JavaScript', 'Git'],
-        startDate: '01/06/2024',
-        endDate: '30/11/2024',
-        isNew: true,
-        isUrgent: false,
-        technologies: ['React Native', 'JavaScript', 'Xcode', 'Android Studio']
-      },
-      {
-        id: 5,
-        title: 'Assistant Commercial',
-        enterprise: 'SalesPro',
-        description: 'Support à l\'équipe commerciale, prospection clients et suivi des ventes. Développement de compétences en relation client.',
-        duration: '3 mois',
-        location: 'Bordeaux',
-        salary: 900,
-        applications: 12,
-        domain: 'Commerce',
-        requirements: ['Relation client', 'Excel', 'CRM'],
-        startDate: '01/07/2024',
-        endDate: '30/09/2024',
-        isNew: false,
-        isUrgent: true
-      },
-      {
-        id: 6,
-        title: 'Développeur Frontend',
-        enterprise: 'WebSolutions',
-        description: 'Création d\'interfaces utilisateur modernes et responsives. Utilisation des dernières technologies frontend.',
-        duration: '4 mois',
-        location: 'Nantes',
-        salary: 1150,
-        applications: 6,
-        domain: 'Informatique',
-        requirements: ['HTML/CSS', 'JavaScript', 'React', 'Figma'],
-        startDate: '01/08/2024',
-        endDate: '30/11/2024',
-        isNew: false,
-        isUrgent: false,
-        technologies: ['React', 'TypeScript', 'Tailwind CSS', 'Figma']
-      }
-    ];
-    setOffers(mockOffers);
-    setFilteredOffers(mockOffers);
+    const fetchOffers = async () => {
+      const q = query(collection(db, 'offres_stage'), where('statut', '==', 'active'));
+      const snap = await getDocs(q);
+      const offres = snap.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          title: data.titre || data.title || '',
+          entrepriseId: data.entrepriseId || '',
+          logoEntreprise: data.logoEntreprise || '',
+          description: data.description || '',
+          duration: data.duree ? `${data.duree} mois` : '',
+          location: [data.adresseEntrepise, data.villeEntreprise].filter(Boolean).join(', '),
+          salary: data.remuneration || 0,
+          applications: data.nbCandidatures || 0,
+          domain: data.domaine || '',
+          requirements: data.exigences || [],
+          startDate: data.dateDebut || '',
+          endDate: data.dateFin || '',
+          isNew: !!data.isNew,
+          isUrgent: !!data.urgent,
+          technologies: data.technologies || []
+        };
+      });
+      setOffers(offres);
+      setFilteredOffers(offres);
+      // Charger les noms d'entreprise en batch
+      const uniqueEntrepriseIds = Array.from(new Set(offres.map(o => o.entrepriseId).filter(Boolean)));
+      const names: { [entrepriseId: string]: string } = {};
+      await Promise.all(uniqueEntrepriseIds.map(async (id) => {
+        try {
+          const ref = doc(db, 'entreprises', id);
+          const snap = await getDoc(ref);
+          if (snap.exists()) {
+            names[id] = snap.data().nom || '';
+          }
+        } catch {}
+      }));
+      setEnterpriseNames(names);
+    };
+    fetchOffers();
   }, []);
+
+  // Récupérer les infos de l'étudiant au chargement
+  useEffect(() => {
+    const fetchEtudiantInfo = async () => {
+      if (!user?.uid) return;
+      try {
+        const etudiantDoc = await getDoc(doc(db, 'etudiants', user.uid));
+        if (etudiantDoc.exists()) {
+          setEtudiantInfo(etudiantDoc.data());
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des infos étudiant:', error);
+      }
+    };
+    fetchEtudiantInfo();
+  }, [user]);
+
+  useEffect(() => {
+    console.log('user:', user);
+    console.log('etudiantInfo:', etudiantInfo);
+  }, [user, etudiantInfo]);
 
   const handleFilterChange = (name: string, value: string) => {
     const newFilters = { ...filters, [name]: value };
@@ -212,22 +186,129 @@ const RechercherStages: React.FC = () => {
     applySorting(filteredOffers);
   };
 
-  const user = {
-    role: 'student',
-    firstName: 'Jean',
-    lastName: 'Dupont'
+  // S'assurer qu'aucune donnée simulée/mock n'est utilisée, tout doit venir de Firestore ou du contexte utilisateur.
+  // Fonction pour charger les infos entreprise lors de l'ouverture de la modale
+  const handleShowDetails = async (offer: StageOffer) => {
+    setSelectedOffer(offer);
+    setShowDetailsModal(true);
+    setEntrepriseInfo(null);
+    if (offer.entrepriseId) {
+      try {
+        const ref = doc(db, 'entreprises', offer.entrepriseId);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          setEntrepriseInfo(snap.data());
+        }
+      } catch (e) {
+        setEntrepriseInfo(null);
+      }
+    }
+  };
+
+  // Vérifier si déjà postulé à l'ouverture de la modale
+  const handleShowApply = async (offer: StageOffer) => {
+    setSelectedOffer(offer);
+    setShowApplyModal(true);
+    if (user?.uid && offer.id) {
+      const q = query(collection(db, 'candidatures'), where('offreId', '==', offer.id), where('etudiantId', '==', user.uid));
+      const snap = await getDocs(q);
+      setHasApplied(prev => ({ ...prev, [offer.id]: !snap.empty }));
+    }
+  };
+
+  // Gérer la sélection du fichier
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB max
+        toast.error('Le fichier est trop volumineux. Maximum 5MB.');
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+      const validTypes = ['.pdf', '.doc', '.docx'];
+      const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+      if (!validTypes.includes(fileExtension)) {
+        toast.error('Format de fichier non supporté. Utilisez PDF, DOC ou DOCX.');
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+      setSelectedFile(file);
+    }
+  };
+
+  // Fonction pour postuler
+  const handleApply = async () => {
+    console.log('handleApply champs:', {
+      userUid: user?.uid,
+      selectedOffer,
+      selectedFile
+    });
+    if (!user?.uid || !selectedOffer || !selectedFile) {
+      toast.error('Veuillez remplir tous les champs requis.');
+      return;
+    }
+
+    setIsApplying(true);
+    try {
+      // Vérifier si déjà postulé
+      const q = query(
+        collection(db, 'candidatures'),
+        where('offreId', '==', selectedOffer.id),
+        where('etudiantId', '==', user.uid)
+      );
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        toast.info('Vous avez déjà postulé à cette offre.');
+        setIsApplying(false);
+        setHasApplied(prev => ({ ...prev, [selectedOffer.id]: true }));
+        return;
+      }
+
+      // Upload du CV
+      const fileExtension = selectedFile.name.substring(selectedFile.name.lastIndexOf('.'));
+      const cvFileName = `cv_${user.uid}_${Date.now()}${fileExtension}`;
+      const cvRef = ref(storage, `cv/${cvFileName}`);
+      await uploadBytes(cvRef, selectedFile);
+      const cvUrl = await getDownloadURL(cvRef);
+
+      // Créer la candidature
+      await addDoc(collection(db, 'candidatures'), {
+        offreId: selectedOffer.id,
+        entrepriseId: selectedOffer.entrepriseId,
+        etudiantId: user.uid,
+        cvUrl: cvUrl,
+        date: new Date().toISOString(),
+        statut: 'en_attente'
+      });
+
+      toast.success('Votre candidature a bien été envoyée !');
+      setHasApplied(prev => ({ ...prev, [selectedOffer.id]: true }));
+      setShowApplyModal(false);
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('Erreur lors de la candidature:', error);
+      toast.error('Erreur lors de l\'envoi de la candidature. Veuillez réessayer.');
+    } finally {
+      setIsApplying(false);
+    }
   };
 
   return (
     <div className="dashboard-container">
       <div className="row g-0">
-        <div className={`col-auto ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-          <Sidebar 
+        {/* Supprimer : div className={`col-auto ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}> */}
+        {/* Supprimer : <Sidebar 
             user={user} 
             isCollapsed={isSidebarCollapsed}
             onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          />
-        </div>
+          /> */}
         <div className="col">
           <div className="dashboard-content p-4">
             {/* Header */}
@@ -364,89 +445,74 @@ const RechercherStages: React.FC = () => {
               <div className="row g-4">
                 {filteredOffers.map((offer) => (
                   <div key={offer.id} className="col-md-6 col-lg-4">
-                    <div className="card h-100 shadow-sm hover-shadow">
-                      <div className="card-body">
-                        <div className="d-flex justify-content-between align-items-start mb-3">
-                          <h5 className="card-title">{offer.title}</h5>
-                          <div>
+                    <div className={styles['offer-card']}>
+                      {/* Header visuel aligné */}
+                      <div className="d-flex align-items-center offer-card-visual p-3 pb-0 gap-3">
+                        {/* Logo entreprise ou avatar */}
+                        {offer.logoEntreprise ? (
+                          <img src={offer.logoEntreprise} alt="Logo entreprise" style={{ width: 54, height: 54, objectFit: 'cover', borderRadius: '50%', border: '2.5px solid #e0e7ef', background: '#fff', boxShadow: '0 2px 8px rgba(37,99,235,0.08)' }} />
+                        ) : (
+                          <div style={{ width: 54, height: 54, borderRadius: '50%', background: '#f0f4fa', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 24, color: '#2563eb', border: '2.5px solid #e0e7ef', boxShadow: '0 2px 8px rgba(37,99,235,0.08)' }}>
+                            <i className="fas fa-building"></i>
+                          </div>
+                        )}
+                        <div className="flex-grow-1 d-flex flex-column align-items-start justify-content-center">
+                          <div className={styles['offer-card-title']}>
+                            {enterpriseNames[offer.entrepriseId] || ''}
+                          </div>
+                          <span className="badge bg-primary mt-1" style={{ fontSize: 13, fontWeight: 500, borderRadius: 8 }}><i className="fas fa-briefcase me-1"></i>{offer.domain}</span>
+                        </div>
+                        <div className="d-flex flex-column align-items-end gap-1">
                             {offer.isNew && (
-                              <span className="badge bg-success me-1">Nouveau</span>
+                            <span className="badge bg-success px-3 py-2 fs-6">Nouveau</span>
                             )}
                             {offer.isUrgent && (
-                              <span className="badge bg-warning">Urgent</span>
+                            <span className="badge bg-danger px-3 py-2 fs-6">Urgent</span>
                             )}
                           </div>
                         </div>
-                        <h6 className="card-subtitle mb-2 text-muted">
-                          <i className="fas fa-building me-1"></i>
-                          {offer.enterprise}
-                        </h6>
-                        <p className="card-text">
+                      <div className="card-body d-flex flex-column">
+                        <h5 className={styles['offer-card-title']}>
+                          {offer.title}
+                        </h5>
+                        <p className="card-text mb-2" style={{ minHeight: 60, color: '#444', fontSize: 15 }}>
                           {offer.description.length > 120 
                             ? `${offer.description.substring(0, 120)}...` 
                             : offer.description
                           }
                         </p>
-                        
-                        <div className="row mb-3">
-                          <div className="col-6">
-                            <small className="text-muted">Durée</small><br />
-                            <strong>{offer.duration}</strong>
-                          </div>
-                          <div className="col-6">
-                            <small className="text-muted">Localisation</small><br />
-                            <strong>
-                              <i className="fas fa-map-marker-alt me-1"></i>
-                              {offer.location}
-                            </strong>
-                          </div>
+                        {/* Chips infos */}
+                        <div className="d-flex flex-wrap gap-2 mb-3">
+                          <span className="badge rounded-pill bg-info text-white px-3 py-2"><i className="fas fa-clock me-1"></i>{offer.duration}</span>
+                          <span className="badge rounded-pill bg-secondary text-white px-3 py-2"><i className="fas fa-map-marker-alt me-1"></i>{offer.location}</span>
+                          <span className="badge rounded-pill bg-warning text-dark px-3 py-2"><i className="fas fa-coins me-1"></i>{offer.salary} FCFA/mois</span>
+                          <span className="badge rounded-pill bg-light text-dark border px-3 py-2"><i className="fas fa-users me-1"></i>{offer.applications} candidatures</span>
                         </div>
-                        
-                        <div className="row mb-3">
-                          <div className="col-6">
-                            <small className="text-muted">Gratification</small><br />
-                            <strong>{offer.salary}€/mois</strong>
-                          </div>
-                          <div className="col-6">
-                            <small className="text-muted">Candidatures</small><br />
-                            <strong>{offer.applications}</strong>
-                          </div>
-                        </div>
-
-                        {offer.technologies && (
-                          <div className="mb-3">
-                            <small className="text-muted">Technologies :</small><br />
-                            <div className="d-flex flex-wrap gap-1">
-                              {offer.technologies.slice(0, 3).map((tech, index) => (
-                                <span key={index} className="badge bg-light text-dark">
-                                  {tech}
+                        {/* Technologies */}
+                        {offer.technologies && offer.technologies.length > 0 && (
+                          <div className="mb-2 d-flex flex-wrap gap-1">
+                            {offer.technologies.slice(0, 3).map((tech, idx) => (
+                              <span key={idx} className="badge bg-light text-dark border border-primary fw-normal" style={{ fontSize: 13 }}>
+                                <i className="fas fa-code me-1 text-primary"></i>{tech}
                                 </span>
                               ))}
                               {offer.technologies.length > 3 && (
-                                <span className="badge bg-light text-dark">
-                                  +{offer.technologies.length - 3}
-                                </span>
+                              <span className="badge bg-light text-dark border border-primary" style={{ fontSize: 13 }}>+{offer.technologies.length - 3}</span>
                               )}
-                            </div>
                           </div>
                         )}
-
-                        <div className="d-flex gap-2">
+                        <div className="mt-auto d-flex gap-2">
                           <button 
-                            className="btn btn-primary flex-fill"
-                            onClick={() => {
-                              setSelectedOffer(offer);
-                              setShowDetailsModal(true);
-                            }}
+                            className="btn btn-primary flex-fill shadow-sm rounded-pill px-3 py-2"
+                            style={{ fontWeight: 500, fontSize: 16, letterSpacing: 0.2 }}
+                            onClick={() => handleShowDetails(offer)}
                           >
                             <i className="fas fa-eye me-2"></i>Voir détails
                           </button>
                           <button 
-                            className="btn btn-outline-success"
-                            onClick={() => {
-                              setSelectedOffer(offer);
-                              setShowApplyModal(true);
-                            }}
+                            className="btn btn-outline-success flex-fill shadow-sm rounded-pill px-3 py-2"
+                            style={{ fontWeight: 500, fontSize: 16, letterSpacing: 0.2 }}
+                            onClick={() => handleShowApply(offer)}
                             title="Postuler"
                           >
                             <i className="fas fa-paper-plane"></i>
@@ -485,11 +551,11 @@ const RechercherStages: React.FC = () => {
                       <i className="fas fa-info-circle me-2"></i>Informations stage
                     </h6>
                     <p><strong>Intitulé:</strong> {selectedOffer.title}</p>
-                    <p><strong>Entreprise:</strong> {selectedOffer.enterprise}</p>
+                    <p><strong>Entreprise:</strong> {entrepriseInfo?.nom || selectedOffer.enterprise}</p>
                     <p><strong>Domaine:</strong> {selectedOffer.domain}</p>
                     <p><strong>Durée:</strong> {selectedOffer.duration}</p>
                     <p><strong>Localisation:</strong> {selectedOffer.location}</p>
-                    <p><strong>Gratification:</strong> {selectedOffer.salary}€/mois</p>
+                    <p><strong>Gratification:</strong> {selectedOffer.salary} FCFA/mois</p>
                     <p><strong>Début:</strong> {selectedOffer.startDate}</p>
                     <p><strong>Fin:</strong> {selectedOffer.endDate}</p>
                   </div>
@@ -497,10 +563,20 @@ const RechercherStages: React.FC = () => {
                     <h6 className="text-primary mb-3">
                       <i className="fas fa-building me-2"></i>Informations entreprise
                     </h6>
-                    <p><strong>Nom:</strong> {selectedOffer.enterprise}</p>
-                    <p><strong>Contact:</strong> contact@{selectedOffer.enterprise.toLowerCase()}.fr</p>
-                    <p><strong>Adresse:</strong> {selectedOffer.location}, France</p>
-                    <p><strong>Candidatures reçues:</strong> {selectedOffer.applications}</p>
+                    {entrepriseInfo ? (
+                      <>
+                        <p><strong>Nom:</strong> {entrepriseInfo.nom}</p>
+                        <p><strong>Email:</strong> {entrepriseInfo.email}</p>
+                        <p><strong>Téléphone:</strong> {entrepriseInfo.telephone}</p>
+                        <p><strong>Adresse:</strong> {entrepriseInfo.adresse}, {entrepriseInfo.ville}, {entrepriseInfo.pays}</p>
+                        <p><strong>Secteur:</strong> {entrepriseInfo.secteur}</p>
+                        {entrepriseInfo.contact && (
+                          <p><strong>Contact principal:</strong> {entrepriseInfo.contact.prenom} {entrepriseInfo.contact.nom} ({entrepriseInfo.contact.poste})</p>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-muted">Chargement des informations...</div>
+                    )}
                   </div>
                 </div>
                 <hr />
@@ -575,29 +651,20 @@ const RechercherStages: React.FC = () => {
               <div className="modal-body">
                 <div className="alert alert-info">
                   <i className="fas fa-info-circle me-2"></i>
-                  Vous êtes sur le point de postuler au stage "{selectedOffer.title}" chez {selectedOffer.enterprise}.
+                  Vous êtes sur le point de postuler au stage "{selectedOffer.title}" chez <strong>{enterpriseNames[selectedOffer.entrepriseId] || ''}</strong>.
                 </div>
                 <form>
                   <div className="mb-3">
-                    <label className="form-label">CV *</label>
-                    <select className="form-select" required>
-                      <option value="">Sélectionner votre CV</option>
-                      <option value="cv1">CV_Jean_Dupont_2024.pdf</option>
-                      <option value="cv2">CV_Jean_Dupont_Anglais.pdf</option>
-                    </select>
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Lettre de motivation</label>
-                    <textarea 
+                    <label className="form-label">Importer votre CV *</label>
+                    <input
+                      type="file"
                       className="form-control" 
-                      rows="5" 
-                      placeholder="Rédigez votre lettre de motivation pour ce stage..."
-                    ></textarea>
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Documents supplémentaires</label>
-                    <input type="file" className="form-control" multiple />
-                    <small className="text-muted">Formats acceptés: PDF, DOC, DOCX (max 5MB par fichier)</small>
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleFileChange}
+                      ref={fileInputRef}
+                      required
+                    />
+                    <small className="text-muted">Formats acceptés : PDF, DOC, DOCX (max 5MB)</small>
                   </div>
                   <div className="form-check">
                     <input className="form-check-input" type="checkbox" id="confirmApply" required />
@@ -615,8 +682,9 @@ const RechercherStages: React.FC = () => {
                 >
                   Annuler
                 </button>
-                <button type="button" className="btn btn-success">
-                  <i className="fas fa-paper-plane me-2"></i>Envoyer ma candidature
+                <button type="button" className="btn btn-success" onClick={handleApply} disabled={isApplying || hasApplied[selectedOffer.id]}>
+                  {isApplying ? <span className="spinner-border spinner-border-sm me-2"></span> : <i className="fas fa-paper-plane me-2"></i>}
+                  {hasApplied[selectedOffer.id] ? 'Déjà postulé' : 'Envoyer ma candidature'}
                 </button>
               </div>
             </div>

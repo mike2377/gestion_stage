@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import { useAuth } from '../../context/AuthContext';
+import { NavLink } from 'react-router-dom';
+import { FaUsers } from 'react-icons/fa';
 
 interface SidebarLayoutProps {
   children: React.ReactNode;

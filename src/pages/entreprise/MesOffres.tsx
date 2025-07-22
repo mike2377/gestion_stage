@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaHandshake, FaSearch, FaFilter, FaPlus, FaEdit, FaTrash, FaEye, FaCheckCircle, FaClock, FaExclamationTriangle, FaCalendarAlt, FaUsers, FaFileAlt, FaDownload, FaEnvelope, FaSort, FaSortUp, FaSortDown, FaMapMarkerAlt, FaIndustry, FaGraduationCap, FaStar } from 'react-icons/fa';
+import { FaHandshake, FaSearch, FaFilter, FaPlus, FaEdit, FaTrash, FaEye, FaCheckCircle, FaClock, FaExclamationTriangle, FaCalendarAlt, FaUsers, FaFileAlt, FaDownload, FaEnvelope, FaSort, FaSortUp, FaSortDown, FaMapMarkerAlt, FaIndustry, FaGraduationCap, FaStar, FaBriefcase } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../config/firebase';
 import { collection, getDocs, query, where, doc, getDoc, addDoc, deleteDoc, updateDoc } from 'firebase/firestore';
@@ -39,6 +39,12 @@ const MesOffres: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [entrepriseInfo, setEntrepriseInfo] = useState<{ adresse?: string; ville?: string; secteur?: string } | null>(null);
+  const [stats, setStats] = useState({
+    offresActives: 0,
+    offresBrouillon: 0,
+    offresInactives: 0,
+    offresExpirees: 0
+  });
 
   // Ajout pour la modale d'ajout d'offre
   const [showAddModal, setShowAddModal] = useState(false);
@@ -383,6 +389,15 @@ const MesOffres: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showAddModal, entrepriseInfo]);
 
+  // Calculer les stats quand les offres changent
+  useEffect(() => {
+    const offresActives = offers.filter(o => o.statut === 'active').length;
+    const offresBrouillon = offers.filter(o => o.statut === 'brouillon').length;
+    const offresInactives = offers.filter(o => o.statut === 'inactive').length;
+    const offresExpirees = offers.filter(o => o.statut === 'expiree').length;
+    setStats({ offresActives, offresBrouillon, offresInactives, offresExpirees });
+  }, [offers]);
+
   const handleFilterChange = (name: string, value: string) => {
     const newFilters = { ...filters, [name]: value };
     setFilters(newFilters);
@@ -411,6 +426,97 @@ const MesOffres: React.FC = () => {
         <h1 className="h3 mb-0"><FaHandshake className="me-2 text-primary" />Mes Offres</h1>
         <button className="btn btn-primary" onClick={() => setShowAddModal(true)}><FaPlus className="me-2" />Nouvelle offre</button>
       </div>
+
+      {/* Statistiques des offres */}
+      <div className="row mb-4 g-4">
+        <div className="col-md-3">
+          <div className="card shadow-sm border-0 bg-success text-white">
+            <div className="card-body d-flex align-items-center">
+              <FaBriefcase className="fa-2x me-3 opacity-75" />
+              <div>
+                <h4 className="mb-0">{stats.offresActives}</h4>
+                <p className="mb-0">Offres actives</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-3">
+          <div className="card shadow-sm border-0 bg-warning text-white">
+            <div className="card-body d-flex align-items-center">
+              <FaBriefcase className="fa-2x me-3 opacity-75" />
+              <div>
+                <h4 className="mb-0">{stats.offresBrouillon}</h4>
+                <p className="mb-0">Brouillons</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-3">
+          <div className="card shadow-sm border-0 bg-secondary text-white">
+            <div className="card-body d-flex align-items-center">
+              <FaBriefcase className="fa-2x me-3 opacity-75" />
+              <div>
+                <h4 className="mb-0">{stats.offresInactives}</h4>
+                <p className="mb-0">Offres inactives</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-3">
+          <div className="card shadow-sm border-0 bg-danger text-white">
+            <div className="card-body d-flex align-items-center">
+              <FaBriefcase className="fa-2x me-3 opacity-75" />
+              <div>
+                <h4 className="mb-0">{stats.offresExpirees}</h4>
+                <p className="mb-0">Offres expirées</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Graphique de répartition des offres */}
+      <div className="card mb-4">
+        <div className="card-body">
+          <div className="mb-4">
+            <div className="d-flex justify-content-between align-items-center mb-1">
+              <span>Actives</span>
+              <span className="text-success">{stats.offresActives} ({Math.round(stats.offresActives / offers.length * 100 || 0)}%)</span>
+            </div>
+            <div className="progress" style={{ height: '10px' }}>
+              <div className="progress-bar bg-success" style={{ width: `${stats.offresActives / offers.length * 100 || 0}%` }}></div>
+            </div>
+          </div>
+          <div className="mb-4">
+            <div className="d-flex justify-content-between align-items-center mb-1">
+              <span>Brouillons</span>
+              <span className="text-warning">{stats.offresBrouillon} ({Math.round(stats.offresBrouillon / offers.length * 100 || 0)}%)</span>
+            </div>
+            <div className="progress" style={{ height: '10px' }}>
+              <div className="progress-bar bg-warning" style={{ width: `${stats.offresBrouillon / offers.length * 100 || 0}%` }}></div>
+            </div>
+          </div>
+          <div className="mb-4">
+            <div className="d-flex justify-content-between align-items-center mb-1">
+              <span>Inactives</span>
+              <span className="text-secondary">{stats.offresInactives} ({Math.round(stats.offresInactives / offers.length * 100 || 0)}%)</span>
+            </div>
+            <div className="progress" style={{ height: '10px' }}>
+              <div className="progress-bar bg-secondary" style={{ width: `${stats.offresInactives / offers.length * 100 || 0}%` }}></div>
+            </div>
+          </div>
+          <div className="mb-4">
+            <div className="d-flex justify-content-between align-items-center mb-1">
+              <span>Expirées</span>
+              <span className="text-danger">{stats.offresExpirees} ({Math.round(stats.offresExpirees / offers.length * 100 || 0)}%)</span>
+            </div>
+            <div className="progress" style={{ height: '10px' }}>
+              <div className="progress-bar bg-danger" style={{ width: `${stats.offresExpirees / offers.length * 100 || 0}%` }}></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Modale d'ajout d'offre */}
       {showAddModal && (
         <div className="modal show d-block" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.3)' }}>

@@ -23,6 +23,8 @@ import {
   FaSortUp,
   FaSortDown
 } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
+import type { User } from '../../types/models/User';
 
 interface Stagiaire {
   id: number;

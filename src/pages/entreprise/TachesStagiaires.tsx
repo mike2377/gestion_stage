@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 // Supprimer : import Sidebar from '../../components/layout/Sidebar';
+import { useAuth } from '../../context/AuthContext';
 
 interface Tache {
   id: number;
@@ -31,6 +32,7 @@ interface Commentaire {
 }
 
 const TachesStagiaires: React.FC = () => {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState<Tache[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<Tache[]>([]);
   const [filters, setFilters] = useState({
@@ -125,12 +127,6 @@ const TachesStagiaires: React.FC = () => {
         task.id === taskId ? { ...task, statut: newStatus as any } : task
       )
     );
-  };
-
-  const user = {
-    role: 'enterprise',
-    firstName: 'TechCorp',
-    lastName: 'Admin'
   };
 
   return (

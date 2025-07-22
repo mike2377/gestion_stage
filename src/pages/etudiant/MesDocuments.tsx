@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../../components/layout/Sidebar';
+// Supprimer : import Sidebar from '../../components/layout/Sidebar';
 
 interface Document {
   id: number;
@@ -22,7 +22,7 @@ const MesDocuments: React.FC = () => {
     status: '',
     stage: ''
   });
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  // Supprimer : const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
@@ -181,13 +181,12 @@ const MesDocuments: React.FC = () => {
   return (
     <div className="dashboard-container">
       <div className="row g-0">
-        <div className={`col-auto ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-          <Sidebar 
+        {/* Supprimer : div className={`col-auto ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}> */}
+        {/* Supprimer : <Sidebar 
             user={user} 
             isCollapsed={isSidebarCollapsed}
             onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          />
-        </div>
+          /> */}
         <div className="col">
           <div className="dashboard-content p-4">
             {/* Header */}

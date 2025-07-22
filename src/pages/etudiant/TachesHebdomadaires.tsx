@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../../components/layout/Sidebar';
+// Supprimer : import Sidebar from '../../components/layout/Sidebar';
 
 interface WeeklyTask {
   id: number;
@@ -30,7 +30,7 @@ const TachesHebdomadaires: React.FC = () => {
     stage: '',
     week: ''
   });
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  // Supprimer : const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<WeeklyTask | null>(null);
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
@@ -233,13 +233,7 @@ const TachesHebdomadaires: React.FC = () => {
   return (
     <div className="dashboard-container">
       <div className="row g-0">
-        <div className={`col-auto ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-          <Sidebar 
-            user={user} 
-            isCollapsed={isSidebarCollapsed}
-            onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          />
-        </div>
+        {/* Supprimer : div className={`col-auto ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`} */}
         <div className="col">
           <div className="dashboard-content p-4">
             {/* Header */}

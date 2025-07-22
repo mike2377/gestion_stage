@@ -1,690 +1,385 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { collection, query, where, getDocs, updateDoc, doc, getDoc, addDoc } from 'firebase/firestore';
+import { db } from '../../config/firebase';
 
-interface Application {
-  id: number;
-  studentId: string;
-  studentName: string;
-  studentEmail: string;
-  studentPhone: string;
-  studentPhoto?: string;
-  stageTitle: string;
-  stageId: number;
-  applicationDate: string;
-  status: 'pending' | 'reviewed' | 'accepted' | 'rejected' | 'interviewed';
-  priority: 'low' | 'medium' | 'high';
+interface Candidature {
+  infosEtudiant?: Record<string, unknown>;
+  candidatureId: string;
+  offreId: string;
+  entrepriseId: string;
+  etudiantId: string;
   cvUrl: string;
-  coverLetterUrl?: string;
-  additionalDocuments?: string[];
-  studentProgram: string;
-  studentYear: number;
-  studentUniversity: string;
-  studentSkills: string[];
-  studentLanguages: string[];
-  notes?: string;
-  interviewDate?: string;
-  evaluation?: number;
-  comments?: string;
+  statut: string;
+  date: string;
+  nomEtudiant: string;
+  emailEtudiant: string;
+  programmeEtudiant: string;
+  universiteEtudiant: string;
+  photoEtudiant?: string;
 }
 
 const Candidatures: React.FC = () => {
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [filteredApplications, setFilteredApplications] = useState<Application[]>([]);
-  const [filters, setFilters] = useState({
-    status: '',
-    stage: '',
-    priority: '',
-    keywords: ''
-  });
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [showInterviewModal, setShowInterviewModal] = useState(false);
-  const [showEvaluationModal, setShowEvaluationModal] = useState(false);
-
-  const user = {
-    role: 'enterprise',
-    firstName: 'TechCorp',
-    lastName: 'Admin',
-    entrepriseId: 'your_enterprise_id_here' // This will be replaced by the actual user's enterpriseId
-  };
-
-  // Données simulées
+  const { user } = useAuth();
+  const [candidatures, setCandidatures] = useState<Candidature[]>([]);
+  const [chargement, setChargement] = useState(true);
+  const [showEtudiantModal, setShowEtudiantModal] = useState(false);
+  const [selectedEtudiant, setSelectedEtudiant] = useState<Candidature | null>(null);
+  // Notification state
+  const [notif, setNotif] = useState<{ type: 'success' | 'error' | 'info', text: string } | null>(null);
+  // Auto-hide notification
   useEffect(() => {
-    if (!user || !user.entrepriseId) return;
-    const mockApplications: Application[] = [
-      {
-        id: 1,
-        studentId: '2024001',
-        studentName: 'Jean Dupont',
-        studentEmail: 'jean.dupont@email.com',
-        studentPhone: '06 12 34 56 78',
-        studentPhoto: '/api/photos/student-1.jpg',
-        stageTitle: 'Développeur Web Full-Stack',
-        stageId: 1,
-        applicationDate: '20/01/2024',
-        status: 'reviewed',
-        priority: 'high',
-        cvUrl: '/api/documents/cv-jean-dupont.pdf',
-        coverLetterUrl: '/api/documents/lettre-jean-dupont.pdf',
-        additionalDocuments: ['portfolio-jean-dupont.pdf'],
-        studentProgram: 'Master Informatique',
-        studentYear: 2,
-        studentUniversity: 'Université de Paris',
-        studentSkills: ['React', 'Node.js', 'MongoDB', 'Git', 'Docker'],
-        studentLanguages: ['Français (Natif)', 'Anglais (Courant)'],
-        notes: 'Profil très intéressant, compétences techniques solides',
-        evaluation: 4.5
-      },
-      {
-        id: 2,
-        studentId: '2024002',
-        studentName: 'Marie Martin',
-        studentEmail: 'marie.martin@email.com',
-        studentPhone: '06 98 76 54 32',
-        studentPhoto: '/api/photos/student-2.jpg',
-        stageTitle: 'Développeur Web Full-Stack',
-        stageId: 1,
-        applicationDate: '18/01/2024',
-        status: 'interviewed',
-        priority: 'medium',
-        cvUrl: '/api/documents/cv-marie-martin.pdf',
-        coverLetterUrl: '/api/documents/lettre-marie-martin.pdf',
-        studentProgram: 'Master Informatique',
-        studentYear: 2,
-        studentUniversity: 'Université de Lyon',
-        studentSkills: ['React', 'Vue.js', 'Python', 'SQL'],
-        studentLanguages: ['Français (Natif)', 'Anglais (Courant)', 'Espagnol (Intermédiaire)'],
-        interviewDate: '25/01/2024',
-        notes: 'Entretien positif, bonne motivation',
-        evaluation: 4.2
-      },
-      {
-        id: 3,
-        studentId: '2024003',
-        studentName: 'Pierre Durand',
-        studentEmail: 'pierre.durand@email.com',
-        studentPhone: '06 11 22 33 44',
-        studentPhoto: '/api/photos/student-3.jpg',
-        stageTitle: 'Assistant Marketing Digital',
-        stageId: 2,
-        applicationDate: '22/01/2024',
-        status: 'pending',
-        priority: 'low',
-        cvUrl: '/api/documents/cv-pierre-durand.pdf',
-        studentProgram: 'Master Marketing',
-        studentYear: 1,
-        studentUniversity: 'Université de Marseille',
-        studentSkills: ['Marketing Digital', 'SEO', 'Réseaux sociaux'],
-        studentLanguages: ['Français (Natif)', 'Anglais (Intermédiaire)']
-      },
-      {
-        id: 4,
-        studentId: '2024004',
-        studentName: 'Sophie Bernard',
-        studentEmail: 'sophie.bernard@email.com',
-        studentPhone: '06 55 66 77 88',
-        studentPhoto: '/api/photos/student-4.jpg',
-        stageTitle: 'Développeur Web Full-Stack',
-        stageId: 1,
-        applicationDate: '15/01/2024',
-        status: 'accepted',
-        priority: 'high',
-        cvUrl: '/api/documents/cv-sophie-bernard.pdf',
-        coverLetterUrl: '/api/documents/lettre-sophie-bernard.pdf',
-        additionalDocuments: ['projet-react-sophie.pdf'],
-        studentProgram: 'Master Informatique',
-        studentYear: 2,
-        studentUniversity: 'Université de Toulouse',
-        studentSkills: ['React', 'TypeScript', 'Node.js', 'PostgreSQL'],
-        studentLanguages: ['Français (Natif)', 'Anglais (Courant)'],
-        notes: 'Excellente candidate, acceptée pour le stage',
-        evaluation: 4.8
-      },
-      {
-        id: 5,
-        studentId: '2024005',
-        studentName: 'Lucas Moreau',
-        studentEmail: 'lucas.moreau@email.com',
-        studentPhone: '06 99 88 77 66',
-        studentPhoto: '/api/photos/student-5.jpg',
-        stageTitle: 'Assistant Marketing Digital',
-        stageId: 2,
-        applicationDate: '19/01/2024',
-        status: 'rejected',
-        priority: 'low',
-        cvUrl: '/api/documents/cv-lucas-moreau.pdf',
-        studentProgram: 'Licence Commerce',
-        studentYear: 3,
-        studentUniversity: 'Université de Bordeaux',
-        studentSkills: ['Excel', 'PowerPoint', 'Réseaux sociaux'],
-        studentLanguages: ['Français (Natif)'],
-        notes: 'Profil ne correspond pas aux exigences du poste',
-        evaluation: 2.5
-      }
-    ];
-    setApplications(mockApplications);
-    setFilteredApplications(mockApplications);
+    if (notif) {
+      const timer = setTimeout(() => setNotif(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notif]);
+
+  useEffect(() => {
+    if (!user?.entrepriseId) return;
+
+    const chargerCandidatures = async () => {
+      setChargement(true);
+      const q = query(collection(db, 'candidatures'), where('entrepriseId', '==', user.entrepriseId));
+      const snap = await getDocs(q);
+
+      const resultats: Candidature[] = await Promise.all(
+        snap.docs.map(async (docSnap) => {
+          const data = docSnap.data();
+          let nomEtudiant = '';
+          let emailEtudiant = '';
+          let programmeEtudiant = '';
+          let universiteEtudiant = '';
+          let infosEtudiant: Record<string, unknown> = {}; // Typage plus strict
+          let photoEtudiant = '';
+          if (data.etudiantId) {
+            const etuSnap = await getDocs(query(collection(db, 'utilisateurs'), where('uid', '==', data.etudiantId)));
+            if (!etuSnap.empty) {
+              const s = etuSnap.docs[0].data();
+              infosEtudiant = s; // On stocke toutes les infos récupérées
+              nomEtudiant = (s.firstName || s.prenom || '') + ' ' + (s.lastName || s.nom || '');
+              emailEtudiant = s.email || '';
+              programmeEtudiant = s.program || s.filiere || '';
+              photoEtudiant = s.avatar || s.photo || '';
+              if (s.universiteId) {
+                try {
+                  const univRef = doc(db, 'universites', s.universiteId);
+                  const univSnap = await getDoc(univRef);
+                  if (univSnap.exists()) {
+                    universiteEtudiant = univSnap.data().nom || s.universiteId;
+                  } else {
+                    universiteEtudiant = s.universiteId;
+                  }
+                } catch (e) {
+                  universiteEtudiant = s.universiteId;
+                  console.error('Erreur récupération université:', e);
+                }
+              } else {
+                universiteEtudiant = '';
+              }
+            }
+          }
+          return {
+            candidatureId: data.candidatureId || docSnap.id,
+            offreId: data.offreId,
+            entrepriseId: data.entrepriseId,
+            etudiantId: data.etudiantId,
+            cvUrl: data.cvUrl,
+            statut: data.statut,
+            date: data.date ? new Date(data.date).toLocaleDateString() : '',
+            nomEtudiant,
+            emailEtudiant,
+            programmeEtudiant,
+            universiteEtudiant,
+            infosEtudiant,
+            photoEtudiant,
+          };
+        })
+      );
+      setCandidatures(resultats);
+      setChargement(false);
+    };
+
+    chargerCandidatures();
   }, [user]);
 
-  const handleFilterChange = (name: string, value: string) => {
-    const newFilters = { ...filters, [name]: value };
-    setFilters(newFilters);
+  const changerStatut = async (candidatureId: string, nouveauStatut: string) => {
+  let stageAjoute = false;
+  let erreurAjout: unknown = null;
+  await updateDoc(doc(db, 'candidatures', candidatureId), { statut: nouveauStatut });
+  setCandidatures(prev =>
+    prev.map(cand =>
+      cand.candidatureId === candidatureId ? { ...cand, statut: nouveauStatut } : cand
+    )
+  );
 
-    let filtered = applications;
-
-    if (newFilters.status) {
-      filtered = filtered.filter(app => app.status === newFilters.status);
+  // Si acceptée, créer le stage dans la collection 'stages'
+  if (nouveauStatut === 'acceptée') {
+    // Trouver la candidature complète
+    const candidature = candidatures.find(c => c.candidatureId === candidatureId);
+    if (!candidature) return;
+    // Récupérer les infos de l'offre de stage
+    try {
+      const offreRef = doc(db, 'offres_stage', candidature.offreId);
+      const offreSnap = await getDoc(offreRef);
+      if (!offreSnap.exists()) return;
+      const offre = offreSnap.data();
+      // Créer le stage
+      const stageData = {
+        entrepriseId: candidature.entrepriseId,
+        etudiantId: candidature.etudiantId,
+        offreId: candidature.offreId,
+        titre: offre.titre || '',
+        description: offre.description || '',
+        dateDebut: offre.dateDebut || '',
+        dateFin: offre.dateFin || '',
+        lieu: offre.lieu || '',
+        encadrant: offre.encadrant || '',
+        tuteur: offre.tuteur || '',
+        universite: candidature.universiteEtudiant || '',
+        programme: candidature.programmeEtudiant || '',
+        statut: 'actif',
+        creeLe: new Date().toISOString(),
+      };
+      // Ajouter le stage
+      await addDoc(collection(db, 'stages'), stageData);
+      stageAjoute = true;
+    } catch (e) {
+      erreurAjout = e;
+      console.error('Erreur lors de la création du stage:', e);
     }
-    if (newFilters.stage) {
-      filtered = filtered.filter(app => app.stageId.toString() === newFilters.stage);
+  }
+
+  // Affichage d'une notification stylée
+  if (nouveauStatut === 'acceptée') {
+    if (stageAjoute) {
+      setNotif({ type: 'success', text: 'Stage ajouté avec succès dans la base de données !' });
+    } else if (erreurAjout) {
+      setNotif({ type: 'error', text: 'Erreur lors de la création du stage. Vérifiez la console pour plus de détails.' });
     }
-    if (newFilters.priority) {
-      filtered = filtered.filter(app => app.priority === newFilters.priority);
-    }
-    if (newFilters.keywords) {
-      const keywords = newFilters.keywords.toLowerCase();
-      filtered = filtered.filter(app => 
-        app.studentName.toLowerCase().includes(keywords) ||
-        app.studentEmail.toLowerCase().includes(keywords) ||
-        app.stageTitle.toLowerCase().includes(keywords) ||
-        app.studentSkills.some(skill => skill.toLowerCase().includes(keywords))
-      );
-    }
+  }
+  if (nouveauStatut === 'refusée') {
+    setNotif({ type: 'info', text: 'Candidature refusée.' });
+  }
+};
 
-    setFilteredApplications(filtered);
-  };
-
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      pending: { class: 'bg-secondary', text: 'En attente', icon: 'fas fa-clock' },
-      reviewed: { class: 'bg-info', text: 'Examinée', icon: 'fas fa-eye' },
-      interviewed: { class: 'bg-warning', text: 'Entretien', icon: 'fas fa-comments' },
-      accepted: { class: 'bg-success', text: 'Acceptée', icon: 'fas fa-check' },
-      rejected: { class: 'bg-danger', text: 'Refusée', icon: 'fas fa-times' }
-    };
-
-    const config = statusConfig[status as keyof typeof statusConfig];
-    return (
-      <span className={`badge ${config.class}`}>
-        <i className={`${config.icon} me-1`}></i>
-        {config.text}
-      </span>
-    );
-  };
-
-  const getPriorityBadge = (priority: string) => {
-    const priorityConfig = {
-      low: { class: 'bg-success', text: 'Faible' },
-      medium: { class: 'bg-warning', text: 'Moyenne' },
-      high: { class: 'bg-danger', text: 'Élevée' }
-    };
-
-    const config = priorityConfig[priority as keyof typeof priorityConfig];
-    return <span className={`badge ${config.class}`}>{config.text}</span>;
-  };
-
-  const getStatusCount = (status: string) => {
-    return applications.filter(app => app.status === status).length;
-  };
-
-  const handleStatusChange = (applicationId: number, newStatus: string) => {
-    setApplications(prev => 
-      prev.map(app => 
-        app.id === applicationId ? { ...app, status: newStatus as any } : app
-      )
-    );
-    setFilteredApplications(prev => 
-      prev.map(app => 
-        app.id === applicationId ? { ...app, status: newStatus as any } : app
-      )
-    );
-  };
+  // Statistiques
+  const total = candidatures.length;
+  const nbAcceptees = candidatures.filter(c => c.statut === 'acceptée').length;
+  const nbRefusees = candidatures.filter(c => c.statut === 'refusée').length;
+  const nbEnAttente = candidatures.filter(c => c.statut === 'en_attente' || c.statut === 'en attente').length;
 
   return (
-    <div className="dashboard-container">
-      <div className="row g-0">
-        <div className={`col-auto ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-          {/* Sidebar removed */}
+    <div className="container-fluid py-4" style={{ minHeight: '100vh', background: '#f8fafc' }}>
+      {/* Notification */}
+      {notif && (
+        <div className={`alert alert-${notif.type === 'success' ? 'success' : notif.type === 'error' ? 'danger' : 'info'} alert-dismissible fade show`} role="alert" style={{ zIndex: 9999, position: 'fixed', top: 20, right: 20, minWidth: 300 }}>
+        {notif.text}
+        <button type="button" className="btn-close" aria-label="Close" onClick={() => setNotif(null)}></button>
+      </div>
+      )}
+      {/* Header et stats */}
+      <div className="mb-4">
+        <div className="d-flex align-items-center mb-3 gap-3">
+          <span className="d-flex align-items-center justify-content-center bg-light rounded-circle" style={{ width: 54, height: 54 }}>
+            <i className="fas fa-folder-open fa-2x text-primary"></i>
+          </span>
+          <div>
+            <h2 className="mb-0 fw-bold text-primary">Candidatures reçues</h2>
+            <div className="text-muted fs-6">Gérez et suivez toutes les candidatures à vos offres de stage</div>
+          </div>
         </div>
-        <div className="col">
-          <div className="dashboard-content p-4">
-            {/* Header */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <div>
-                <h1 className="h3 mb-0">
-                  <i className="fas fa-users me-2 text-primary"></i>
-                  Candidatures
-                </h1>
-                <p className="text-muted mb-0">
-                  Gérez les candidatures reçues pour vos offres de stage
-                </p>
-              </div>
-              <div className="d-flex gap-2">
-                <button className="btn btn-outline-primary">
-                  <i className="fas fa-download me-2"></i>Exporter
-                </button>
-                <button className="btn btn-outline-secondary">
-                  <i className="fas fa-filter me-2"></i>Filtres avancés
-                </button>
-              </div>
-            </div>
-
-            {/* Statistiques */}
-            <div className="row g-4 mb-4">
-              <div className="col-md-3">
-                <div className="card bg-primary text-white">
-                  <div className="card-body">
-                    <div className="d-flex justify-content-between">
-                      <div>
-                        <h4 className="mb-0">{applications.length}</h4>
-                        <p className="mb-0">Total candidatures</p>
-                      </div>
-                      <i className="fas fa-users fa-2x opacity-50"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="card bg-secondary text-white">
-                  <div className="card-body">
-                    <div className="d-flex justify-content-between">
-                      <div>
-                        <h4 className="mb-0">{getStatusCount('pending')}</h4>
-                        <p className="mb-0">En attente</p>
-                      </div>
-                      <i className="fas fa-clock fa-2x opacity-50"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="card bg-warning text-white">
-                  <div className="card-body">
-                    <div className="d-flex justify-content-between">
-                      <div>
-                        <h4 className="mb-0">{getStatusCount('interviewed')}</h4>
-                        <p className="mb-0">Entretiens</p>
-                      </div>
-                      <i className="fas fa-comments fa-2x opacity-50"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="card bg-success text-white">
-                  <div className="card-body">
-                    <div className="d-flex justify-content-between">
-                      <div>
-                        <h4 className="mb-0">{getStatusCount('accepted')}</h4>
-                        <p className="mb-0">Acceptées</p>
-                      </div>
-                      <i className="fas fa-check-circle fa-2x opacity-50"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Filtres */}
-            <div className="card mb-4">
+        <div className="row g-4">
+          <div className="col-md-3">
+            <div className="card shadow-sm border-0 bg-primary text-white rounded-4">
               <div className="card-body">
-                <h5 className="mb-3">
-                  <i className="fas fa-filter me-2"></i>Filtres
-                </h5>
-                <div className="row g-3">
-                  <div className="col-md-3">
-                    <label className="form-label">Statut</label>
-                    <select 
-                      className="form-select"
-                      value={filters.status}
-                      onChange={(e) => handleFilterChange('status', e.target.value)}
-                    >
-                      <option value="">Tous les statuts</option>
-                      <option value="pending">En attente</option>
-                      <option value="reviewed">Examinée</option>
-                      <option value="interviewed">Entretien</option>
-                      <option value="accepted">Acceptée</option>
-                      <option value="rejected">Refusée</option>
-                    </select>
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h4 className="mb-0 fw-bold">{total}</h4>
+                    <p className="mb-0">Total</p>
                   </div>
-                  <div className="col-md-3">
-                    <label className="form-label">Offre de stage</label>
-                    <select 
-                      className="form-select"
-                      value={filters.stage}
-                      onChange={(e) => handleFilterChange('stage', e.target.value)}
-                    >
-                      <option value="">Toutes les offres</option>
-                      <option value="1">Développeur Web Full-Stack</option>
-                      <option value="2">Assistant Marketing Digital</option>
-                    </select>
-                  </div>
-                  <div className="col-md-3">
-                    <label className="form-label">Priorité</label>
-                    <select 
-                      className="form-select"
-                      value={filters.priority}
-                      onChange={(e) => handleFilterChange('priority', e.target.value)}
-                    >
-                      <option value="">Toutes les priorités</option>
-                      <option value="low">Faible</option>
-                      <option value="medium">Moyenne</option>
-                      <option value="high">Élevée</option>
-                    </select>
-                  </div>
-                  <div className="col-md-3">
-                    <label className="form-label">&nbsp;</label>
-                    <button 
-                      className="btn btn-primary w-100"
-                      onClick={() => {
-                        setFilters({ status: '', stage: '', priority: '', keywords: '' });
-                        setFilteredApplications(applications);
-                      }}
-                    >
-                      <i className="fas fa-times me-2"></i>Réinitialiser
-                    </button>
-                  </div>
-                </div>
-                <div className="row mt-3">
-                  <div className="col-12">
-                    <div className="input-group">
-                      <input 
-                        type="text" 
-                        className="form-control" 
-                        placeholder="Rechercher par nom, email, compétences..."
-                        value={filters.keywords}
-                        onChange={(e) => handleFilterChange('keywords', e.target.value)}
-                      />
-                      <button className="btn btn-outline-secondary" type="button">
-                        <i className="fas fa-search"></i>
-                      </button>
-                    </div>
-                  </div>
+                  <i className="fas fa-users fa-2x opacity-50"></i>
                 </div>
               </div>
             </div>
-
-            {/* Tableau des candidatures */}
-            <div className="card">
-              <div className="card-header">
-                <h5 className="mb-0">
-                  <i className="fas fa-list me-2"></i>
-                  Candidatures ({filteredApplications.length})
-                </h5>
-              </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card shadow-sm border-0 bg-success text-white rounded-4">
               <div className="card-body">
-                {filteredApplications.length === 0 ? (
-                  <div className="text-center py-5">
-                    <i className="fas fa-inbox fa-4x text-muted mb-3"></i>
-                    <h5 className="text-muted">Aucune candidature trouvée</h5>
-                    <p className="text-muted">Aucune candidature ne correspond à vos critères de recherche.</p>
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h4 className="mb-0 fw-bold">{nbAcceptees}</h4>
+                    <p className="mb-0">Acceptées</p>
                   </div>
-                ) : (
-                  <div className="table-responsive">
-                    <table className="table table-hover">
-                      <thead>
-                        <tr>
-                          <th>Candidat</th>
-                          <th>Offre</th>
-                          <th>Date de candidature</th>
-                          <th>Statut</th>
-                          <th>Priorité</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredApplications.map((application) => (
-                          <tr key={application.id}>
-                            <td>
-                              <div className="d-flex align-items-center">
-                                <img 
-                                  src={application.studentPhoto || '/default-avatar.png'} 
-                                  alt="Photo"
-                                  className="rounded-circle me-3"
-                                  style={{ width: '40px', height: '40px', objectFit: 'cover' }}
-                                />
-                                <div>
-                                  <strong>{application.studentName}</strong><br />
-                                  <small className="text-muted">{application.studentEmail}</small><br />
-                                  <small className="text-muted">{application.studentProgram} - {application.studentUniversity}</small>
-                                </div>
-                              </div>
-                            </td>
-                            <td>
-                              <strong>{application.stageTitle}</strong><br />
-                              <small className="text-muted">ID: {application.studentId}</small>
-                            </td>
-                            <td>{application.applicationDate}</td>
-                            <td>{getStatusBadge(application.status)}</td>
-                            <td>{getPriorityBadge(application.priority)}</td>
-                            <td>
-                              <div className="btn-group" role="group">
-                                <button 
-                                  className="btn btn-sm btn-outline-primary"
-                                  onClick={() => {
-                                    setSelectedApplication(application);
-                                    setShowDetailsModal(true);
-                                  }}
-                                  title="Voir détails"
-                                >
-                                  <i className="fas fa-eye"></i>
-                                </button>
-                                <button 
-                                  className="btn btn-sm btn-outline-success"
-                                  title="Accepter"
-                                  onClick={() => handleStatusChange(application.id, 'accepted')}
-                                >
-                                  <i className="fas fa-check"></i>
-                                </button>
-                                <button 
-                                  className="btn btn-sm btn-outline-warning"
-                                  title="Programmer entretien"
-                                  onClick={() => {
-                                    setSelectedApplication(application);
-                                    setShowInterviewModal(true);
-                                  }}
-                                >
-                                  <i className="fas fa-calendar"></i>
-                                </button>
-                                <button 
-                                  className="btn btn-sm btn-outline-danger"
-                                  title="Refuser"
-                                  onClick={() => handleStatusChange(application.id, 'rejected')}
-                                >
-                                  <i className="fas fa-times"></i>
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <i className="fas fa-check fa-2x opacity-50"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card shadow-sm border-0 bg-danger text-white rounded-4">
+              <div className="card-body">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h4 className="mb-0 fw-bold">{nbRefusees}</h4>
+                    <p className="mb-0">Refusées</p>
                   </div>
-                )}
+                  <i className="fas fa-times fa-2x opacity-50"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card shadow-sm border-0 bg-secondary text-white rounded-4">
+              <div className="card-body">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h4 className="mb-0 fw-bold">{nbEnAttente}</h4>
+                    <p className="mb-0">En attente</p>
+                  </div>
+                  <i className="fas fa-clock fa-2x opacity-50"></i>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Modal Détails Candidature */}
-      {showDetailsModal && selectedApplication && (
-        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-lg">
+      {/* Tableau des candidatures */}
+      <div className="container py-4">
+        {chargement ? (
+          <div>Chargement...</div>
+        ) : candidatures.length === 0 ? (
+          <div className="alert alert-info">Aucune candidature reçue pour le moment.</div>
+        ) : (
+          <div className="table-responsive">
+            <table className="table table-hover align-middle bg-white rounded-4 shadow-sm overflow-hidden">
+              <thead className="align-middle bg-light">
+                <tr style={{ fontWeight: 600, fontSize: 16 }}>
+                  <th>Étudiant</th>
+                  <th>Email</th>
+                  <th>Programme</th>
+                  <th>Université</th>
+                  <th>Date</th>
+                  <th>CV</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {candidatures.map(cand => (
+                  <tr key={cand.candidatureId} style={{ transition: 'background 0.2s' }}>
+                    <td style={{ fontWeight: 500 }}>{cand.nomEtudiant}</td>
+                    <td>{cand.emailEtudiant}</td>
+                    <td>{cand.programmeEtudiant}</td>
+                    <td>{cand.universiteEtudiant}</td>
+                    <td>{cand.date}</td>
+                    <td>
+                      {cand.cvUrl ? (
+                        <a href={cand.cvUrl} target="_blank" rel="noopener noreferrer" className="btn btn-outline-primary btn-sm rounded-pill px-3 py-1">
+                          <i className="fas fa-file-pdf me-1"></i>CV
+                        </a>
+                      ) : (
+                        <span className="text-muted">Aucun</span>
+                      )}
+                    </td>
+                    <td>
+                      <span className={
+                        cand.statut === 'acceptée' ? 'badge bg-success px-3 py-2 fs-6' :
+                        cand.statut === 'refusée' ? 'badge bg-danger px-3 py-2 fs-6' :
+                        'badge bg-secondary px-3 py-2 fs-6'
+                      } style={{ fontSize: 15 }}>
+                        {cand.statut}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="d-flex gap-1">
+                        <button
+                          className="btn btn-outline-success btn-sm"
+                          title="Accepter"
+                          onClick={() => changerStatut(cand.candidatureId, 'acceptée')}
+                          style={{ minWidth: 32, minHeight: 32, padding: 0 }}
+                        >
+                          <i className="fas fa-check"></i>
+                        </button>
+                        <button
+                          className="btn btn-outline-danger btn-sm"
+                          title="Refuser"
+                          onClick={() => changerStatut(cand.candidatureId, 'refusée')}
+                          style={{ minWidth: 32, minHeight: 32, padding: 0 }}
+                        >
+                          <i className="fas fa-times"></i>
+                        </button>
+                        <button
+                          className="btn btn-outline-info btn-sm"
+                          title="Voir profil"
+                          onClick={() => { setSelectedEtudiant(cand); setShowEtudiantModal(true); }}
+                          style={{ minWidth: 32, minHeight: 32, padding: 0 }}
+                        >
+                          <i className="fas fa-eye"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+      {showEtudiantModal && selectedEtudiant && (
+        <div className="modal show d-block" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.3)' }}>
+          <div className="modal-dialog modal-dialog-centered modal-lg">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">
-                  <i className="fas fa-user me-2"></i>
-                  Détails de la candidature
-                </h5>
-                <button 
-                  type="button" 
-                  className="btn-close"
-                  onClick={() => setShowDetailsModal(false)}
-                ></button>
+                <h5 className="modal-title">Profil de l'étudiant</h5>
+                <button type="button" className="btn-close" onClick={() => setShowEtudiantModal(false)}></button>
               </div>
               <div className="modal-body">
-                <div className="row">
+                <div className="row g-3">
                   <div className="col-md-4 text-center">
-                    <img 
-                      src={selectedApplication.studentPhoto || '/default-avatar.png'} 
-                      alt="Photo"
-                      className="rounded-circle mb-3"
-                      style={{ width: '120px', height: '120px', objectFit: 'cover' }}
-                    />
-                    <h5>{selectedApplication.studentName}</h5>
-                    <p className="text-muted">{selectedApplication.studentEmail}</p>
-                    <p className="text-muted">{selectedApplication.studentPhone}</p>
+                    {typeof selectedEtudiant.photoEtudiant === 'string' && selectedEtudiant.photoEtudiant.trim() !== '' ? (
+                      <img src={selectedEtudiant.photoEtudiant} alt="Photo étudiant" className="rounded-circle mb-3" style={{ width: 120, height: 120, objectFit: 'cover', border: '2px solid #ddd' }} />
+                    ) : (
+                      <div className="rounded-circle bg-light mb-3 d-flex align-items-center justify-content-center" style={{ width: 120, height: 120 }}>
+                        <i className="fas fa-user fa-4x text-secondary"></i>
+                      </div>
+                    )}
+                    <div className="fw-bold fs-5 mb-2">{selectedEtudiant.nomEtudiant}</div>
+                    <div className="text-muted">{selectedEtudiant.emailEtudiant}</div>
                   </div>
                   <div className="col-md-8">
-                    <h6 className="text-primary mb-3">Informations académiques</h6>
-                    <p><strong>Programme:</strong> {selectedApplication.studentProgram}</p>
-                    <p><strong>Année:</strong> {selectedApplication.studentYear}</p>
-                    <p><strong>Université:</strong> {selectedApplication.studentUniversity}</p>
-                    <p><strong>ID Étudiant:</strong> {selectedApplication.studentId}</p>
-
-                    <h6 className="text-primary mb-3 mt-4">Compétences</h6>
-                    <div className="d-flex flex-wrap gap-2 mb-3">
-                      {selectedApplication.studentSkills.map((skill, index) => (
-                        <span key={index} className="badge bg-primary">{skill}</span>
-                      ))}
-                    </div>
-
-                    <h6 className="text-primary mb-3">Langues</h6>
-                    <div className="d-flex flex-wrap gap-2 mb-3">
-                      {selectedApplication.studentLanguages.map((language, index) => (
-                        <span key={index} className="badge bg-info">{language}</span>
-                      ))}
-                    </div>
-
-                    <h6 className="text-primary mb-3">Documents</h6>
-                    <div className="list-group">
-                      <a href={selectedApplication.cvUrl} className="list-group-item list-group-item-action" target="_blank">
-                        <i className="fas fa-file-pdf text-danger me-2"></i>CV
-                      </a>
-                      {selectedApplication.coverLetterUrl && (
-                        <a href={selectedApplication.coverLetterUrl} className="list-group-item list-group-item-action" target="_blank">
-                          <i className="fas fa-file-word text-primary me-2"></i>Lettre de motivation
+                    <h6 className="fw-bold mb-3">Informations détaillées :</h6>
+                    <div className="row">
+                      {selectedEtudiant.infosEtudiant &&
+  Object.entries(selectedEtudiant.infosEtudiant as Record<string, unknown>).map(([key, value]) => (
+    (typeof value === 'string' || typeof value === 'number') && key !== 'avatar' && key !== 'photo' && key !== 'firstName' && key !== 'prenom' && key !== 'lastName' && key !== 'nom' && key !== 'email' ? (
+      <div className="col-md-6 mb-2" key={key}>
+        <strong>{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} :</strong> {value}
+      </div>
+    ) : null
+  ))}
+                      <div className="col-md-6 mb-2"><strong>Programme :</strong> {selectedEtudiant.programmeEtudiant}</div>
+                      <div className="col-md-6 mb-2"><strong>Université :</strong> {selectedEtudiant.universiteEtudiant}</div>
+                      <div className="col-md-6 mb-2"><strong>Date de candidature :</strong> {selectedEtudiant.date}</div>
+                      <div className="col-md-6 mb-2"><strong>Statut :</strong> <span className={
+                        selectedEtudiant.statut === 'acceptée' ? 'badge bg-success' :
+                        selectedEtudiant.statut === 'refusée' ? 'badge bg-danger' :
+                        'badge bg-secondary'
+                      }>{selectedEtudiant.statut}</span></div>
+                      <div className="col-md-12 mb-2"><strong>CV :</strong> {selectedEtudiant.cvUrl ? (
+                        <a href={selectedEtudiant.cvUrl} target="_blank" rel="noopener noreferrer" className="btn btn-outline-primary btn-sm ms-2">
+                          <i className="fas fa-file-pdf me-1"></i>Voir le CV
                         </a>
+                      ) : (
+                        <span className="text-muted ms-2">Aucun</span>
                       )}
-                      {selectedApplication.additionalDocuments?.map((doc, index) => (
-                        <a key={index} href={`/api/documents/${doc}`} className="list-group-item list-group-item-action" target="_blank">
-                          <i className="fas fa-file me-2"></i>{doc}
-                        </a>
-                      ))}
+                      </div>
                     </div>
-
-                    {selectedApplication.notes && (
-                      <>
-                        <h6 className="text-primary mb-3 mt-4">Notes</h6>
-                        <p>{selectedApplication.notes}</p>
-                      </>
-                    )}
-
-                    {selectedApplication.evaluation && (
-                      <>
-                        <h6 className="text-primary mb-3">Évaluation</h6>
-                        <div className="d-flex align-items-center">
-                          <span className="me-2">{selectedApplication.evaluation}/5</span>
-                          <div className="d-flex">
-                            {[...Array(5)].map((_, i) => (
-                              <i 
-                                key={i} 
-                                className={`fas fa-star ${i < Math.floor(selectedApplication.evaluation!) ? 'text-warning' : 'text-muted'}`}
-                              ></i>
-                            ))}
-                          </div>
-                        </div>
-                      </>
-                    )}
                   </div>
                 </div>
               </div>
               <div className="modal-footer">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary"
-                  onClick={() => setShowDetailsModal(false)}
-                >
-                  Fermer
-                </button>
-                <button 
-                  type="button" 
-                  className="btn btn-success"
-                  onClick={() => handleStatusChange(selectedApplication.id, 'accepted')}
-                >
-                  <i className="fas fa-check me-2"></i>Accepter
-                </button>
-                <button 
-                  type="button" 
-                  className="btn btn-warning"
-                  onClick={() => {
-                    setShowDetailsModal(false);
-                    setShowInterviewModal(true);
-                  }}
-                >
-                  <i className="fas fa-calendar me-2"></i>Programmer entretien
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Entretien */}
-      {showInterviewModal && selectedApplication && (
-        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  <i className="fas fa-calendar me-2"></i>
-                  Programmer un entretien
-                </h5>
-                <button 
-                  type="button" 
-                  className="btn-close"
-                  onClick={() => setShowInterviewModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <p><strong>Candidat:</strong> {selectedApplication.studentName}</p>
-                <p><strong>Offre:</strong> {selectedApplication.stageTitle}</p>
-                
-                <form>
-                  <div className="mb-3">
-                    <label className="form-label">Date et heure *</label>
-                    <input type="datetime-local" className="form-control" required />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Type d'entretien</label>
-                    <select className="form-select">
-                      <option value="video">Visioconférence</option>
-                      <option value="phone">Téléphone</option>
-                      <option value="onsite">Sur site</option>
-                    </select>
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Lien/Adresse</label>
-                    <input type="text" className="form-control" placeholder="Lien Zoom, adresse..." />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Notes</label>
-                    <textarea className="form-control" rows="3" placeholder="Informations supplémentaires..."></textarea>
-                  </div>
-                </form>
-              </div>
-              <div className="modal-footer">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary"
-                  onClick={() => setShowInterviewModal(false)}
-                >
-                  Annuler
-                </button>
-                <button type="button" className="btn btn-primary">
-                  <i className="fas fa-calendar-plus me-2"></i>Programmer
-                </button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowEtudiantModal(false)}>Fermer</button>
               </div>
             </div>
           </div>

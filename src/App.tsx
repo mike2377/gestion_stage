@@ -7,6 +7,8 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Pages Étudiant
 import MesStages from './pages/etudiant/MesStages';
@@ -24,6 +26,7 @@ import MonProfilEntreprise from './pages/entreprise/MonProfil';
 import TachesStagiaires from './pages/entreprise/TachesStagiaires';
 import ParametresEntreprise from './pages/entreprise/Parametres';
 import DashboardEntreprise from './pages/entreprise/Dashboard';
+import Employes from './pages/entreprise/Employes';
 
 // Pages Enseignant
 import GestionStages from './pages/enseignant/GestionStages';
@@ -147,6 +150,7 @@ function App() {
                 <Route path="profil" element={<MonProfilEntreprise />} />
                 <Route path="taches" element={<TachesStagiaires />} />
                 <Route path="parametres" element={<ParametresEntreprise />} />
+                <Route path="employes" element={<Employes />} />
               </Routes>
             </SidebarLayout>
           } />
@@ -406,6 +410,7 @@ function App() {
           {/* Redirection par défaut */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <ToastContainer position="top-right" autoClose={3000} />
       </Router>
     </AuthProvider>
   );
