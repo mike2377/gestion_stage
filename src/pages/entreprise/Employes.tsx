@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs, query, where, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { db } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
 import { FaUserTie, FaEnvelope, FaPhone, FaEdit, FaTrash, FaUserPlus } from 'react-icons/fa';
@@ -23,6 +24,7 @@ interface EmployeFormData {
   telephone: string;
   poste: string;
   role: string;
+  password: string;
 }
 
 const initialFormData: EmployeFormData = {
@@ -31,7 +33,8 @@ const initialFormData: EmployeFormData = {
   email: '',
   telephone: '',
   poste: '',
-  role: ''
+  role: '',
+  password: ''
 };
 
 const Employes: React.FC = () => {
@@ -106,7 +109,15 @@ const Employes: React.FC = () => {
         await updateDoc(employeRef, employeData);
         toast.success('Employé modifié avec succès');
       } else {
-        await addDoc(collection(db, 'utilisateurs'), employeData);
+        // Création dans Authentification
+        const auth = getAuth();
+        const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+        const newUser = userCredential.user;
+        // Ajout dans Firestore avec l'uid
+        await addDoc(collection(db, 'utilisateurs'), {
+          ...employeData,
+          uid: newUser.uid
+        });
         toast.success('Employé ajouté avec succès');
       }
 
@@ -114,9 +125,15 @@ const Employes: React.FC = () => {
       setFormData(initialFormData);
       setEditingId(null);
       fetchEmployes();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur lors de l\'enregistrement:', error);
-      toast.error('Erreur lors de l\'enregistrement');
+      if (error.code === 'auth/email-already-in-use') {
+        toast.error('Cet email est déjà utilisé pour un autre compte.');
+      } else if (error.code === 'auth/weak-password') {
+        toast.error('Le mot de passe est trop faible (minimum 6 caractères).');
+      } else {
+        toast.error('Erreur lors de l\'enregistrement');
+      }
     }
   };
 
@@ -127,7 +144,8 @@ const Employes: React.FC = () => {
       email: employe.email,
       telephone: employe.telephone,
       poste: employe.poste,
-      role: employe.role
+      role: employe.role,
+      password: ''
     });
     setEditingId(employe.id);
     setShowModal(true);
@@ -356,6 +374,18 @@ const Employes: React.FC = () => {
                         <option value="tuteur">Tuteur</option>
                         <option value="entreprise">Entreprise</option>
                       </select>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Mot de passe</label>
+                      <input
+                        type="password"
+                        className="form-control"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        required
+                        minLength={6}
+                      />
                     </div>
                   </div>
                 </div>

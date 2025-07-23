@@ -25,30 +25,36 @@ import {
 } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import type { User } from '../../types/models/User';
+import { collection, getDocs, query, where, updateDoc, doc, getDoc } from 'firebase/firestore';
+import { db } from '../../config/firebase';
+import { toast } from 'react-toastify';
 
 interface Stagiaire {
-  id: number;
-  matricule: string;
-  prenom: string;
-  nom: string;
-  email: string;
-  telephone: string;
+  id: string;
+  matricule?: string;
+  prenom?: string;
+  nom?: string;
+  email?: string;
+  telephone?: string;
   photo?: string;
-  titreStage: string;
-  idStage: number;
-  dateDebut: string;
-  dateFin: string;
-  statut: 'actif' | 'termine' | 'termine_anticipé';
-  encadrant: string;
-  tuteur: string;
-  universite: string;
-  programme: string;
-  annee: number;
-  noteEvaluation: number;
-  progression: number;
-  taches: Tache[];
-  documents: Document[];
-  evaluations: Evaluation[];
+  titreStage?: string;
+  idStage?: number;
+  dateDebut?: string;
+  dateFin?: string;
+  statut?: 'actif' | 'termine' | 'termine_anticipé';
+  encadrant?: string;
+  tuteur?: string;
+  tuteurId?: string;
+  universite?: string;
+  programme?: string;
+  annee?: number;
+  noteEvaluation?: number;
+  progression?: number;
+  taches?: Tache[];
+  documents?: Document[];
+  evaluations?: Evaluation[];
+  enseignantId?: string; // Added for enseignant référent
+  etudiantId?: string; // Added for etudiant référent
 }
 
 interface Tache {
@@ -64,7 +70,7 @@ interface Tache {
 
 interface Document {
   id: number;
-  nom: string;
+    nom: string;
   type: string;
   dateDepot: string;
   statut: string;
@@ -93,185 +99,122 @@ const MesStagiaires: React.FC = () => {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showEvaluationModal, setShowEvaluationModal] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [tuteurs, setTuteurs] = useState<{ id: string; nom: string }[]>([]);
 
-  // Données simulées
+  const { user } = useAuth();
+
+  // Récupérer dynamiquement les tuteurs de l'entreprise
   useEffect(() => {
-    if (!user || !user.entrepriseId) return;
-    const mockStagiaires: Stagiaire[] = [
-      {
-        id: 1,
-        matricule: '2024001',
-        prenom: 'Jean',
-        nom: 'Dupont',
-        email: 'jean.dupont@email.com',
-        telephone: '06 12 34 56 78',
-        photo: '/api/photos/student-1.jpg',
-        titreStage: 'Développeur Web Full-Stack',
-        idStage: 1,
-        dateDebut: '01/03/2024',
-        dateFin: '31/08/2024',
-        statut: 'actif',
-        encadrant: 'M. Martin',
-        tuteur: 'Dr. Dupont',
-        universite: 'Université de Paris',
-        programme: 'Master Informatique',
-        annee: 2,
-        noteEvaluation: 4.5,
-        progression: 75,
-        taches: [
-          {
-            id: 1,
-            titre: 'Développement du frontend',
-            description: 'Créer les interfaces utilisateur avec React',
-            dateEcheance: '15/04/2024',
-            statut: 'terminee',
-            priorite: 'haute',
-            dateAttribution: '01/03/2024',
-            dateTerminaison: '10/04/2024'
-          },
-          {
-            id: 2,
-            titre: 'Intégration API',
-            description: 'Connecter le frontend aux APIs backend',
-            dateEcheance: '30/04/2024',
-            statut: 'en_cours',
-            priorite: 'haute',
-            dateAttribution: '15/03/2024'
-          },
-          {
-            id: 3,
-            titre: 'Tests unitaires',
-            description: 'Écrire les tests pour les composants',
-            dateEcheance: '15/05/2024',
-            statut: 'en_attente',
-            priorite: 'moyenne',
-            dateAttribution: '01/04/2024'
-          }
-        ],
-        documents: [
-          {
-            id: 1,
-            nom: 'Convention_stage_Jean_Dupont.pdf',
-            type: 'Convention',
-            dateDepot: '28/02/2024',
-            statut: 'Approuvé'
-          },
-          {
-            id: 2,
-            nom: 'Rapport_mensuel_Jean_Dupont.pdf',
-            type: 'Rapport',
-            dateDepot: '01/04/2024',
-            statut: 'En attente'
-          }
-        ],
-        evaluations: [
-          {
-            id: 1,
-            date: '01/04/2024',
-            type: 'mi_parcours',
-            note: 4.5,
-            commentaires: 'Excellent travail, très autonome et créatif',
-            evaluateur: 'M. Martin'
-          }
-        ]
-      },
-      {
-        id: 2,
-        matricule: '2024002',
-        prenom: 'Marie',
-        nom: 'Martin',
-        email: 'marie.martin@email.com',
-        telephone: '06 98 76 54 32',
-        photo: '/api/photos/student-2.jpg',
-        titreStage: 'Assistant Marketing Digital',
-        idStage: 2,
-        dateDebut: '01/04/2024',
-        dateFin: '31/07/2024',
-        statut: 'actif',
-        encadrant: 'Mme. Dubois',
-        tuteur: 'Dr. Moreau',
-        universite: 'Université de Lyon',
-        programme: 'Master Marketing',
-        annee: 2,
-        noteEvaluation: 4.2,
-        progression: 60,
-        taches: [
-          {
-            id: 4,
-            titre: 'Gestion réseaux sociaux',
-            description: 'Créer et publier du contenu sur les réseaux',
-            dateEcheance: '15/04/2024',
-            statut: 'terminee',
-            priorite: 'haute',
-            dateAttribution: '01/04/2024',
-            dateTerminaison: '12/04/2024'
-          },
-          {
-            id: 5,
-            titre: 'Analyse des performances',
-            description: 'Analyser les métriques des campagnes',
-            dateEcheance: '30/04/2024',
-            statut: 'en_cours',
-            priorite: 'moyenne',
-            dateAttribution: '10/04/2024'
-          }
-        ],
-        documents: [
-          {
-            id: 3,
-            nom: 'Convention_stage_Marie_Martin.pdf',
-            type: 'Convention',
-            dateDepot: '25/03/2024',
-            statut: 'Approuvé'
-          }
-        ],
-        evaluations: []
-      },
-      {
-        id: 3,
-        matricule: '2024003',
-        prenom: 'Sophie',
-        nom: 'Bernard',
-        email: 'sophie.bernard@email.com',
-        telephone: '06 55 66 77 88',
-        photo: '/api/photos/student-4.jpg',
-        titreStage: 'Développeur Web Full-Stack',
-        idStage: 1,
-        dateDebut: '01/06/2023',
-        dateFin: '31/12/2023',
-        statut: 'termine',
-        encadrant: 'M. Martin',
-        tuteur: 'Dr. Dupont',
-        universite: 'Université de Toulouse',
-        programme: 'Master Informatique',
-        annee: 2,
-        noteEvaluation: 4.8,
-        progression: 100,
-        taches: [],
-        documents: [
-          {
-            id: 4,
-            nom: 'Rapport_final_Sophie_Bernard.pdf',
-            type: 'Rapport final',
-            dateDepot: '15/12/2023',
-            statut: 'Approuvé'
-          }
-        ],
-        evaluations: [
-          {
-            id: 2,
-            date: '15/12/2023',
-            type: 'finale',
-            note: 4.8,
-            commentaires: 'Excellente stagiaire, travail de qualité exceptionnelle',
-            evaluateur: 'M. Martin'
-          }
-        ]
+    const fetchTuteurs = async () => {
+      if (!user || !user.entrepriseId) return;
+      try {
+        const q = query(
+          collection(db, 'utilisateurs'),
+          where('entrepriseId', '==', user.entrepriseId),
+          where('role', '==', 'tuteur')
+        );
+        const snap = await getDocs(q);
+        const tuteursList: { id: string; nom: string }[] = snap.docs.map(doc => ({
+          id: doc.id,
+          nom: (doc.data().firstName || '') + ' ' + (doc.data().lastName || '')
+        }));
+        setTuteurs(tuteursList);
+      } catch (error) {
+        toast.error('Erreur lors du chargement des tuteurs');
       }
-    ];
-    setStagiaires(mockStagiaires);
-    setFilteredStagiaires(mockStagiaires);
+    };
+    fetchTuteurs();
   }, [user]);
+
+  // Charger dynamiquement les stagiaires de l'entreprise depuis Firestore
+  useEffect(() => {
+    // Modifiez la fonction fetchStagiaires comme ceci :
+    const fetchStagiaires = async () => {
+      if (!user || !user.entrepriseId) return;
+
+      try {
+        const q = query(
+          collection(db, 'stages'),
+          where('entrepriseId', '==', user.entrepriseId)
+        );
+        const querySnapshot = await getDocs(q);
+
+        const stagiairesData = await Promise.all(
+          querySnapshot.docs.map(async (stageDoc) => {
+            const stageData = stageDoc.data();
+            const studentInfo = {
+              prenom: '',
+              nom: '',
+              email: '',
+              telephone: ''
+            };
+
+            // Debug: Vérifiez l'ID de l'étudiant
+            console.log(`Processing stage ${stageDoc.id} with etudiantId:`, stageData.etudiantId);
+
+            if (stageData.etudiantId) {
+              try {
+                const userDoc = await getDoc(doc(db, 'utilisateurs', stageData.etudiantId));
+                
+                if (userDoc.exists()) {
+                  const userData = userDoc.data();
+                  console.log('User data found:', userData);
+                  
+                  // Mappez les champs selon votre structure exacte
+                  return {
+                    id: stageDoc.id,
+                    ...stageData,
+                    prenom: userData.firstName || userData.prenom || 'Non renseigné',
+                    nom: userData.lastName || userData.nom || 'Non renseigné',
+                    email: userData.email || 'Non renseigné',
+                    telephone: userData.phone || userData.telephone || 'Non renseigné',
+                    universite: userData.universiteId || 'Non renseignée'
+                  };
+                } else {
+                  console.warn(`User document not found for id: ${stageData.etudiantId}`);
+                }
+              } catch (error) {
+                console.error(`Error fetching user ${stageData.etudiantId}:`, error);
+              }
+            }
+
+            return {
+              id: stageDoc.id,
+              ...stageData,
+              ...studentInfo
+            };
+          })
+        );
+
+        console.log('Final stagiaires data:', stagiairesData);
+        setStagiaires(stagiairesData);
+        setFilteredStagiaires(stagiairesData);
+      } catch (error) {
+        console.error('Error loading stagiaires:', error);
+        toast.error('Erreur de chargement des stagiaires');
+      }
+    };
+    fetchStagiaires();
+  }, [user]);
+
+  // Affichage debug temporaire pour voir les données récupérées
+  useEffect(() => {
+    if (stagiaires.length === 0) {
+      console.log('Aucun stage trouvé pour cette entreprise.');
+    } else {
+      console.log('Stages récupérés:', stagiaires);
+    }
+  }, [stagiaires]);
+
+  // Fonctions de tri (mock pour éviter l'erreur)
+  const handleSort = (field: string) => {
+    // À implémenter : logique de tri si besoin
+    // Pour l'instant, ne fait rien
+  };
+  const getSortIcon = (field: string) => {
+    // À implémenter : retourne une icône de tri selon l'état
+    return null;
+  };
 
   const handleFilterChange = (name: string, value: string) => {
     const newFilters = { ...filters, [name]: value };
@@ -329,13 +272,6 @@ const MesStagiaires: React.FC = () => {
     if (progression >= 60) return 'info';
     if (progression >= 40) return 'warning';
     return 'danger';
-  };
-
-  const user = {
-    role: 'enterprise',
-    firstName: 'TechCorp',
-    lastName: 'Admin',
-    entrepriseId: 'your_enterprise_id_here' // Placeholder for actual user data
   };
 
   return (
@@ -444,47 +380,47 @@ const MesStagiaires: React.FC = () => {
         <div className="card-body">
           <div className="row">
             <div className="col-md-4 mb-3">
-              <div className="input-group">
-                <span className="input-group-text">
-                  <FaSearch />
-                </span>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Rechercher un stagiaire..."
+          <div className="input-group">
+            <span className="input-group-text">
+              <FaSearch />
+            </span>
+            <input 
+              type="text" 
+              className="form-control" 
+              placeholder="Rechercher un stagiaire..."
                   value={filters.encadrant}
                   onChange={(e) => handleFilterChange('encadrant', e.target.value)}
-                />
-              </div>
-            </div>
+            />
+          </div>
+        </div>
             <div className="col-md-3 mb-3">
-              <select
-                className="form-select"
-                value={filters.statut}
-                onChange={(e) => handleFilterChange('statut', e.target.value)}
-              >
-                <option value="">Tous les statuts</option>
-                <option value="actif">En cours</option>
-                <option value="termine">Terminé</option>
+          <select 
+            className="form-select"
+            value={filters.statut}
+            onChange={(e) => handleFilterChange('statut', e.target.value)}
+          >
+            <option value="">Tous les statuts</option>
+            <option value="actif">En cours</option>
+            <option value="termine">Terminé</option>
                 <option value="termine_anticipé">Terminé</option>
-              </select>
-            </div>
+          </select>
+        </div>
             <div className="col-md-3 mb-3">
-              <select
-                className="form-select"
-                value={filters.stage}
-                onChange={(e) => handleFilterChange('stage', e.target.value)}
-              >
-                <option value="">Tous les stages</option>
+          <select 
+            className="form-select"
+            value={filters.stage}
+            onChange={(e) => handleFilterChange('stage', e.target.value)}
+          >
+            <option value="">Tous les stages</option>
                 <option value="1">Développeur Web Full-Stack</option>
                 <option value="2">Assistant Marketing Digital</option>
-              </select>
-            </div>
+          </select>
+        </div>
             <div className="col-md-2 mb-3">
-              <button className="btn btn-outline-secondary w-100">
-                <FaFilter className="me-1" />
-                Filtrer
-              </button>
+          <button className="btn btn-outline-secondary w-100">
+            <FaFilter className="me-1" />
+            Filtrer
+          </button>
             </div>
           </div>
         </div>
@@ -495,7 +431,7 @@ const MesStagiaires: React.FC = () => {
         <div className="card-header py-3">
           <ul className="nav nav-tabs card-header-tabs">
             <li className="nav-item">
-              <button
+              <button 
                 className={`nav-link ${activeTab === 'liste' ? 'active' : ''}`}
                 onClick={() => setActiveTab('liste')}
               >
@@ -504,7 +440,7 @@ const MesStagiaires: React.FC = () => {
               </button>
             </li>
             <li className="nav-item">
-              <button
+              <button 
                 className={`nav-link ${activeTab === 'statistiques' ? 'active' : ''}`}
                 onClick={() => setActiveTab('statistiques')}
               >
@@ -516,10 +452,10 @@ const MesStagiaires: React.FC = () => {
         </div>
         <div className="card-body">
           {activeTab === 'liste' && (
-            <div className="table-responsive">
+                <div className="table-responsive">
               <table className="table table-bordered" width="100%" cellSpacing="0">
-                <thead>
-                  <tr>
+                    <thead>
+                      <tr>
                     <th>
                       <button 
                         className="btn btn-link p-0 text-decoration-none"
@@ -528,112 +464,125 @@ const MesStagiaires: React.FC = () => {
                         Stagiaire {getSortIcon('nom')}
                       </button>
                     </th>
-                    <th>Formation</th>
+                    <th>Titre du stage</th>
+                    <th>Université</th>
+                    <th>Période</th>
                     <th>Statut</th>
-                    <th>Progression</th>
-                    <th>Note</th>
-                    <th>
-                      <button 
-                        className="btn btn-link p-0 text-decoration-none"
-                        onClick={() => handleSort('dateDebut')}
-                      >
-                        Date Début {getSortIcon('dateDebut')}
-                      </button>
-                    </th>
+                    <th>Tuteur</th>
                     <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredStagiaires.map((stagiaire) => (
-                    <tr key={stagiaire.id}>
-                      <td>
-                        <div>
-                          <strong>{stagiaire.prenom} {stagiaire.nom}</strong>
-                          <br />
-                          <small className="text-muted">
-                            <FaEnvelope className="me-1" />
-                            {stagiaire.email}
-                          </small>
-                          <br />
-                          <small className="text-muted">
-                            <FaPhone className="me-1" />
-                            {stagiaire.telephone}
-                          </small>
-                        </div>
-                      </td>
-                      <td>
-                        <div>
-                          <FaGraduationCap className="me-1 text-muted" />
-                          {stagiaire.titreStage}
-                          <br />
-                          <small className="text-muted">
-                            <FaBuilding className="me-1" />
-                            {stagiaire.universite}
-                          </small>
-                        </div>
-                      </td>
-                      <td>{getStatusBadge(stagiaire.statut)}</td>
-                      <td>
-                        <div className="progress" style={{ height: '20px' }}>
-                          <div
-                            className="progress-bar"
-                            style={{ width: `${stagiaire.progression}%` }}
-                          >
-                            {stagiaire.progression}%
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div className={`${getProgressColor(stagiaire.noteEvaluation)}`}>
-                          {stagiaire.noteEvaluation.toFixed(1)}
-                        </div>
-                      </td>
-                      <td>
-                        <div>
-                          <FaCalendarAlt className="me-1 text-muted" />
-                          {stagiaire.dateDebut}
-                          <br />
-                          <small className="text-muted">
-                            Fin: {stagiaire.dateFin}
-                          </small>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="btn-group" role="group">
-                          <button
-                            className="btn btn-sm btn-outline-primary"
-                            onClick={() => {
-                              setSelectedStagiaire(stagiaire);
-                              setShowDetailsModal(true);
-                            }}
-                            title="Voir détails"
-                          >
-                            <FaEye />
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-success"
-                            title="Évaluer"
-                          >
-                            <FaStar />
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-info"
-                            title="Contacter"
-                          >
-                            <FaEnvelope />
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-warning"
-                            title="Modifier"
-                          >
-                            <FaEdit />
-                          </button>
-                        </div>
+                      </tr>
+                    </thead>
+                    <tbody>
+                  {filteredStagiaires.length === 0 ? (
+                    <tr>
+                      <td colSpan={10} className="text-center text-muted py-4">
+                        Aucun stagiaire trouvé pour cette entreprise.<br />
+                        <span style={{fontSize:12}}>Vérifiez que des stages existent bien dans la collection <b>stages</b> avec le bon <b>entrepriseId</b>.</span>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  ) : (
+                    filteredStagiaires.map((stagiaire) => (
+                      <tr key={stagiaire.id}>
+                        <td>
+                          <div>
+                            <strong>{stagiaire.prenom || ''} {stagiaire.nom || ''}</strong>
+                            <br />
+                            <small className="text-muted">
+                              {stagiaire.telephone && (
+                                <span className="d-block">
+                                  <FaPhone className="me-1" />
+                                  {stagiaire.telephone}
+                                </span>
+                              )}
+                              <span>
+                                <FaEnvelope className="me-1" />
+                                {stagiaire.email || ''}
+                              </span>
+                            </small>
+                          </div>
+                        </td>
+                        <td>{stagiaire.titre || ''}</td>
+                        <td>{stagiaire.universite || ''}</td>
+                        <td>
+                          <div className="d-flex flex-column">
+                            <span className="text-primary">
+                              <FaCalendarAlt className="me-1" />
+                              {stagiaire.dateDebut || ''}
+                            </span>
+                            <span className="text-muted">
+                              <FaCalendarAlt className="me-1" />
+                              {stagiaire.dateFin || ''}
+                            </span>
+                          </div>
+                        </td>
+                        <td>{getStatusBadge(stagiaire.statut || '')}</td>
+                        <td>
+                          {stagiaire.tuteurId ? (
+                            <span>{tuteurs.find(t => t.id === stagiaire.tuteurId)?.nom || 'Tuteur inconnu'}</span>
+                          ) : (
+                            <select
+                              className="form-select form-select-sm"
+                              defaultValue=""
+                              onChange={async (e) => {
+                                const tuteurId = e.target.value;
+                                const tuteur = tuteurs.find(t => t.id === tuteurId);
+                                if (!tuteur) return;
+                                try {
+                                  await updateDoc(doc(db, 'stages', String(stagiaire.id)), {
+                                    tuteurId: tuteur.id
+                                  });
+                                  setStagiaires(prev => prev.map(s => s.id === stagiaire.id ? { ...s, tuteurId: tuteur.id } : s));
+                                  setFilteredStagiaires(prev => prev.map(s => s.id === stagiaire.id ? { ...s, tuteurId: tuteur.id } : s));
+                                  toast.success('Tuteur attribué avec succès');
+                                } catch (err) {
+                                  toast.error('Erreur lors de l\'attribution du tuteur');
+                                }
+                              }}
+                            >
+                              <option value="">Attribuer un tuteur</option>
+                              {tuteurs.map(t => (
+                                <option key={t.id} value={t.id}>{t.nom}</option>
+                              ))}
+                            </select>
+                          )}
+                        </td>
+                        <td>
+                          <div className="btn-group" role="group">
+                            <button
+                              className="btn btn-sm btn-outline-primary"
+                              onClick={() => {
+                                setSelectedStagiaire(stagiaire);
+                                setShowDetailsModal(true);
+                              }}
+                              title="Voir détails"
+                            >
+                                <FaEye />
+                              </button>
+                            <button
+                              className="btn btn-sm btn-outline-success"
+                              title="Évaluer"
+                            >
+                              <FaStar />
+                            </button>
+                            <button
+                              className="btn btn-sm btn-outline-info"
+                              title="Contacter"
+                            >
+                              <FaEnvelope />
+                            </button>
+                            <button
+                              className="btn btn-sm btn-outline-warning"
+                              title="Modifier"
+                            >
+                              <FaEdit />
+                              </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                    </tbody>
+                  </table>
             </div>
           )}
 
@@ -791,4 +740,4 @@ const MesStagiaires: React.FC = () => {
   );
 };
 
-export default MesStagiaires; 
+export default MesStagiaires;

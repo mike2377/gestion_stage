@@ -169,6 +169,34 @@ const Candidatures: React.FC = () => {
   const nbRefusees = candidatures.filter(c => c.statut === 'refusée').length;
   const nbEnAttente = candidatures.filter(c => c.statut === 'en_attente' || c.statut === 'en attente').length;
 
+  // Dictionnaire pour afficher les champs en français
+  const fieldLabels: Record<string, string> = {
+    programme: 'Programme',
+    universite: 'Université',
+    dateNaissance: 'Date de naissance',
+    adresse: 'Adresse',
+    telephone: 'Téléphone',
+    ville: 'Ville',
+    pays: 'Pays',
+    codePostal: 'Code postal',
+    genre: 'Genre',
+    specialite: 'Spécialité',
+    niveau: 'Niveau',
+    program: 'Programme',
+    country: 'Pays',
+    city: 'Ville',
+    postalCode: 'Code postal',
+    gender: 'Genre',
+    specialty: 'Spécialité',
+    level: 'Niveau',
+    address: 'Adresse',
+    birthDate: 'Date de naissance',
+    phone: 'Téléphone',
+    university: 'Université',
+    role: 'Rôle',
+    // Ajoute ici d'autres champs à traduire si besoin
+  };
+
   return (
     <div className="container-fluid py-4" style={{ minHeight: '100vh', background: '#f8fafc' }}>
       {/* Notification */}
@@ -345,6 +373,11 @@ const Candidatures: React.FC = () => {
                       </div>
                     )}
                     <div className="fw-bold fs-5 mb-2">{selectedEtudiant.nomEtudiant}</div>
+                    {selectedEtudiant.infosEtudiant && selectedEtudiant.infosEtudiant['role'] && (
+                      <div>
+                        <span className="badge bg-info text-dark mt-1">{selectedEtudiant.infosEtudiant['role']}</span>
+                      </div>
+                    )}
                     <div className="text-muted">{selectedEtudiant.emailEtudiant}</div>
                   </div>
                   <div className="col-md-8">
@@ -352,11 +385,27 @@ const Candidatures: React.FC = () => {
                     <div className="row">
                       {selectedEtudiant.infosEtudiant &&
   Object.entries(selectedEtudiant.infosEtudiant as Record<string, unknown>).map(([key, value]) => (
-    (typeof value === 'string' || typeof value === 'number') && key !== 'avatar' && key !== 'photo' && key !== 'firstName' && key !== 'prenom' && key !== 'lastName' && key !== 'nom' && key !== 'email' ? (
-      <div className="col-md-6 mb-2" key={key}>
-        <strong>{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} :</strong> {value}
-      </div>
-    ) : null
+    // Ignore 'program' (anglais), n'affiche que 'programme' (français)
+    key === 'program' ? null :
+    (typeof value === 'string' || typeof value === 'number')
+      && key !== 'avatar'
+      && key !== 'photo'
+      && key !== 'firstName'
+      && key !== 'prenom'
+      && key !== 'lastName'
+      && key !== 'nom'
+      && key !== 'email'
+      && key !== 'uid'
+      && key !== 'id'
+      && key !== 'etudiantId'
+      && key !== 'universiteId'
+      && key !== 'updatedAt'
+      && key !== 'role'
+      ? (
+        <div className="col-md-6 mb-2" key={key}>
+          <strong>{key === 'year' ? 'Niveau' : (fieldLabels[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()))} :</strong> {value}
+        </div>
+      ) : null
   ))}
                       <div className="col-md-6 mb-2"><strong>Programme :</strong> {selectedEtudiant.programmeEtudiant}</div>
                       <div className="col-md-6 mb-2"><strong>Université :</strong> {selectedEtudiant.universiteEtudiant}</div>
